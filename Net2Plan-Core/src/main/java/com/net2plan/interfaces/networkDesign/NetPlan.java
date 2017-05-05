@@ -266,7 +266,7 @@ public class NetPlan extends NetworkElement
                         int index = xmlStreamReader.getAttributeIndex(null, "version");
                         if (index == -1)
                         {
-                            System.out.println("Version 1");
+//                            System.out.println("Version 1");
                             netPlanFormat = new ReaderNetPlanN2PVersion_1();
                         } else
                         {
@@ -274,22 +274,22 @@ public class NetPlan extends NetworkElement
                             switch (version)
                             {
                                 case 2:
-                                    System.out.println("Version 2");
+//                                    System.out.println("Version 2");
                                     netPlanFormat = new ReaderNetPlanN2PVersion_2();
                                     break;
 
                                 case 3:
-                                    System.out.println("Version 3");
+//                                    System.out.println("Version 3");
                                     netPlanFormat = new ReaderNetPlanN2PVersion_3();
                                     break;
 
                                 case 4:
-                                    System.out.println("Version 4");
+//                                    System.out.println("Version 4");
                                     netPlanFormat = new ReaderNetPlanN2PVersion_4();
                                     break;
 
                                 case 5:
-                                    System.out.println("Version 5");
+//                                    System.out.println("Version 5");
                                     netPlanFormat = new ReaderNetPlanN2PVersion_5();
                                     break;
 

@@ -1,0 +1,1199 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<network description="" name="" version="4">
+	<node id="2" xCoord="9.8" yCoord="52.39" name="Hannover" isUp="true"/>
+	<node id="3" xCoord="8.66" yCoord="50.14" name="Frankfurt" isUp="true"/>
+	<node id="4" xCoord="10.08" yCoord="53.55" name="Hamburg" isUp="true"/>
+	<node id="5" xCoord="7.21" yCoord="53.6" name="Norden" isUp="true"/>
+	<node id="6" xCoord="8.8" yCoord="53.08" name="Bremen" isUp="true"/>
+	<node id="7" xCoord="13.48" yCoord="52.52" name="Berlin" isUp="true"/>
+	<node id="8" xCoord="11.55" yCoord="48.15" name="Muenchen" isUp="true"/>
+	<node id="9" xCoord="9.99" yCoord="48.4" name="Ulm" isUp="true"/>
+	<node id="10" xCoord="11.08" yCoord="49.45" name="Nuernberg" isUp="true"/>
+	<node id="11" xCoord="9.12" yCoord="48.73" name="Stuttgart" isUp="true"/>
+	<node id="12" xCoord="8.41" yCoord="49.01" name="Karlsruhe" isUp="true"/>
+	<node id="13" xCoord="8.49" yCoord="49.49" name="Mannheim" isUp="true"/>
+	<node id="14" xCoord="7.0" yCoord="51.44" name="Essen" isUp="true"/>
+	<node id="15" xCoord="7.48" yCoord="51.51" name="Dortmund" isUp="true"/>
+	<node id="16" xCoord="6.78" yCoord="51.22" name="Duesseldorf" isUp="true"/>
+	<node id="17" xCoord="7.01" yCoord="50.92" name="Koeln" isUp="true"/>
+	<node id="18" xCoord="12.38" yCoord="51.34" name="Leipzig" isUp="true"/>
+	<layer id="1" name="Layer 0" description="" linkCapacityUnitsName="" demandTrafficUnitsName="">
+		<link id="19" originNodeId="7" destinationNodeId="4" capacity="0.0" lengthInKm="254.5231550314205" propagationSpeedInKmPerSecond="200000.0" isUp="true">
+			<attribute key="bidirectionalCouple" value="20"/>
+			<attribute key="name" value="L1"/>
+		</link>
+		<link id="20" originNodeId="4" destinationNodeId="7" capacity="0.0" lengthInKm="254.5231550314205" propagationSpeedInKmPerSecond="200000.0" isUp="true">
+			<attribute key="bidirectionalCouple" value="19"/>
+			<attribute key="name" value="L1"/>
+		</link>
+		<link id="21" originNodeId="7" destinationNodeId="2" capacity="0.0" lengthInKm="249.74985488539133" propagationSpeedInKmPerSecond="200000.0" isUp="true">
+			<attribute key="bidirectionalCouple" value="22"/>
+			<attribute key="name" value="L2"/>
+		</link>
+		<link id="22" originNodeId="2" destinationNodeId="7" capacity="0.0" lengthInKm="249.74985488539133" propagationSpeedInKmPerSecond="200000.0" isUp="true">
+			<attribute key="bidirectionalCouple" value="21"/>
+			<attribute key="name" value="L2"/>
+		</link>
+		<link id="23" originNodeId="7" destinationNodeId="18" capacity="0.0" lengthInKm="151.3381958628939" propagationSpeedInKmPerSecond="200000.0" isUp="true">
+			<attribute key="bidirectionalCouple" value="24"/>
+			<attribute key="name" value="L3"/>
+		</link>
+		<link id="24" originNodeId="18" destinationNodeId="7" capacity="0.0" lengthInKm="151.3381958628939" propagationSpeedInKmPerSecond="200000.0" isUp="true">
+			<attribute key="bidirectionalCouple" value="23"/>
+			<attribute key="name" value="L3"/>
+		</link>
+		<link id="25" originNodeId="6" destinationNodeId="4" capacity="0.0" lengthInKm="99.80427126712999" propagationSpeedInKmPerSecond="200000.0" isUp="true">
+			<attribute key="bidirectionalCouple" value="26"/>
+			<attribute key="name" value="L4"/>
+		</link>
+		<link id="26" originNodeId="4" destinationNodeId="6" capacity="0.0" lengthInKm="99.80427126712999" propagationSpeedInKmPerSecond="200000.0" isUp="true">
+			<attribute key="bidirectionalCouple" value="25"/>
+			<attribute key="name" value="L4"/>
+		</link>
+		<link id="27" originNodeId="6" destinationNodeId="2" capacity="0.0" lengthInKm="102.07547811577393" propagationSpeedInKmPerSecond="200000.0" isUp="true">
+			<attribute key="bidirectionalCouple" value="28"/>
+			<attribute key="name" value="L5"/>
+		</link>
+		<link id="28" originNodeId="2" destinationNodeId="6" capacity="0.0" lengthInKm="102.07547811577393" propagationSpeedInKmPerSecond="200000.0" isUp="true">
+			<attribute key="bidirectionalCouple" value="27"/>
+			<attribute key="name" value="L5"/>
+		</link>
+		<link id="29" originNodeId="6" destinationNodeId="5" capacity="0.0" lengthInKm="120.35574069858681" propagationSpeedInKmPerSecond="200000.0" isUp="true">
+			<attribute key="bidirectionalCouple" value="30"/>
+			<attribute key="name" value="L6"/>
+		</link>
+		<link id="30" originNodeId="5" destinationNodeId="6" capacity="0.0" lengthInKm="120.35574069858681" propagationSpeedInKmPerSecond="200000.0" isUp="true">
+			<attribute key="bidirectionalCouple" value="29"/>
+			<attribute key="name" value="L6"/>
+		</link>
+		<link id="31" originNodeId="15" destinationNodeId="14" capacity="0.0" lengthInKm="34.143038961793664" propagationSpeedInKmPerSecond="200000.0" isUp="true">
+			<attribute key="bidirectionalCouple" value="32"/>
+			<attribute key="name" value="L7"/>
+		</link>
+		<link id="32" originNodeId="14" destinationNodeId="15" capacity="0.0" lengthInKm="34.143038961793664" propagationSpeedInKmPerSecond="200000.0" isUp="true">
+			<attribute key="bidirectionalCouple" value="31"/>
+			<attribute key="name" value="L7"/>
+		</link>
+		<link id="33" originNodeId="15" destinationNodeId="2" capacity="0.0" lengthInKm="186.68459308007206" propagationSpeedInKmPerSecond="200000.0" isUp="true">
+			<attribute key="bidirectionalCouple" value="34"/>
+			<attribute key="name" value="L8"/>
+		</link>
+		<link id="34" originNodeId="2" destinationNodeId="15" capacity="0.0" lengthInKm="186.68459308007206" propagationSpeedInKmPerSecond="200000.0" isUp="true">
+			<attribute key="bidirectionalCouple" value="33"/>
+			<attribute key="name" value="L8"/>
+		</link>
+		<link id="35" originNodeId="15" destinationNodeId="17" capacity="0.0" lengthInKm="73.31881696624323" propagationSpeedInKmPerSecond="200000.0" isUp="true">
+			<attribute key="bidirectionalCouple" value="36"/>
+			<attribute key="name" value="L9"/>
+		</link>
+		<link id="36" originNodeId="17" destinationNodeId="15" capacity="0.0" lengthInKm="73.31881696624323" propagationSpeedInKmPerSecond="200000.0" isUp="true">
+			<attribute key="bidirectionalCouple" value="35"/>
+			<attribute key="name" value="L9"/>
+		</link>
+		<link id="37" originNodeId="15" destinationNodeId="5" capacity="0.0" lengthInKm="233.11268283805643" propagationSpeedInKmPerSecond="200000.0" isUp="true">
+			<attribute key="bidirectionalCouple" value="38"/>
+			<attribute key="name" value="L10"/>
+		</link>
+		<link id="38" originNodeId="5" destinationNodeId="15" capacity="0.0" lengthInKm="233.11268283805643" propagationSpeedInKmPerSecond="200000.0" isUp="true">
+			<attribute key="bidirectionalCouple" value="37"/>
+			<attribute key="name" value="L10"/>
+		</link>
+		<link id="39" originNodeId="16" destinationNodeId="14" capacity="0.0" lengthInKm="28.84561394790831" propagationSpeedInKmPerSecond="200000.0" isUp="true">
+			<attribute key="bidirectionalCouple" value="40"/>
+			<attribute key="name" value="L11"/>
+		</link>
+		<link id="40" originNodeId="14" destinationNodeId="16" capacity="0.0" lengthInKm="28.84561394790831" propagationSpeedInKmPerSecond="200000.0" isUp="true">
+			<attribute key="bidirectionalCouple" value="39"/>
+			<attribute key="name" value="L11"/>
+		</link>
+		<link id="41" originNodeId="16" destinationNodeId="17" capacity="0.0" lengthInKm="37.02761854643972" propagationSpeedInKmPerSecond="200000.0" isUp="true">
+			<attribute key="bidirectionalCouple" value="42"/>
+			<attribute key="name" value="L12"/>
+		</link>
+		<link id="42" originNodeId="17" destinationNodeId="16" capacity="0.0" lengthInKm="37.02761854643972" propagationSpeedInKmPerSecond="200000.0" isUp="true">
+			<attribute key="bidirectionalCouple" value="41"/>
+			<attribute key="name" value="L12"/>
+		</link>
+		<link id="43" originNodeId="3" destinationNodeId="2" capacity="0.0" lengthInKm="262.4517079640682" propagationSpeedInKmPerSecond="200000.0" isUp="true">
+			<attribute key="bidirectionalCouple" value="44"/>
+			<attribute key="name" value="L13"/>
+		</link>
+		<link id="44" originNodeId="2" destinationNodeId="3" capacity="0.0" lengthInKm="262.4517079640682" propagationSpeedInKmPerSecond="200000.0" isUp="true">
+			<attribute key="bidirectionalCouple" value="43"/>
+			<attribute key="name" value="L13"/>
+		</link>
+		<link id="45" originNodeId="3" destinationNodeId="17" capacity="0.0" lengthInKm="145.33711284292391" propagationSpeedInKmPerSecond="200000.0" isUp="true">
+			<attribute key="bidirectionalCouple" value="46"/>
+			<attribute key="name" value="L14"/>
+		</link>
+		<link id="46" originNodeId="17" destinationNodeId="3" capacity="0.0" lengthInKm="145.33711284292391" propagationSpeedInKmPerSecond="200000.0" isUp="true">
+			<attribute key="bidirectionalCouple" value="45"/>
+			<attribute key="name" value="L14"/>
+		</link>
+		<link id="47" originNodeId="3" destinationNodeId="18" capacity="0.0" lengthInKm="293.7697710915307" propagationSpeedInKmPerSecond="200000.0" isUp="true">
+			<attribute key="bidirectionalCouple" value="48"/>
+			<attribute key="name" value="L15"/>
+		</link>
+		<link id="48" originNodeId="18" destinationNodeId="3" capacity="0.0" lengthInKm="293.7697710915307" propagationSpeedInKmPerSecond="200000.0" isUp="true">
+			<attribute key="bidirectionalCouple" value="47"/>
+			<attribute key="name" value="L15"/>
+		</link>
+		<link id="49" originNodeId="3" destinationNodeId="13" capacity="0.0" lengthInKm="73.29863420512697" propagationSpeedInKmPerSecond="200000.0" isUp="true">
+			<attribute key="bidirectionalCouple" value="50"/>
+			<attribute key="name" value="L16"/>
+		</link>
+		<link id="50" originNodeId="13" destinationNodeId="3" capacity="0.0" lengthInKm="73.29863420512697" propagationSpeedInKmPerSecond="200000.0" isUp="true">
+			<attribute key="bidirectionalCouple" value="49"/>
+			<attribute key="name" value="L16"/>
+		</link>
+		<link id="51" originNodeId="3" destinationNodeId="10" capacity="0.0" lengthInKm="189.88325955448036" propagationSpeedInKmPerSecond="200000.0" isUp="true">
+			<attribute key="bidirectionalCouple" value="52"/>
+			<attribute key="name" value="L17"/>
+		</link>
+		<link id="52" originNodeId="10" destinationNodeId="3" capacity="0.0" lengthInKm="189.88325955448036" propagationSpeedInKmPerSecond="200000.0" isUp="true">
+			<attribute key="bidirectionalCouple" value="51"/>
+			<attribute key="name" value="L17"/>
+		</link>
+		<link id="53" originNodeId="4" destinationNodeId="2" capacity="0.0" lengthInKm="130.34153162994733" propagationSpeedInKmPerSecond="200000.0" isUp="true">
+			<attribute key="bidirectionalCouple" value="54"/>
+			<attribute key="name" value="L18"/>
+		</link>
+		<link id="54" originNodeId="2" destinationNodeId="4" capacity="0.0" lengthInKm="130.34153162994733" propagationSpeedInKmPerSecond="200000.0" isUp="true">
+			<attribute key="bidirectionalCouple" value="53"/>
+			<attribute key="name" value="L18"/>
+		</link>
+		<link id="55" originNodeId="2" destinationNodeId="18" capacity="0.0" lengthInKm="212.14873577531685" propagationSpeedInKmPerSecond="200000.0" isUp="true">
+			<attribute key="bidirectionalCouple" value="56"/>
+			<attribute key="name" value="L19"/>
+		</link>
+		<link id="56" originNodeId="18" destinationNodeId="2" capacity="0.0" lengthInKm="212.14873577531685" propagationSpeedInKmPerSecond="200000.0" isUp="true">
+			<attribute key="bidirectionalCouple" value="55"/>
+			<attribute key="name" value="L19"/>
+		</link>
+		<link id="57" originNodeId="12" destinationNodeId="13" capacity="0.0" lengthInKm="53.68849058591994" propagationSpeedInKmPerSecond="200000.0" isUp="true">
+			<attribute key="bidirectionalCouple" value="58"/>
+			<attribute key="name" value="L20"/>
+		</link>
+		<link id="58" originNodeId="13" destinationNodeId="12" capacity="0.0" lengthInKm="53.68849058591994" propagationSpeedInKmPerSecond="200000.0" isUp="true">
+			<attribute key="bidirectionalCouple" value="57"/>
+			<attribute key="name" value="L20"/>
+		</link>
+		<link id="59" originNodeId="12" destinationNodeId="11" capacity="0.0" lengthInKm="60.54772436363471" propagationSpeedInKmPerSecond="200000.0" isUp="true">
+			<attribute key="bidirectionalCouple" value="60"/>
+			<attribute key="name" value="L21"/>
+		</link>
+		<link id="60" originNodeId="11" destinationNodeId="12" capacity="0.0" lengthInKm="60.54772436363471" propagationSpeedInKmPerSecond="200000.0" isUp="true">
+			<attribute key="bidirectionalCouple" value="59"/>
+			<attribute key="name" value="L21"/>
+		</link>
+		<link id="61" originNodeId="18" destinationNodeId="10" capacity="0.0" lengthInKm="229.46481449045197" propagationSpeedInKmPerSecond="200000.0" isUp="true">
+			<attribute key="bidirectionalCouple" value="62"/>
+			<attribute key="name" value="L22"/>
+		</link>
+		<link id="62" originNodeId="10" destinationNodeId="18" capacity="0.0" lengthInKm="229.46481449045197" propagationSpeedInKmPerSecond="200000.0" isUp="true">
+			<attribute key="bidirectionalCouple" value="61"/>
+			<attribute key="name" value="L22"/>
+		</link>
+		<link id="63" originNodeId="8" destinationNodeId="10" capacity="0.0" lengthInKm="148.59494280060417" propagationSpeedInKmPerSecond="200000.0" isUp="true">
+			<attribute key="bidirectionalCouple" value="64"/>
+			<attribute key="name" value="L23"/>
+		</link>
+		<link id="64" originNodeId="10" destinationNodeId="8" capacity="0.0" lengthInKm="148.59494280060417" propagationSpeedInKmPerSecond="200000.0" isUp="true">
+			<attribute key="bidirectionalCouple" value="63"/>
+			<attribute key="name" value="L23"/>
+		</link>
+		<link id="65" originNodeId="8" destinationNodeId="9" capacity="0.0" lengthInKm="118.74733626580577" propagationSpeedInKmPerSecond="200000.0" isUp="true">
+			<attribute key="bidirectionalCouple" value="66"/>
+			<attribute key="name" value="L24"/>
+		</link>
+		<link id="66" originNodeId="9" destinationNodeId="8" capacity="0.0" lengthInKm="118.74733626580577" propagationSpeedInKmPerSecond="200000.0" isUp="true">
+			<attribute key="bidirectionalCouple" value="65"/>
+			<attribute key="name" value="L24"/>
+		</link>
+		<link id="67" originNodeId="10" destinationNodeId="11" capacity="0.0" lengthInKm="163.63805711115785" propagationSpeedInKmPerSecond="200000.0" isUp="true">
+			<attribute key="bidirectionalCouple" value="68"/>
+			<attribute key="name" value="L25"/>
+		</link>
+		<link id="68" originNodeId="11" destinationNodeId="10" capacity="0.0" lengthInKm="163.63805711115785" propagationSpeedInKmPerSecond="200000.0" isUp="true">
+			<attribute key="bidirectionalCouple" value="67"/>
+			<attribute key="name" value="L25"/>
+		</link>
+		<link id="69" originNodeId="11" destinationNodeId="9" capacity="0.0" lengthInKm="73.78923875460328" propagationSpeedInKmPerSecond="200000.0" isUp="true">
+			<attribute key="bidirectionalCouple" value="70"/>
+			<attribute key="name" value="L26"/>
+		</link>
+		<link id="70" originNodeId="9" destinationNodeId="11" capacity="0.0" lengthInKm="73.78923875460328" propagationSpeedInKmPerSecond="200000.0" isUp="true">
+			<attribute key="bidirectionalCouple" value="69"/>
+			<attribute key="name" value="L26"/>
+		</link>
+		<demand id="71" ingressNodeId="7" egressNodeId="6" offeredTraffic="4.0">
+			<attribute key="bidirectionalCouple" value="72"/>
+			<attribute key="name" value="BerlinBremen"/>
+		</demand>
+		<demand id="72" ingressNodeId="6" egressNodeId="7" offeredTraffic="4.0">
+			<attribute key="bidirectionalCouple" value="71"/>
+			<attribute key="name" value="BerlinBremen"/>
+		</demand>
+		<demand id="73" ingressNodeId="7" egressNodeId="15" offeredTraffic="4.0">
+			<attribute key="bidirectionalCouple" value="74"/>
+			<attribute key="name" value="BerlinDortmund"/>
+		</demand>
+		<demand id="74" ingressNodeId="15" egressNodeId="7" offeredTraffic="4.0">
+			<attribute key="bidirectionalCouple" value="73"/>
+			<attribute key="name" value="BerlinDortmund"/>
+		</demand>
+		<demand id="75" ingressNodeId="7" egressNodeId="16" offeredTraffic="4.0">
+			<attribute key="bidirectionalCouple" value="76"/>
+			<attribute key="name" value="BerlinDuesseldorf"/>
+		</demand>
+		<demand id="76" ingressNodeId="16" egressNodeId="7" offeredTraffic="4.0">
+			<attribute key="bidirectionalCouple" value="75"/>
+			<attribute key="name" value="BerlinDuesseldorf"/>
+		</demand>
+		<demand id="77" ingressNodeId="7" egressNodeId="14" offeredTraffic="4.0">
+			<attribute key="bidirectionalCouple" value="78"/>
+			<attribute key="name" value="BerlinEssen"/>
+		</demand>
+		<demand id="78" ingressNodeId="14" egressNodeId="7" offeredTraffic="4.0">
+			<attribute key="bidirectionalCouple" value="77"/>
+			<attribute key="name" value="BerlinEssen"/>
+		</demand>
+		<demand id="79" ingressNodeId="7" egressNodeId="3" offeredTraffic="12.0">
+			<attribute key="bidirectionalCouple" value="80"/>
+			<attribute key="name" value="BerlinFrankfurt"/>
+		</demand>
+		<demand id="80" ingressNodeId="3" egressNodeId="7" offeredTraffic="12.0">
+			<attribute key="bidirectionalCouple" value="79"/>
+			<attribute key="name" value="BerlinFrankfurt"/>
+		</demand>
+		<demand id="81" ingressNodeId="7" egressNodeId="4" offeredTraffic="8.0">
+			<attribute key="bidirectionalCouple" value="82"/>
+			<attribute key="name" value="BerlinHamburg"/>
+		</demand>
+		<demand id="82" ingressNodeId="4" egressNodeId="7" offeredTraffic="8.0">
+			<attribute key="bidirectionalCouple" value="81"/>
+			<attribute key="name" value="BerlinHamburg"/>
+		</demand>
+		<demand id="83" ingressNodeId="7" egressNodeId="2" offeredTraffic="8.0">
+			<attribute key="bidirectionalCouple" value="84"/>
+			<attribute key="name" value="BerlinHannover"/>
+		</demand>
+		<demand id="84" ingressNodeId="2" egressNodeId="7" offeredTraffic="8.0">
+			<attribute key="bidirectionalCouple" value="83"/>
+			<attribute key="name" value="BerlinHannover"/>
+		</demand>
+		<demand id="85" ingressNodeId="7" egressNodeId="12" offeredTraffic="2.0">
+			<attribute key="bidirectionalCouple" value="86"/>
+			<attribute key="name" value="BerlinKarlsruhe"/>
+		</demand>
+		<demand id="86" ingressNodeId="12" egressNodeId="7" offeredTraffic="2.0">
+			<attribute key="bidirectionalCouple" value="85"/>
+			<attribute key="name" value="BerlinKarlsruhe"/>
+		</demand>
+		<demand id="87" ingressNodeId="7" egressNodeId="17" offeredTraffic="4.0">
+			<attribute key="bidirectionalCouple" value="88"/>
+			<attribute key="name" value="BerlinKoeln"/>
+		</demand>
+		<demand id="88" ingressNodeId="17" egressNodeId="7" offeredTraffic="4.0">
+			<attribute key="bidirectionalCouple" value="87"/>
+			<attribute key="name" value="BerlinKoeln"/>
+		</demand>
+		<demand id="89" ingressNodeId="7" egressNodeId="18" offeredTraffic="14.0">
+			<attribute key="bidirectionalCouple" value="90"/>
+			<attribute key="name" value="BerlinLeipzig"/>
+		</demand>
+		<demand id="90" ingressNodeId="18" egressNodeId="7" offeredTraffic="14.0">
+			<attribute key="bidirectionalCouple" value="89"/>
+			<attribute key="name" value="BerlinLeipzig"/>
+		</demand>
+		<demand id="91" ingressNodeId="7" egressNodeId="13" offeredTraffic="2.0">
+			<attribute key="bidirectionalCouple" value="92"/>
+			<attribute key="name" value="BerlinMannheim"/>
+		</demand>
+		<demand id="92" ingressNodeId="13" egressNodeId="7" offeredTraffic="2.0">
+			<attribute key="bidirectionalCouple" value="91"/>
+			<attribute key="name" value="BerlinMannheim"/>
+		</demand>
+		<demand id="93" ingressNodeId="7" egressNodeId="8" offeredTraffic="4.0">
+			<attribute key="bidirectionalCouple" value="94"/>
+			<attribute key="name" value="BerlinMuenchen"/>
+		</demand>
+		<demand id="94" ingressNodeId="8" egressNodeId="7" offeredTraffic="4.0">
+			<attribute key="bidirectionalCouple" value="93"/>
+			<attribute key="name" value="BerlinMuenchen"/>
+		</demand>
+		<demand id="95" ingressNodeId="7" egressNodeId="10" offeredTraffic="4.0">
+			<attribute key="bidirectionalCouple" value="96"/>
+			<attribute key="name" value="BerlinNuernberg"/>
+		</demand>
+		<demand id="96" ingressNodeId="10" egressNodeId="7" offeredTraffic="4.0">
+			<attribute key="bidirectionalCouple" value="95"/>
+			<attribute key="name" value="BerlinNuernberg"/>
+		</demand>
+		<demand id="97" ingressNodeId="7" egressNodeId="11" offeredTraffic="6.0">
+			<attribute key="bidirectionalCouple" value="98"/>
+			<attribute key="name" value="BerlinStuttgart"/>
+		</demand>
+		<demand id="98" ingressNodeId="11" egressNodeId="7" offeredTraffic="6.0">
+			<attribute key="bidirectionalCouple" value="97"/>
+			<attribute key="name" value="BerlinStuttgart"/>
+		</demand>
+		<demand id="99" ingressNodeId="7" egressNodeId="9" offeredTraffic="4.0">
+			<attribute key="bidirectionalCouple" value="100"/>
+			<attribute key="name" value="BerlinUlm"/>
+		</demand>
+		<demand id="100" ingressNodeId="9" egressNodeId="7" offeredTraffic="4.0">
+			<attribute key="bidirectionalCouple" value="99"/>
+			<attribute key="name" value="BerlinUlm"/>
+		</demand>
+		<demand id="101" ingressNodeId="6" egressNodeId="15" offeredTraffic="2.0">
+			<attribute key="bidirectionalCouple" value="102"/>
+			<attribute key="name" value="BremenDortmund"/>
+		</demand>
+		<demand id="102" ingressNodeId="15" egressNodeId="6" offeredTraffic="2.0">
+			<attribute key="bidirectionalCouple" value="101"/>
+			<attribute key="name" value="BremenDortmund"/>
+		</demand>
+		<demand id="103" ingressNodeId="6" egressNodeId="16" offeredTraffic="2.0">
+			<attribute key="bidirectionalCouple" value="104"/>
+			<attribute key="name" value="BremenDuesseldorf"/>
+		</demand>
+		<demand id="104" ingressNodeId="16" egressNodeId="6" offeredTraffic="2.0">
+			<attribute key="bidirectionalCouple" value="103"/>
+			<attribute key="name" value="BremenDuesseldorf"/>
+		</demand>
+		<demand id="105" ingressNodeId="6" egressNodeId="14" offeredTraffic="2.0">
+			<attribute key="bidirectionalCouple" value="106"/>
+			<attribute key="name" value="BremenEssen"/>
+		</demand>
+		<demand id="106" ingressNodeId="14" egressNodeId="6" offeredTraffic="2.0">
+			<attribute key="bidirectionalCouple" value="105"/>
+			<attribute key="name" value="BremenEssen"/>
+		</demand>
+		<demand id="107" ingressNodeId="6" egressNodeId="3" offeredTraffic="6.0">
+			<attribute key="bidirectionalCouple" value="108"/>
+			<attribute key="name" value="BremenFrankfurt"/>
+		</demand>
+		<demand id="108" ingressNodeId="3" egressNodeId="6" offeredTraffic="6.0">
+			<attribute key="bidirectionalCouple" value="107"/>
+			<attribute key="name" value="BremenFrankfurt"/>
+		</demand>
+		<demand id="109" ingressNodeId="6" egressNodeId="4" offeredTraffic="6.0">
+			<attribute key="bidirectionalCouple" value="110"/>
+			<attribute key="name" value="BremenHamburg"/>
+		</demand>
+		<demand id="110" ingressNodeId="4" egressNodeId="6" offeredTraffic="6.0">
+			<attribute key="bidirectionalCouple" value="109"/>
+			<attribute key="name" value="BremenHamburg"/>
+		</demand>
+		<demand id="111" ingressNodeId="6" egressNodeId="2" offeredTraffic="6.0">
+			<attribute key="bidirectionalCouple" value="112"/>
+			<attribute key="name" value="BremenHannover"/>
+		</demand>
+		<demand id="112" ingressNodeId="2" egressNodeId="6" offeredTraffic="6.0">
+			<attribute key="bidirectionalCouple" value="111"/>
+			<attribute key="name" value="BremenHannover"/>
+		</demand>
+		<demand id="113" ingressNodeId="6" egressNodeId="12" offeredTraffic="2.0">
+			<attribute key="bidirectionalCouple" value="114"/>
+			<attribute key="name" value="BremenKarlsruhe"/>
+		</demand>
+		<demand id="114" ingressNodeId="12" egressNodeId="6" offeredTraffic="2.0">
+			<attribute key="bidirectionalCouple" value="113"/>
+			<attribute key="name" value="BremenKarlsruhe"/>
+		</demand>
+		<demand id="115" ingressNodeId="6" egressNodeId="17" offeredTraffic="2.0">
+			<attribute key="bidirectionalCouple" value="116"/>
+			<attribute key="name" value="BremenKoeln"/>
+		</demand>
+		<demand id="116" ingressNodeId="17" egressNodeId="6" offeredTraffic="2.0">
+			<attribute key="bidirectionalCouple" value="115"/>
+			<attribute key="name" value="BremenKoeln"/>
+		</demand>
+		<demand id="117" ingressNodeId="6" egressNodeId="18" offeredTraffic="4.0">
+			<attribute key="bidirectionalCouple" value="118"/>
+			<attribute key="name" value="BremenLeipzig"/>
+		</demand>
+		<demand id="118" ingressNodeId="18" egressNodeId="6" offeredTraffic="4.0">
+			<attribute key="bidirectionalCouple" value="117"/>
+			<attribute key="name" value="BremenLeipzig"/>
+		</demand>
+		<demand id="119" ingressNodeId="6" egressNodeId="13" offeredTraffic="2.0">
+			<attribute key="bidirectionalCouple" value="120"/>
+			<attribute key="name" value="BremenMannheim"/>
+		</demand>
+		<demand id="120" ingressNodeId="13" egressNodeId="6" offeredTraffic="2.0">
+			<attribute key="bidirectionalCouple" value="119"/>
+			<attribute key="name" value="BremenMannheim"/>
+		</demand>
+		<demand id="121" ingressNodeId="6" egressNodeId="8" offeredTraffic="2.0">
+			<attribute key="bidirectionalCouple" value="122"/>
+			<attribute key="name" value="BremenMuenchen"/>
+		</demand>
+		<demand id="122" ingressNodeId="8" egressNodeId="6" offeredTraffic="2.0">
+			<attribute key="bidirectionalCouple" value="121"/>
+			<attribute key="name" value="BremenMuenchen"/>
+		</demand>
+		<demand id="123" ingressNodeId="6" egressNodeId="10" offeredTraffic="2.0">
+			<attribute key="bidirectionalCouple" value="124"/>
+			<attribute key="name" value="BremenNuernberg"/>
+		</demand>
+		<demand id="124" ingressNodeId="10" egressNodeId="6" offeredTraffic="2.0">
+			<attribute key="bidirectionalCouple" value="123"/>
+			<attribute key="name" value="BremenNuernberg"/>
+		</demand>
+		<demand id="125" ingressNodeId="6" egressNodeId="11" offeredTraffic="2.0">
+			<attribute key="bidirectionalCouple" value="126"/>
+			<attribute key="name" value="BremenStuttgart"/>
+		</demand>
+		<demand id="126" ingressNodeId="11" egressNodeId="6" offeredTraffic="2.0">
+			<attribute key="bidirectionalCouple" value="125"/>
+			<attribute key="name" value="BremenStuttgart"/>
+		</demand>
+		<demand id="127" ingressNodeId="6" egressNodeId="9" offeredTraffic="2.0">
+			<attribute key="bidirectionalCouple" value="128"/>
+			<attribute key="name" value="BremenUlm"/>
+		</demand>
+		<demand id="128" ingressNodeId="9" egressNodeId="6" offeredTraffic="2.0">
+			<attribute key="bidirectionalCouple" value="127"/>
+			<attribute key="name" value="BremenUlm"/>
+		</demand>
+		<demand id="129" ingressNodeId="15" egressNodeId="16" offeredTraffic="8.0">
+			<attribute key="bidirectionalCouple" value="130"/>
+			<attribute key="name" value="DortmundDuesseldorf"/>
+		</demand>
+		<demand id="130" ingressNodeId="16" egressNodeId="15" offeredTraffic="8.0">
+			<attribute key="bidirectionalCouple" value="129"/>
+			<attribute key="name" value="DortmundDuesseldorf"/>
+		</demand>
+		<demand id="131" ingressNodeId="15" egressNodeId="14" offeredTraffic="8.0">
+			<attribute key="bidirectionalCouple" value="132"/>
+			<attribute key="name" value="DortmundEssen"/>
+		</demand>
+		<demand id="132" ingressNodeId="14" egressNodeId="15" offeredTraffic="8.0">
+			<attribute key="bidirectionalCouple" value="131"/>
+			<attribute key="name" value="DortmundEssen"/>
+		</demand>
+		<demand id="133" ingressNodeId="15" egressNodeId="3" offeredTraffic="10.0">
+			<attribute key="bidirectionalCouple" value="134"/>
+			<attribute key="name" value="DortmundFrankfurt"/>
+		</demand>
+		<demand id="134" ingressNodeId="3" egressNodeId="15" offeredTraffic="10.0">
+			<attribute key="bidirectionalCouple" value="133"/>
+			<attribute key="name" value="DortmundFrankfurt"/>
+		</demand>
+		<demand id="135" ingressNodeId="15" egressNodeId="4" offeredTraffic="4.0">
+			<attribute key="bidirectionalCouple" value="136"/>
+			<attribute key="name" value="DortmundHamburg"/>
+		</demand>
+		<demand id="136" ingressNodeId="4" egressNodeId="15" offeredTraffic="4.0">
+			<attribute key="bidirectionalCouple" value="135"/>
+			<attribute key="name" value="DortmundHamburg"/>
+		</demand>
+		<demand id="137" ingressNodeId="15" egressNodeId="2" offeredTraffic="6.0">
+			<attribute key="bidirectionalCouple" value="138"/>
+			<attribute key="name" value="DortmundHannover"/>
+		</demand>
+		<demand id="138" ingressNodeId="2" egressNodeId="15" offeredTraffic="6.0">
+			<attribute key="bidirectionalCouple" value="137"/>
+			<attribute key="name" value="DortmundHannover"/>
+		</demand>
+		<demand id="139" ingressNodeId="15" egressNodeId="12" offeredTraffic="2.0">
+			<attribute key="bidirectionalCouple" value="140"/>
+			<attribute key="name" value="DortmundKarlsruhe"/>
+		</demand>
+		<demand id="140" ingressNodeId="12" egressNodeId="15" offeredTraffic="2.0">
+			<attribute key="bidirectionalCouple" value="139"/>
+			<attribute key="name" value="DortmundKarlsruhe"/>
+		</demand>
+		<demand id="141" ingressNodeId="15" egressNodeId="17" offeredTraffic="6.0">
+			<attribute key="bidirectionalCouple" value="142"/>
+			<attribute key="name" value="DortmundKoeln"/>
+		</demand>
+		<demand id="142" ingressNodeId="17" egressNodeId="15" offeredTraffic="6.0">
+			<attribute key="bidirectionalCouple" value="141"/>
+			<attribute key="name" value="DortmundKoeln"/>
+		</demand>
+		<demand id="143" ingressNodeId="15" egressNodeId="18" offeredTraffic="6.0">
+			<attribute key="bidirectionalCouple" value="144"/>
+			<attribute key="name" value="DortmundLeipzig"/>
+		</demand>
+		<demand id="144" ingressNodeId="18" egressNodeId="15" offeredTraffic="6.0">
+			<attribute key="bidirectionalCouple" value="143"/>
+			<attribute key="name" value="DortmundLeipzig"/>
+		</demand>
+		<demand id="145" ingressNodeId="15" egressNodeId="13" offeredTraffic="2.0">
+			<attribute key="bidirectionalCouple" value="146"/>
+			<attribute key="name" value="DortmundMannheim"/>
+		</demand>
+		<demand id="146" ingressNodeId="13" egressNodeId="15" offeredTraffic="2.0">
+			<attribute key="bidirectionalCouple" value="145"/>
+			<attribute key="name" value="DortmundMannheim"/>
+		</demand>
+		<demand id="147" ingressNodeId="15" egressNodeId="8" offeredTraffic="4.0">
+			<attribute key="bidirectionalCouple" value="148"/>
+			<attribute key="name" value="DortmundMuenchen"/>
+		</demand>
+		<demand id="148" ingressNodeId="8" egressNodeId="15" offeredTraffic="4.0">
+			<attribute key="bidirectionalCouple" value="147"/>
+			<attribute key="name" value="DortmundMuenchen"/>
+		</demand>
+		<demand id="149" ingressNodeId="15" egressNodeId="10" offeredTraffic="2.0">
+			<attribute key="bidirectionalCouple" value="150"/>
+			<attribute key="name" value="DortmundNuernberg"/>
+		</demand>
+		<demand id="150" ingressNodeId="10" egressNodeId="15" offeredTraffic="2.0">
+			<attribute key="bidirectionalCouple" value="149"/>
+			<attribute key="name" value="DortmundNuernberg"/>
+		</demand>
+		<demand id="151" ingressNodeId="15" egressNodeId="11" offeredTraffic="4.0">
+			<attribute key="bidirectionalCouple" value="152"/>
+			<attribute key="name" value="DortmundStuttgart"/>
+		</demand>
+		<demand id="152" ingressNodeId="11" egressNodeId="15" offeredTraffic="4.0">
+			<attribute key="bidirectionalCouple" value="151"/>
+			<attribute key="name" value="DortmundStuttgart"/>
+		</demand>
+		<demand id="153" ingressNodeId="15" egressNodeId="9" offeredTraffic="2.0">
+			<attribute key="bidirectionalCouple" value="154"/>
+			<attribute key="name" value="DortmundUlm"/>
+		</demand>
+		<demand id="154" ingressNodeId="9" egressNodeId="15" offeredTraffic="2.0">
+			<attribute key="bidirectionalCouple" value="153"/>
+			<attribute key="name" value="DortmundUlm"/>
+		</demand>
+		<demand id="155" ingressNodeId="16" egressNodeId="14" offeredTraffic="10.0">
+			<attribute key="bidirectionalCouple" value="156"/>
+			<attribute key="name" value="DuesseldorfEssen"/>
+		</demand>
+		<demand id="156" ingressNodeId="14" egressNodeId="16" offeredTraffic="10.0">
+			<attribute key="bidirectionalCouple" value="155"/>
+			<attribute key="name" value="DuesseldorfEssen"/>
+		</demand>
+		<demand id="157" ingressNodeId="16" egressNodeId="3" offeredTraffic="12.0">
+			<attribute key="bidirectionalCouple" value="158"/>
+			<attribute key="name" value="DuesseldorfFrankfurt"/>
+		</demand>
+		<demand id="158" ingressNodeId="3" egressNodeId="16" offeredTraffic="12.0">
+			<attribute key="bidirectionalCouple" value="157"/>
+			<attribute key="name" value="DuesseldorfFrankfurt"/>
+		</demand>
+		<demand id="159" ingressNodeId="16" egressNodeId="4" offeredTraffic="4.0">
+			<attribute key="bidirectionalCouple" value="160"/>
+			<attribute key="name" value="DuesseldorfHamburg"/>
+		</demand>
+		<demand id="160" ingressNodeId="4" egressNodeId="16" offeredTraffic="4.0">
+			<attribute key="bidirectionalCouple" value="159"/>
+			<attribute key="name" value="DuesseldorfHamburg"/>
+		</demand>
+		<demand id="161" ingressNodeId="16" egressNodeId="2" offeredTraffic="6.0">
+			<attribute key="bidirectionalCouple" value="162"/>
+			<attribute key="name" value="DuesseldorfHannover"/>
+		</demand>
+		<demand id="162" ingressNodeId="2" egressNodeId="16" offeredTraffic="6.0">
+			<attribute key="bidirectionalCouple" value="161"/>
+			<attribute key="name" value="DuesseldorfHannover"/>
+		</demand>
+		<demand id="163" ingressNodeId="16" egressNodeId="12" offeredTraffic="2.0">
+			<attribute key="bidirectionalCouple" value="164"/>
+			<attribute key="name" value="DuesseldorfKarlsruhe"/>
+		</demand>
+		<demand id="164" ingressNodeId="12" egressNodeId="16" offeredTraffic="2.0">
+			<attribute key="bidirectionalCouple" value="163"/>
+			<attribute key="name" value="DuesseldorfKarlsruhe"/>
+		</demand>
+		<demand id="165" ingressNodeId="16" egressNodeId="17" offeredTraffic="12.0">
+			<attribute key="bidirectionalCouple" value="166"/>
+			<attribute key="name" value="DuesseldorfKoeln"/>
+		</demand>
+		<demand id="166" ingressNodeId="17" egressNodeId="16" offeredTraffic="12.0">
+			<attribute key="bidirectionalCouple" value="165"/>
+			<attribute key="name" value="DuesseldorfKoeln"/>
+		</demand>
+		<demand id="167" ingressNodeId="16" egressNodeId="18" offeredTraffic="6.0">
+			<attribute key="bidirectionalCouple" value="168"/>
+			<attribute key="name" value="DuesseldorfLeipzig"/>
+		</demand>
+		<demand id="168" ingressNodeId="18" egressNodeId="16" offeredTraffic="6.0">
+			<attribute key="bidirectionalCouple" value="167"/>
+			<attribute key="name" value="DuesseldorfLeipzig"/>
+		</demand>
+		<demand id="169" ingressNodeId="16" egressNodeId="13" offeredTraffic="2.0">
+			<attribute key="bidirectionalCouple" value="170"/>
+			<attribute key="name" value="DuesseldorfMannheim"/>
+		</demand>
+		<demand id="170" ingressNodeId="13" egressNodeId="16" offeredTraffic="2.0">
+			<attribute key="bidirectionalCouple" value="169"/>
+			<attribute key="name" value="DuesseldorfMannheim"/>
+		</demand>
+		<demand id="171" ingressNodeId="16" egressNodeId="8" offeredTraffic="4.0">
+			<attribute key="bidirectionalCouple" value="172"/>
+			<attribute key="name" value="DuesseldorfMuenchen"/>
+		</demand>
+		<demand id="172" ingressNodeId="8" egressNodeId="16" offeredTraffic="4.0">
+			<attribute key="bidirectionalCouple" value="171"/>
+			<attribute key="name" value="DuesseldorfMuenchen"/>
+		</demand>
+		<demand id="173" ingressNodeId="16" egressNodeId="10" offeredTraffic="4.0">
+			<attribute key="bidirectionalCouple" value="174"/>
+			<attribute key="name" value="DuesseldorfNuernberg"/>
+		</demand>
+		<demand id="174" ingressNodeId="10" egressNodeId="16" offeredTraffic="4.0">
+			<attribute key="bidirectionalCouple" value="173"/>
+			<attribute key="name" value="DuesseldorfNuernberg"/>
+		</demand>
+		<demand id="175" ingressNodeId="16" egressNodeId="11" offeredTraffic="4.0">
+			<attribute key="bidirectionalCouple" value="176"/>
+			<attribute key="name" value="DuesseldorfStuttgart"/>
+		</demand>
+		<demand id="176" ingressNodeId="11" egressNodeId="16" offeredTraffic="4.0">
+			<attribute key="bidirectionalCouple" value="175"/>
+			<attribute key="name" value="DuesseldorfStuttgart"/>
+		</demand>
+		<demand id="177" ingressNodeId="16" egressNodeId="9" offeredTraffic="2.0">
+			<attribute key="bidirectionalCouple" value="178"/>
+			<attribute key="name" value="DuesseldorfUlm"/>
+		</demand>
+		<demand id="178" ingressNodeId="9" egressNodeId="16" offeredTraffic="2.0">
+			<attribute key="bidirectionalCouple" value="177"/>
+			<attribute key="name" value="DuesseldorfUlm"/>
+		</demand>
+		<demand id="179" ingressNodeId="14" egressNodeId="3" offeredTraffic="8.0">
+			<attribute key="bidirectionalCouple" value="180"/>
+			<attribute key="name" value="EssenFrankfurt"/>
+		</demand>
+		<demand id="180" ingressNodeId="3" egressNodeId="14" offeredTraffic="8.0">
+			<attribute key="bidirectionalCouple" value="179"/>
+			<attribute key="name" value="EssenFrankfurt"/>
+		</demand>
+		<demand id="181" ingressNodeId="14" egressNodeId="4" offeredTraffic="4.0">
+			<attribute key="bidirectionalCouple" value="182"/>
+			<attribute key="name" value="EssenHamburg"/>
+		</demand>
+		<demand id="182" ingressNodeId="4" egressNodeId="14" offeredTraffic="4.0">
+			<attribute key="bidirectionalCouple" value="181"/>
+			<attribute key="name" value="EssenHamburg"/>
+		</demand>
+		<demand id="183" ingressNodeId="14" egressNodeId="2" offeredTraffic="4.0">
+			<attribute key="bidirectionalCouple" value="184"/>
+			<attribute key="name" value="EssenHannover"/>
+		</demand>
+		<demand id="184" ingressNodeId="2" egressNodeId="14" offeredTraffic="4.0">
+			<attribute key="bidirectionalCouple" value="183"/>
+			<attribute key="name" value="EssenHannover"/>
+		</demand>
+		<demand id="185" ingressNodeId="14" egressNodeId="12" offeredTraffic="2.0">
+			<attribute key="bidirectionalCouple" value="186"/>
+			<attribute key="name" value="EssenKarlsruhe"/>
+		</demand>
+		<demand id="186" ingressNodeId="12" egressNodeId="14" offeredTraffic="2.0">
+			<attribute key="bidirectionalCouple" value="185"/>
+			<attribute key="name" value="EssenKarlsruhe"/>
+		</demand>
+		<demand id="187" ingressNodeId="14" egressNodeId="17" offeredTraffic="6.0">
+			<attribute key="bidirectionalCouple" value="188"/>
+			<attribute key="name" value="EssenKoeln"/>
+		</demand>
+		<demand id="188" ingressNodeId="17" egressNodeId="14" offeredTraffic="6.0">
+			<attribute key="bidirectionalCouple" value="187"/>
+			<attribute key="name" value="EssenKoeln"/>
+		</demand>
+		<demand id="189" ingressNodeId="14" egressNodeId="18" offeredTraffic="4.0">
+			<attribute key="bidirectionalCouple" value="190"/>
+			<attribute key="name" value="EssenLeipzig"/>
+		</demand>
+		<demand id="190" ingressNodeId="18" egressNodeId="14" offeredTraffic="4.0">
+			<attribute key="bidirectionalCouple" value="189"/>
+			<attribute key="name" value="EssenLeipzig"/>
+		</demand>
+		<demand id="191" ingressNodeId="14" egressNodeId="13" offeredTraffic="2.0">
+			<attribute key="bidirectionalCouple" value="192"/>
+			<attribute key="name" value="EssenMannheim"/>
+		</demand>
+		<demand id="192" ingressNodeId="13" egressNodeId="14" offeredTraffic="2.0">
+			<attribute key="bidirectionalCouple" value="191"/>
+			<attribute key="name" value="EssenMannheim"/>
+		</demand>
+		<demand id="193" ingressNodeId="14" egressNodeId="8" offeredTraffic="2.0">
+			<attribute key="bidirectionalCouple" value="194"/>
+			<attribute key="name" value="EssenMuenchen"/>
+		</demand>
+		<demand id="194" ingressNodeId="8" egressNodeId="14" offeredTraffic="2.0">
+			<attribute key="bidirectionalCouple" value="193"/>
+			<attribute key="name" value="EssenMuenchen"/>
+		</demand>
+		<demand id="195" ingressNodeId="14" egressNodeId="10" offeredTraffic="2.0">
+			<attribute key="bidirectionalCouple" value="196"/>
+			<attribute key="name" value="EssenNuernberg"/>
+		</demand>
+		<demand id="196" ingressNodeId="10" egressNodeId="14" offeredTraffic="2.0">
+			<attribute key="bidirectionalCouple" value="195"/>
+			<attribute key="name" value="EssenNuernberg"/>
+		</demand>
+		<demand id="197" ingressNodeId="14" egressNodeId="11" offeredTraffic="4.0">
+			<attribute key="bidirectionalCouple" value="198"/>
+			<attribute key="name" value="EssenStuttgart"/>
+		</demand>
+		<demand id="198" ingressNodeId="11" egressNodeId="14" offeredTraffic="4.0">
+			<attribute key="bidirectionalCouple" value="197"/>
+			<attribute key="name" value="EssenStuttgart"/>
+		</demand>
+		<demand id="199" ingressNodeId="14" egressNodeId="9" offeredTraffic="2.0">
+			<attribute key="bidirectionalCouple" value="200"/>
+			<attribute key="name" value="EssenUlm"/>
+		</demand>
+		<demand id="200" ingressNodeId="9" egressNodeId="14" offeredTraffic="2.0">
+			<attribute key="bidirectionalCouple" value="199"/>
+			<attribute key="name" value="EssenUlm"/>
+		</demand>
+		<demand id="201" ingressNodeId="3" egressNodeId="4" offeredTraffic="12.0">
+			<attribute key="bidirectionalCouple" value="202"/>
+			<attribute key="name" value="FrankfurtHamburg"/>
+		</demand>
+		<demand id="202" ingressNodeId="4" egressNodeId="3" offeredTraffic="12.0">
+			<attribute key="bidirectionalCouple" value="201"/>
+			<attribute key="name" value="FrankfurtHamburg"/>
+		</demand>
+		<demand id="203" ingressNodeId="3" egressNodeId="2" offeredTraffic="14.0">
+			<attribute key="bidirectionalCouple" value="204"/>
+			<attribute key="name" value="FrankfurtHannover"/>
+		</demand>
+		<demand id="204" ingressNodeId="2" egressNodeId="3" offeredTraffic="14.0">
+			<attribute key="bidirectionalCouple" value="203"/>
+			<attribute key="name" value="FrankfurtHannover"/>
+		</demand>
+		<demand id="205" ingressNodeId="3" egressNodeId="12" offeredTraffic="4.0">
+			<attribute key="bidirectionalCouple" value="206"/>
+			<attribute key="name" value="FrankfurtKarlsruhe"/>
+		</demand>
+		<demand id="206" ingressNodeId="12" egressNodeId="3" offeredTraffic="4.0">
+			<attribute key="bidirectionalCouple" value="205"/>
+			<attribute key="name" value="FrankfurtKarlsruhe"/>
+		</demand>
+		<demand id="207" ingressNodeId="3" egressNodeId="17" offeredTraffic="12.0">
+			<attribute key="bidirectionalCouple" value="208"/>
+			<attribute key="name" value="FrankfurtKoeln"/>
+		</demand>
+		<demand id="208" ingressNodeId="17" egressNodeId="3" offeredTraffic="12.0">
+			<attribute key="bidirectionalCouple" value="207"/>
+			<attribute key="name" value="FrankfurtKoeln"/>
+		</demand>
+		<demand id="209" ingressNodeId="3" egressNodeId="18" offeredTraffic="18.0">
+			<attribute key="bidirectionalCouple" value="210"/>
+			<attribute key="name" value="FrankfurtLeipzig"/>
+		</demand>
+		<demand id="210" ingressNodeId="18" egressNodeId="3" offeredTraffic="18.0">
+			<attribute key="bidirectionalCouple" value="209"/>
+			<attribute key="name" value="FrankfurtLeipzig"/>
+		</demand>
+		<demand id="211" ingressNodeId="3" egressNodeId="13" offeredTraffic="10.0">
+			<attribute key="bidirectionalCouple" value="212"/>
+			<attribute key="name" value="FrankfurtMannheim"/>
+		</demand>
+		<demand id="212" ingressNodeId="13" egressNodeId="3" offeredTraffic="10.0">
+			<attribute key="bidirectionalCouple" value="211"/>
+			<attribute key="name" value="FrankfurtMannheim"/>
+		</demand>
+		<demand id="213" ingressNodeId="3" egressNodeId="8" offeredTraffic="10.0">
+			<attribute key="bidirectionalCouple" value="214"/>
+			<attribute key="name" value="FrankfurtMuenchen"/>
+		</demand>
+		<demand id="214" ingressNodeId="8" egressNodeId="3" offeredTraffic="10.0">
+			<attribute key="bidirectionalCouple" value="213"/>
+			<attribute key="name" value="FrankfurtMuenchen"/>
+		</demand>
+		<demand id="215" ingressNodeId="3" egressNodeId="5" offeredTraffic="50.0">
+			<attribute key="bidirectionalCouple" value="216"/>
+			<attribute key="name" value="FrankfurtNorden"/>
+		</demand>
+		<demand id="216" ingressNodeId="5" egressNodeId="3" offeredTraffic="50.0">
+			<attribute key="bidirectionalCouple" value="215"/>
+			<attribute key="name" value="FrankfurtNorden"/>
+		</demand>
+		<demand id="217" ingressNodeId="3" egressNodeId="10" offeredTraffic="10.0">
+			<attribute key="bidirectionalCouple" value="218"/>
+			<attribute key="name" value="FrankfurtNuernberg"/>
+		</demand>
+		<demand id="218" ingressNodeId="10" egressNodeId="3" offeredTraffic="10.0">
+			<attribute key="bidirectionalCouple" value="217"/>
+			<attribute key="name" value="FrankfurtNuernberg"/>
+		</demand>
+		<demand id="219" ingressNodeId="3" egressNodeId="11" offeredTraffic="14.0">
+			<attribute key="bidirectionalCouple" value="220"/>
+			<attribute key="name" value="FrankfurtStuttgart"/>
+		</demand>
+		<demand id="220" ingressNodeId="11" egressNodeId="3" offeredTraffic="14.0">
+			<attribute key="bidirectionalCouple" value="219"/>
+			<attribute key="name" value="FrankfurtStuttgart"/>
+		</demand>
+		<demand id="221" ingressNodeId="3" egressNodeId="9" offeredTraffic="8.0">
+			<attribute key="bidirectionalCouple" value="222"/>
+			<attribute key="name" value="FrankfurtUlm"/>
+		</demand>
+		<demand id="222" ingressNodeId="9" egressNodeId="3" offeredTraffic="8.0">
+			<attribute key="bidirectionalCouple" value="221"/>
+			<attribute key="name" value="FrankfurtUlm"/>
+		</demand>
+		<demand id="223" ingressNodeId="4" egressNodeId="2" offeredTraffic="10.0">
+			<attribute key="bidirectionalCouple" value="224"/>
+			<attribute key="name" value="HamburgHannover"/>
+		</demand>
+		<demand id="224" ingressNodeId="2" egressNodeId="4" offeredTraffic="10.0">
+			<attribute key="bidirectionalCouple" value="223"/>
+			<attribute key="name" value="HamburgHannover"/>
+		</demand>
+		<demand id="225" ingressNodeId="4" egressNodeId="12" offeredTraffic="2.0">
+			<attribute key="bidirectionalCouple" value="226"/>
+			<attribute key="name" value="HamburgKarlsruhe"/>
+		</demand>
+		<demand id="226" ingressNodeId="12" egressNodeId="4" offeredTraffic="2.0">
+			<attribute key="bidirectionalCouple" value="225"/>
+			<attribute key="name" value="HamburgKarlsruhe"/>
+		</demand>
+		<demand id="227" ingressNodeId="4" egressNodeId="17" offeredTraffic="4.0">
+			<attribute key="bidirectionalCouple" value="228"/>
+			<attribute key="name" value="HamburgKoeln"/>
+		</demand>
+		<demand id="228" ingressNodeId="17" egressNodeId="4" offeredTraffic="4.0">
+			<attribute key="bidirectionalCouple" value="227"/>
+			<attribute key="name" value="HamburgKoeln"/>
+		</demand>
+		<demand id="229" ingressNodeId="4" egressNodeId="18" offeredTraffic="8.0">
+			<attribute key="bidirectionalCouple" value="230"/>
+			<attribute key="name" value="HamburgLeipzig"/>
+		</demand>
+		<demand id="230" ingressNodeId="18" egressNodeId="4" offeredTraffic="8.0">
+			<attribute key="bidirectionalCouple" value="229"/>
+			<attribute key="name" value="HamburgLeipzig"/>
+		</demand>
+		<demand id="231" ingressNodeId="4" egressNodeId="13" offeredTraffic="2.0">
+			<attribute key="bidirectionalCouple" value="232"/>
+			<attribute key="name" value="HamburgMannheim"/>
+		</demand>
+		<demand id="232" ingressNodeId="13" egressNodeId="4" offeredTraffic="2.0">
+			<attribute key="bidirectionalCouple" value="231"/>
+			<attribute key="name" value="HamburgMannheim"/>
+		</demand>
+		<demand id="233" ingressNodeId="4" egressNodeId="8" offeredTraffic="4.0">
+			<attribute key="bidirectionalCouple" value="234"/>
+			<attribute key="name" value="HamburgMuenchen"/>
+		</demand>
+		<demand id="234" ingressNodeId="8" egressNodeId="4" offeredTraffic="4.0">
+			<attribute key="bidirectionalCouple" value="233"/>
+			<attribute key="name" value="HamburgMuenchen"/>
+		</demand>
+		<demand id="235" ingressNodeId="4" egressNodeId="10" offeredTraffic="4.0">
+			<attribute key="bidirectionalCouple" value="236"/>
+			<attribute key="name" value="HamburgNuernberg"/>
+		</demand>
+		<demand id="236" ingressNodeId="10" egressNodeId="4" offeredTraffic="4.0">
+			<attribute key="bidirectionalCouple" value="235"/>
+			<attribute key="name" value="HamburgNuernberg"/>
+		</demand>
+		<demand id="237" ingressNodeId="4" egressNodeId="11" offeredTraffic="4.0">
+			<attribute key="bidirectionalCouple" value="238"/>
+			<attribute key="name" value="HamburgStuttgart"/>
+		</demand>
+		<demand id="238" ingressNodeId="11" egressNodeId="4" offeredTraffic="4.0">
+			<attribute key="bidirectionalCouple" value="237"/>
+			<attribute key="name" value="HamburgStuttgart"/>
+		</demand>
+		<demand id="239" ingressNodeId="4" egressNodeId="9" offeredTraffic="4.0">
+			<attribute key="bidirectionalCouple" value="240"/>
+			<attribute key="name" value="HamburgUlm"/>
+		</demand>
+		<demand id="240" ingressNodeId="9" egressNodeId="4" offeredTraffic="4.0">
+			<attribute key="bidirectionalCouple" value="239"/>
+			<attribute key="name" value="HamburgUlm"/>
+		</demand>
+		<demand id="241" ingressNodeId="2" egressNodeId="12" offeredTraffic="2.0">
+			<attribute key="bidirectionalCouple" value="242"/>
+			<attribute key="name" value="HannoverKarlsruhe"/>
+		</demand>
+		<demand id="242" ingressNodeId="12" egressNodeId="2" offeredTraffic="2.0">
+			<attribute key="bidirectionalCouple" value="241"/>
+			<attribute key="name" value="HannoverKarlsruhe"/>
+		</demand>
+		<demand id="243" ingressNodeId="2" egressNodeId="17" offeredTraffic="6.0">
+			<attribute key="bidirectionalCouple" value="244"/>
+			<attribute key="name" value="HannoverKoeln"/>
+		</demand>
+		<demand id="244" ingressNodeId="17" egressNodeId="2" offeredTraffic="6.0">
+			<attribute key="bidirectionalCouple" value="243"/>
+			<attribute key="name" value="HannoverKoeln"/>
+		</demand>
+		<demand id="245" ingressNodeId="2" egressNodeId="18" offeredTraffic="10.0">
+			<attribute key="bidirectionalCouple" value="246"/>
+			<attribute key="name" value="HannoverLeipzig"/>
+		</demand>
+		<demand id="246" ingressNodeId="18" egressNodeId="2" offeredTraffic="10.0">
+			<attribute key="bidirectionalCouple" value="245"/>
+			<attribute key="name" value="HannoverLeipzig"/>
+		</demand>
+		<demand id="247" ingressNodeId="2" egressNodeId="13" offeredTraffic="4.0">
+			<attribute key="bidirectionalCouple" value="248"/>
+			<attribute key="name" value="HannoverMannheim"/>
+		</demand>
+		<demand id="248" ingressNodeId="13" egressNodeId="2" offeredTraffic="4.0">
+			<attribute key="bidirectionalCouple" value="247"/>
+			<attribute key="name" value="HannoverMannheim"/>
+		</demand>
+		<demand id="249" ingressNodeId="2" egressNodeId="8" offeredTraffic="4.0">
+			<attribute key="bidirectionalCouple" value="250"/>
+			<attribute key="name" value="HannoverMuenchen"/>
+		</demand>
+		<demand id="250" ingressNodeId="8" egressNodeId="2" offeredTraffic="4.0">
+			<attribute key="bidirectionalCouple" value="249"/>
+			<attribute key="name" value="HannoverMuenchen"/>
+		</demand>
+		<demand id="251" ingressNodeId="2" egressNodeId="10" offeredTraffic="4.0">
+			<attribute key="bidirectionalCouple" value="252"/>
+			<attribute key="name" value="HannoverNuernberg"/>
+		</demand>
+		<demand id="252" ingressNodeId="10" egressNodeId="2" offeredTraffic="4.0">
+			<attribute key="bidirectionalCouple" value="251"/>
+			<attribute key="name" value="HannoverNuernberg"/>
+		</demand>
+		<demand id="253" ingressNodeId="2" egressNodeId="11" offeredTraffic="6.0">
+			<attribute key="bidirectionalCouple" value="254"/>
+			<attribute key="name" value="HannoverStuttgart"/>
+		</demand>
+		<demand id="254" ingressNodeId="11" egressNodeId="2" offeredTraffic="6.0">
+			<attribute key="bidirectionalCouple" value="253"/>
+			<attribute key="name" value="HannoverStuttgart"/>
+		</demand>
+		<demand id="255" ingressNodeId="2" egressNodeId="9" offeredTraffic="4.0">
+			<attribute key="bidirectionalCouple" value="256"/>
+			<attribute key="name" value="HannoverUlm"/>
+		</demand>
+		<demand id="256" ingressNodeId="9" egressNodeId="2" offeredTraffic="4.0">
+			<attribute key="bidirectionalCouple" value="255"/>
+			<attribute key="name" value="HannoverUlm"/>
+		</demand>
+		<demand id="257" ingressNodeId="12" egressNodeId="17" offeredTraffic="2.0">
+			<attribute key="bidirectionalCouple" value="258"/>
+			<attribute key="name" value="KarlsruheKoeln"/>
+		</demand>
+		<demand id="258" ingressNodeId="17" egressNodeId="12" offeredTraffic="2.0">
+			<attribute key="bidirectionalCouple" value="257"/>
+			<attribute key="name" value="KarlsruheKoeln"/>
+		</demand>
+		<demand id="259" ingressNodeId="12" egressNodeId="18" offeredTraffic="2.0">
+			<attribute key="bidirectionalCouple" value="260"/>
+			<attribute key="name" value="KarlsruheLeipzig"/>
+		</demand>
+		<demand id="260" ingressNodeId="18" egressNodeId="12" offeredTraffic="2.0">
+			<attribute key="bidirectionalCouple" value="259"/>
+			<attribute key="name" value="KarlsruheLeipzig"/>
+		</demand>
+		<demand id="261" ingressNodeId="12" egressNodeId="13" offeredTraffic="2.0">
+			<attribute key="bidirectionalCouple" value="262"/>
+			<attribute key="name" value="KarlsruheMannheim"/>
+		</demand>
+		<demand id="262" ingressNodeId="13" egressNodeId="12" offeredTraffic="2.0">
+			<attribute key="bidirectionalCouple" value="261"/>
+			<attribute key="name" value="KarlsruheMannheim"/>
+		</demand>
+		<demand id="263" ingressNodeId="12" egressNodeId="8" offeredTraffic="2.0">
+			<attribute key="bidirectionalCouple" value="264"/>
+			<attribute key="name" value="KarlsruheMuenchen"/>
+		</demand>
+		<demand id="264" ingressNodeId="8" egressNodeId="12" offeredTraffic="2.0">
+			<attribute key="bidirectionalCouple" value="263"/>
+			<attribute key="name" value="KarlsruheMuenchen"/>
+		</demand>
+		<demand id="265" ingressNodeId="12" egressNodeId="10" offeredTraffic="2.0">
+			<attribute key="bidirectionalCouple" value="266"/>
+			<attribute key="name" value="KarlsruheNuernberg"/>
+		</demand>
+		<demand id="266" ingressNodeId="10" egressNodeId="12" offeredTraffic="2.0">
+			<attribute key="bidirectionalCouple" value="265"/>
+			<attribute key="name" value="KarlsruheNuernberg"/>
+		</demand>
+		<demand id="267" ingressNodeId="12" egressNodeId="11" offeredTraffic="4.0">
+			<attribute key="bidirectionalCouple" value="268"/>
+			<attribute key="name" value="KarlsruheStuttgart"/>
+		</demand>
+		<demand id="268" ingressNodeId="11" egressNodeId="12" offeredTraffic="4.0">
+			<attribute key="bidirectionalCouple" value="267"/>
+			<attribute key="name" value="KarlsruheStuttgart"/>
+		</demand>
+		<demand id="269" ingressNodeId="12" egressNodeId="9" offeredTraffic="2.0">
+			<attribute key="bidirectionalCouple" value="270"/>
+			<attribute key="name" value="KarlsruheUlm"/>
+		</demand>
+		<demand id="270" ingressNodeId="9" egressNodeId="12" offeredTraffic="2.0">
+			<attribute key="bidirectionalCouple" value="269"/>
+			<attribute key="name" value="KarlsruheUlm"/>
+		</demand>
+		<demand id="271" ingressNodeId="17" egressNodeId="18" offeredTraffic="6.0">
+			<attribute key="bidirectionalCouple" value="272"/>
+			<attribute key="name" value="KoelnLeipzig"/>
+		</demand>
+		<demand id="272" ingressNodeId="18" egressNodeId="17" offeredTraffic="6.0">
+			<attribute key="bidirectionalCouple" value="271"/>
+			<attribute key="name" value="KoelnLeipzig"/>
+		</demand>
+		<demand id="273" ingressNodeId="17" egressNodeId="13" offeredTraffic="2.0">
+			<attribute key="bidirectionalCouple" value="274"/>
+			<attribute key="name" value="KoelnMannheim"/>
+		</demand>
+		<demand id="274" ingressNodeId="13" egressNodeId="17" offeredTraffic="2.0">
+			<attribute key="bidirectionalCouple" value="273"/>
+			<attribute key="name" value="KoelnMannheim"/>
+		</demand>
+		<demand id="275" ingressNodeId="17" egressNodeId="8" offeredTraffic="4.0">
+			<attribute key="bidirectionalCouple" value="276"/>
+			<attribute key="name" value="KoelnMuenchen"/>
+		</demand>
+		<demand id="276" ingressNodeId="8" egressNodeId="17" offeredTraffic="4.0">
+			<attribute key="bidirectionalCouple" value="275"/>
+			<attribute key="name" value="KoelnMuenchen"/>
+		</demand>
+		<demand id="277" ingressNodeId="17" egressNodeId="10" offeredTraffic="4.0">
+			<attribute key="bidirectionalCouple" value="278"/>
+			<attribute key="name" value="KoelnNuernberg"/>
+		</demand>
+		<demand id="278" ingressNodeId="10" egressNodeId="17" offeredTraffic="4.0">
+			<attribute key="bidirectionalCouple" value="277"/>
+			<attribute key="name" value="KoelnNuernberg"/>
+		</demand>
+		<demand id="279" ingressNodeId="17" egressNodeId="11" offeredTraffic="4.0">
+			<attribute key="bidirectionalCouple" value="280"/>
+			<attribute key="name" value="KoelnStuttgart"/>
+		</demand>
+		<demand id="280" ingressNodeId="11" egressNodeId="17" offeredTraffic="4.0">
+			<attribute key="bidirectionalCouple" value="279"/>
+			<attribute key="name" value="KoelnStuttgart"/>
+		</demand>
+		<demand id="281" ingressNodeId="17" egressNodeId="9" offeredTraffic="4.0">
+			<attribute key="bidirectionalCouple" value="282"/>
+			<attribute key="name" value="KoelnUlm"/>
+		</demand>
+		<demand id="282" ingressNodeId="9" egressNodeId="17" offeredTraffic="4.0">
+			<attribute key="bidirectionalCouple" value="281"/>
+			<attribute key="name" value="KoelnUlm"/>
+		</demand>
+		<demand id="283" ingressNodeId="18" egressNodeId="13" offeredTraffic="4.0">
+			<attribute key="bidirectionalCouple" value="284"/>
+			<attribute key="name" value="LeipzigMannheim"/>
+		</demand>
+		<demand id="284" ingressNodeId="13" egressNodeId="18" offeredTraffic="4.0">
+			<attribute key="bidirectionalCouple" value="283"/>
+			<attribute key="name" value="LeipzigMannheim"/>
+		</demand>
+		<demand id="285" ingressNodeId="18" egressNodeId="8" offeredTraffic="8.0">
+			<attribute key="bidirectionalCouple" value="286"/>
+			<attribute key="name" value="LeipzigMuenchen"/>
+		</demand>
+		<demand id="286" ingressNodeId="8" egressNodeId="18" offeredTraffic="8.0">
+			<attribute key="bidirectionalCouple" value="285"/>
+			<attribute key="name" value="LeipzigMuenchen"/>
+		</demand>
+		<demand id="287" ingressNodeId="18" egressNodeId="10" offeredTraffic="6.0">
+			<attribute key="bidirectionalCouple" value="288"/>
+			<attribute key="name" value="LeipzigNuernberg"/>
+		</demand>
+		<demand id="288" ingressNodeId="10" egressNodeId="18" offeredTraffic="6.0">
+			<attribute key="bidirectionalCouple" value="287"/>
+			<attribute key="name" value="LeipzigNuernberg"/>
+		</demand>
+		<demand id="289" ingressNodeId="18" egressNodeId="11" offeredTraffic="8.0">
+			<attribute key="bidirectionalCouple" value="290"/>
+			<attribute key="name" value="LeipzigStuttgart"/>
+		</demand>
+		<demand id="290" ingressNodeId="11" egressNodeId="18" offeredTraffic="8.0">
+			<attribute key="bidirectionalCouple" value="289"/>
+			<attribute key="name" value="LeipzigStuttgart"/>
+		</demand>
+		<demand id="291" ingressNodeId="18" egressNodeId="9" offeredTraffic="6.0">
+			<attribute key="bidirectionalCouple" value="292"/>
+			<attribute key="name" value="LeipzigUlm"/>
+		</demand>
+		<demand id="292" ingressNodeId="9" egressNodeId="18" offeredTraffic="6.0">
+			<attribute key="bidirectionalCouple" value="291"/>
+			<attribute key="name" value="LeipzigUlm"/>
+		</demand>
+		<demand id="293" ingressNodeId="13" egressNodeId="8" offeredTraffic="2.0">
+			<attribute key="bidirectionalCouple" value="294"/>
+			<attribute key="name" value="MannheimMuenchen"/>
+		</demand>
+		<demand id="294" ingressNodeId="8" egressNodeId="13" offeredTraffic="2.0">
+			<attribute key="bidirectionalCouple" value="293"/>
+			<attribute key="name" value="MannheimMuenchen"/>
+		</demand>
+		<demand id="295" ingressNodeId="13" egressNodeId="10" offeredTraffic="2.0">
+			<attribute key="bidirectionalCouple" value="296"/>
+			<attribute key="name" value="MannheimNuernberg"/>
+		</demand>
+		<demand id="296" ingressNodeId="10" egressNodeId="13" offeredTraffic="2.0">
+			<attribute key="bidirectionalCouple" value="295"/>
+			<attribute key="name" value="MannheimNuernberg"/>
+		</demand>
+		<demand id="297" ingressNodeId="13" egressNodeId="11" offeredTraffic="4.0">
+			<attribute key="bidirectionalCouple" value="298"/>
+			<attribute key="name" value="MannheimStuttgart"/>
+		</demand>
+		<demand id="298" ingressNodeId="11" egressNodeId="13" offeredTraffic="4.0">
+			<attribute key="bidirectionalCouple" value="297"/>
+			<attribute key="name" value="MannheimStuttgart"/>
+		</demand>
+		<demand id="299" ingressNodeId="13" egressNodeId="9" offeredTraffic="2.0">
+			<attribute key="bidirectionalCouple" value="300"/>
+			<attribute key="name" value="MannheimUlm"/>
+		</demand>
+		<demand id="300" ingressNodeId="9" egressNodeId="13" offeredTraffic="2.0">
+			<attribute key="bidirectionalCouple" value="299"/>
+			<attribute key="name" value="MannheimUlm"/>
+		</demand>
+		<demand id="301" ingressNodeId="8" egressNodeId="10" offeredTraffic="6.0">
+			<attribute key="bidirectionalCouple" value="302"/>
+			<attribute key="name" value="MuenchenNuernberg"/>
+		</demand>
+		<demand id="302" ingressNodeId="10" egressNodeId="8" offeredTraffic="6.0">
+			<attribute key="bidirectionalCouple" value="301"/>
+			<attribute key="name" value="MuenchenNuernberg"/>
+		</demand>
+		<demand id="303" ingressNodeId="8" egressNodeId="11" offeredTraffic="6.0">
+			<attribute key="bidirectionalCouple" value="304"/>
+			<attribute key="name" value="MuenchenStuttgart"/>
+		</demand>
+		<demand id="304" ingressNodeId="11" egressNodeId="8" offeredTraffic="6.0">
+			<attribute key="bidirectionalCouple" value="303"/>
+			<attribute key="name" value="MuenchenStuttgart"/>
+		</demand>
+		<demand id="305" ingressNodeId="8" egressNodeId="9" offeredTraffic="6.0">
+			<attribute key="bidirectionalCouple" value="306"/>
+			<attribute key="name" value="MuenchenUlm"/>
+		</demand>
+		<demand id="306" ingressNodeId="9" egressNodeId="8" offeredTraffic="6.0">
+			<attribute key="bidirectionalCouple" value="305"/>
+			<attribute key="name" value="MuenchenUlm"/>
+		</demand>
+		<demand id="307" ingressNodeId="10" egressNodeId="11" offeredTraffic="6.0">
+			<attribute key="bidirectionalCouple" value="308"/>
+			<attribute key="name" value="NuernbergStuttgart"/>
+		</demand>
+		<demand id="308" ingressNodeId="11" egressNodeId="10" offeredTraffic="6.0">
+			<attribute key="bidirectionalCouple" value="307"/>
+			<attribute key="name" value="NuernbergStuttgart"/>
+		</demand>
+		<demand id="309" ingressNodeId="10" egressNodeId="9" offeredTraffic="4.0">
+			<attribute key="bidirectionalCouple" value="310"/>
+			<attribute key="name" value="NuernbergUlm"/>
+		</demand>
+		<demand id="310" ingressNodeId="9" egressNodeId="10" offeredTraffic="4.0">
+			<attribute key="bidirectionalCouple" value="309"/>
+			<attribute key="name" value="NuernbergUlm"/>
+		</demand>
+		<demand id="311" ingressNodeId="11" egressNodeId="9" offeredTraffic="8.0">
+			<attribute key="bidirectionalCouple" value="312"/>
+			<attribute key="name" value="StuttgartUlm"/>
+		</demand>
+		<demand id="312" ingressNodeId="9" egressNodeId="11" offeredTraffic="8.0">
+			<attribute key="bidirectionalCouple" value="311"/>
+			<attribute key="name" value="StuttgartUlm"/>
+		</demand>
+		<sourceRouting/>
+	</layer>
+</network>
