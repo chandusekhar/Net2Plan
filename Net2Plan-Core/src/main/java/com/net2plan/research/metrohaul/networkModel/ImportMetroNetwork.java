@@ -70,7 +70,7 @@ public class ImportMetroNetwork
         	final String arbitraryParamsString = readString (thisRowData , COLUMNS_NODESTAB.ARBITRARYPARAMS.ordinal() , "");
         	System.out.println("arbitraryParamsString loaded: "+arbitraryParamsString);
         	
-        	if(!type.equals("CoreMetro") && !type.equals("EdgeMetro")) throw new Net2PlanException ("Unkown node type: "+type+". Only CoreMetro and EdgeMetro are valid names");
+        	//if(!type.equals("CoreMetro") && !type.equals("EdgeMetro")) throw new Net2PlanException ("Unkown node type: "+type+". Only CoreMetro and EdgeMetro are valid names");
         	
         	final WNode n = net.addNode(xCoord, yCoord, name, type);
         	n.setIsConnectedToNetworkCore(isConnectedToCoreNode);
