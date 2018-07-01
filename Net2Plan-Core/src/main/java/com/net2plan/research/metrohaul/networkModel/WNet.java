@@ -10,6 +10,16 @@
  *******************************************************************************/
 
 
+
+Pablo:
+	- NetworkService (layer). Un network service es un conjunto de service chain requests, mas potencialmente info de restricciones para ubicar 
+	juntos o no VNFs del mismo tipo o cosas asi. 
+	- Cada serv chain request es una demanda en el layer del network service
+	- Una SC realiza una SCR, es una ruta para esa demanda. Atraviesa los VLDs, que son los links en NS layer. OJO: para VLDs entre VNFs del mismo OpenStack => autolinks en el mismo nodo
+	- Una VNFInstance puede ser usada por diferentes SC de distintos NSs
+	- Un VLD es un enlace entre dos VNFInstances o un origen/destino de tráfico y un VNFInsance, dentro de un NS
+	- Un network service puede estar cursado o no, y ok o no 
+
 package com.net2plan.research.metrohaul.networkModel;
 
 import java.io.File;
