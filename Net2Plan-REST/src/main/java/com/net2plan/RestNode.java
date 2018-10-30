@@ -8,11 +8,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 public class RestNode
 {
-    @XmlElement
     private String name;
-    @XmlElement
     private double xCoord;
-    @XmlElement
     private double yCoord;
 
     public RestNode(){}
@@ -41,22 +38,22 @@ public class RestNode
         return name;
     }
 
-    public void setXCoord(double xCoord)
+    public void setxCoord(double xCoord)
     {
         this.xCoord = xCoord;
     }
 
-    public double getXCoord()
+    public double getxCoord()
     {
         return xCoord;
     }
 
-    public void setYCoord(double yCoord)
+    public void setyCoord(double yCoord)
     {
         this.yCoord = yCoord;
     }
 
-    public double getYCoord()
+    public double getyCoord()
     {
         return yCoord;
     }

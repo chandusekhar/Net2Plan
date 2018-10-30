@@ -84,6 +84,13 @@
         </dependency>
         <dependency>
             <groupId>com.net2plan</groupId>
+            <artifactId>net2plan-rest</artifactId>
+            <version>0.6.1</version>
+            <scope>runtime</scope>
+            <type>war</type>
+        </dependency>
+        <dependency>
+            <groupId>com.net2plan</groupId>
             <artifactId>net2plan-javadoc</artifactId>
             <version>0.6.1</version>
             <scope>runtime</scope>

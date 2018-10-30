@@ -109,6 +109,17 @@
             <outputDirectory/>
             <outputFileNameMapping>Net2Plan.jar</outputFileNameMapping>
         </dependencySet>
+        <!--REST Main-->
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <useTransitiveDependencies>false</useTransitiveDependencies>
+            <unpack>false</unpack>
+            <includes>
+                <include>${project.groupId}:net2plan-rest:*</include>
+            </includes>
+            <outputDirectory/>
+            <outputFileNameMapping>Net2Plan-REST.war</outputFileNameMapping>
+        </dependencySet>
         <!--External resources-->
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
