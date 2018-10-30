@@ -1,8 +1,7 @@
-package com.net2plan;
+package com.net2plan.components;
 
 import com.net2plan.interfaces.networkDesign.Node;
 
-import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
