@@ -30,7 +30,7 @@ public class RestController
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/nodes")
-    public Response AddNode(RestNode node)
+    public Response addNode(RestNode node)
     {
         Node n = netPlan.addNode(node.getxCoord(), node.getyCoord(), node.getName(), null);
         if(n == null)
@@ -75,6 +75,15 @@ public class RestController
             return Response.status(Response.Status.NOT_FOUND).build();
 
         return Response.ok(restNodes).build();
+    }
+
+    @DELETE
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/nodes")
+    public Response removeAllNodes()
+    {
+        netPlan.removeAllNodes();
+        return Response.ok().build();
     }
 
 
