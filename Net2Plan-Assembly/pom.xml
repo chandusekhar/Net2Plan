@@ -91,7 +91,7 @@
         </dependency>
         <dependency>
             <groupId>com.net2plan</groupId>
-            <artifactId>net2plan-rest-api-server</artifactId>
+            <artifactId>net2plan-rest-api.net2plan-rest-api-server</artifactId>
             <version>0.6.1</version>
             <scope>runtime</scope>
             <type>war</type>
