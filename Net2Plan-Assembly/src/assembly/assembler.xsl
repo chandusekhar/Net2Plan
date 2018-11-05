@@ -120,6 +120,17 @@
             <outputDirectory>rest</outputDirectory>
             <outputFileNameMapping>Net2Plan-REST-API.war</outputFileNameMapping>
         </dependencySet>
+        <!--REST Client-->
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <useTransitiveDependencies>false</useTransitiveDependencies>
+            <unpack>false</unpack>
+            <includes>
+                <include>${project.groupId}.net2plan-rest-api:net2plan-rest-api-client:jar</include>
+            </includes>
+            <outputDirectory>rest</outputDirectory>
+            <outputFileNameMapping>Net2Plan-REST-Client.jar</outputFileNameMapping>
+        </dependencySet>
         <!--External resources-->
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>

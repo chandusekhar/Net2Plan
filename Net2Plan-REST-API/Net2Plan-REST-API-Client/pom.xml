@@ -1,17 +1,19 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>net2plan-rest-api</artifactId>
         <groupId>com.net2plan</groupId>
         <version>0.7.0-SNAPSHOT</version>
     </parent>
-
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.net2plan.net2plan-rest-api</groupId>
-    <artifactId>net2plan-rest-api-server</artifactId>
-    <packaging>war</packaging>
-    <name>Net2Plan-REST-API</name>
+    <artifactId>net2plan-rest-api-client</artifactId>
+    <packaging>jar</packaging>
+    <name>Net2Plan-REST-Client</name>
+
 
     <dependencyManagement>
         <dependencies>
@@ -62,4 +64,5 @@
         <jersey.version>2.9</jersey.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
+
 </project>
