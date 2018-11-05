@@ -1,32 +1,17 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <parent>
-        <artifactId>net2plan</artifactId>
+        <artifactId>net2plan-rest-api</artifactId>
         <groupId>com.net2plan</groupId>
         <version>0.6.1</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>net2plan-rest</artifactId>
+    <artifactId>net2plan-rest-api-server</artifactId>
     <packaging>war</packaging>
-    <name>Net2Plan-REST</name>
+    <name>Net2Plan-REST-API</name>
 
-   <!-- <build>
-        <finalName>Net2Plan-REST</finalName>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.5.1</version>
-                <inherited>true</inherited>
-                <configuration>
-                    <source>1.7</source>
-                    <target>1.7</target>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build> -->
 
     <dependencyManagement>
         <dependencies>
