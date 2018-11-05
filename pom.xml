@@ -14,7 +14,7 @@
 
     <groupId>com.net2plan</groupId>
     <artifactId>net2plan</artifactId>
-    <version>0.6.1</version>
+    <version>0.7.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <url>http://www.net2plan.com</url>
 
@@ -29,12 +29,12 @@
         <module>Net2Plan-Core</module>
         <module>Net2Plan-CLI</module>
         <module>Net2Plan-GUI</module>
+        <module>Net2Plan-REST-API</module>
         <module>Net2Plan-Examples</module>
         <module>Net2Plan-Javadoc</module>
         <module>Net2Plan-Launcher</module>
         <module>Net2Plan-CI</module>
         <module>Net2Plan-Assembly</module>
-        <module>Net2Plan-REST-API</module>
     </modules>
 
     <properties>

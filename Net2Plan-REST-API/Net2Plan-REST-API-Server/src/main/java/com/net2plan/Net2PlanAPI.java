@@ -7,9 +7,7 @@ import com.net2plan.components.RestNode;
 import com.net2plan.examples.ExamplesController;
 import com.net2plan.interfaces.networkDesign.*;
 import com.net2plan.utils.Constants;
-import com.net2plan.utils.InputParameter;
 import com.net2plan.utils.RestUtils;
-import com.net2plan.utils.Triple;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -17,13 +15,12 @@ import javax.ws.rs.core.Response;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Root resource (exposed at "design" path)
  */
 @Path("/design")
-public class RestController
+public class Net2PlanAPI
 {
     private NetPlan netPlan = RestUtils.netPlan;
 
@@ -66,7 +63,7 @@ public class RestController
     {
         IAlgorithm algorithm = ExamplesController.getAlgorithm(algorithmName);
         if(algorithm == null)
-            return RestUtils.NOT_FOUND;
+            return RestUtils.NOT_FOUND(null);
         String response = algorithm.executeAlgorithm(netPlan, new LinkedHashMap<>(), new LinkedHashMap<>());
         return RestUtils.OK(response);
     }
@@ -112,7 +109,7 @@ public class RestController
     {
         Node n = netPlan.getNode(index);
         if(n == null)
-            return RestUtils.NOT_FOUND;
+            return RestUtils.NOT_FOUND(com.net2plan.internal.Constants.NetworkElementType.NODE);
         return RestUtils.OK(new RestNode(n));
     }
 
@@ -123,7 +120,7 @@ public class RestController
     {
         Node n = netPlan.getNode(index);
         if(n == null)
-            return RestUtils.NOT_FOUND;
+            return RestUtils.NOT_FOUND(com.net2plan.internal.Constants.NetworkElementType.NODE);
         n.remove();
         return RestUtils.OK(null);
     }
@@ -135,7 +132,7 @@ public class RestController
     {
         Node n = netPlan.getNodeFromId(id);
         if(n == null)
-            return RestUtils.NOT_FOUND;
+            return RestUtils.NOT_FOUND(com.net2plan.internal.Constants.NetworkElementType.NODE);
         return RestUtils.OK(new RestNode(n));
     }
 
@@ -146,7 +143,7 @@ public class RestController
     {
         Node n = netPlan.getNodeFromId(id);
         if(n == null)
-            return RestUtils.NOT_FOUND;
+            return RestUtils.NOT_FOUND(com.net2plan.internal.Constants.NetworkElementType.NODE);
         n.remove();
         return RestUtils.OK(null);
     }
@@ -158,7 +155,7 @@ public class RestController
     {
         List<Node> nodes = netPlan.getNodeByNameAllNodes(name);
         if(nodes.isEmpty())
-            return RestUtils.NOT_FOUND;
+            return RestUtils.NOT_FOUND(com.net2plan.internal.Constants.NetworkElementType.NODE);
         List<RestNode> restNodes = new LinkedList<>();
         nodes.stream().forEach(n -> restNodes.add(new RestNode(n)));
         return RestUtils.OK(restNodes);
@@ -171,7 +168,7 @@ public class RestController
     {
         List<Node> nodes = netPlan.getNodeByNameAllNodes(name);
         if(nodes.isEmpty())
-            return RestUtils.NOT_FOUND;
+            return RestUtils.NOT_FOUND(com.net2plan.internal.Constants.NetworkElementType.NODE);
         List<Node> nodesToRemove = new LinkedList<>(nodes);
         nodesToRemove.stream().forEach(n -> n.remove());
         return RestUtils.OK(null);
@@ -216,7 +213,7 @@ public class RestController
     {
         NetworkLayer layer = netPlan.getNetworkLayer(index);
         if(layer == null)
-            return RestUtils.NOT_FOUND;
+            return RestUtils.NOT_FOUND(com.net2plan.internal.Constants.NetworkElementType.LAYER);
         return RestUtils.OK(new RestNetworkLayer(layer));
     }
 
@@ -227,7 +224,7 @@ public class RestController
     {
         NetworkLayer layer = netPlan.getNetworkLayer(index);
         if(layer == null)
-            return RestUtils.NOT_FOUND;
+            return RestUtils.NOT_FOUND(com.net2plan.internal.Constants.NetworkElementType.LAYER);
         netPlan.removeNetworkLayer(layer);
         return RestUtils.OK(null);
     }
@@ -239,7 +236,7 @@ public class RestController
     {
         NetworkLayer layer = netPlan.getNetworkLayer(layerIndex);
         if(layer == null)
-            return RestUtils.NOT_FOUND;
+            return RestUtils.NOT_FOUND(com.net2plan.internal.Constants.NetworkElementType.LAYER);
         List<Link> links = netPlan.getLinks(layer);
         List<RestLink> restLinks = new LinkedList<>();
         links.stream().forEach(l -> restLinks.add(new RestLink(l)));
@@ -255,8 +252,10 @@ public class RestController
         Node originNode = netPlan.getNode(link.getOriginNodeIndex());
         Node destinationNode = netPlan.getNode(link.getDestinationNodeIndex());
         NetworkLayer layer = netPlan.getNetworkLayer(layerIndex);
-        if(originNode == null || destinationNode == null || layer == null)
-            return RestUtils.NOT_FOUND;
+        if(originNode == null || destinationNode == null)
+            return RestUtils.NOT_FOUND(com.net2plan.internal.Constants.NetworkElementType.NODE);
+        if(layer == null)
+            return RestUtils.NOT_FOUND(com.net2plan.internal.Constants.NetworkElementType.LAYER);
         Link l = netPlan.addLink(originNode, destinationNode, link.getCapacity(), link.getLengthInKm(), link.getPropagationSpeedInKmPerSecond(), null, layer);
         if(l == null)
             return Response.serverError().entity("Couldn't add a new link").build();
@@ -270,7 +269,7 @@ public class RestController
     {
         NetworkLayer layer = netPlan.getNetworkLayer(layerIndex);
         if(layer == null)
-            return RestUtils.NOT_FOUND;
+            return RestUtils.NOT_FOUND(com.net2plan.internal.Constants.NetworkElementType.LAYER);
         netPlan.removeAllLinks(layer);
         return RestUtils.OK(null);
     }
@@ -282,10 +281,10 @@ public class RestController
     {
         NetworkLayer layer = netPlan.getNetworkLayer(layerIndex);
         if(layer == null)
-            return RestUtils.NOT_FOUND;
+            return RestUtils.NOT_FOUND(com.net2plan.internal.Constants.NetworkElementType.LAYER);
         Link l = netPlan.getLink(linkIndex, layer);
         if(l == null)
-            return RestUtils.NOT_FOUND;
+            return RestUtils.NOT_FOUND(com.net2plan.internal.Constants.NetworkElementType.LINK);
         return RestUtils.OK(new RestLink(l));
     }
 
@@ -296,10 +295,10 @@ public class RestController
     {
         NetworkLayer layer = netPlan.getNetworkLayer(layerIndex);
         if(layer == null)
-            return RestUtils.NOT_FOUND;
+            return RestUtils.NOT_FOUND(com.net2plan.internal.Constants.NetworkElementType.LAYER);
         Link l = netPlan.getLink(linkIndex, layer);
         if(l == null)
-            return RestUtils.NOT_FOUND;
+            return RestUtils.NOT_FOUND(com.net2plan.internal.Constants.NetworkElementType.LINK);
         l.remove();
         return RestUtils.OK(null);
     }
@@ -311,7 +310,7 @@ public class RestController
     {
         Link l = netPlan.getLinkFromId(linkId);
         if(l == null)
-            return RestUtils.NOT_FOUND;
+            return RestUtils.NOT_FOUND(com.net2plan.internal.Constants.NetworkElementType.LINK);
         return RestUtils.OK(new RestLink(l));
     }
 
@@ -322,7 +321,7 @@ public class RestController
     {
         Link l = netPlan.getLinkFromId(linkId);
         if(l == null)
-            return RestUtils.NOT_FOUND;
+            return RestUtils.NOT_FOUND(com.net2plan.internal.Constants.NetworkElementType.LINK);
         l.remove();
         return RestUtils.OK(null);
     }
@@ -334,7 +333,7 @@ public class RestController
     {
         NetworkLayer layer = netPlan.getNetworkLayer(layerIndex);
         if(layer == null)
-            return RestUtils.NOT_FOUND;
+            return RestUtils.NOT_FOUND(com.net2plan.internal.Constants.NetworkElementType.LAYER);
         List<Demand> demands = netPlan.getDemands(layer);
         List<RestDemand> restDemands = new LinkedList<>();
         demands.stream().forEach(d -> restDemands.add(new RestDemand(d)));
@@ -350,8 +349,10 @@ public class RestController
         Node ingressNode = netPlan.getNode(demand.getIngressNodeIndex());
         Node egressNode = netPlan.getNode(demand.getEgressNodeIndex());
         NetworkLayer layer = netPlan.getNetworkLayer(layerIndex);
-        if(ingressNode == null || egressNode == null || layer == null)
-            return RestUtils.NOT_FOUND;
+        if(ingressNode == null || egressNode == null)
+            return RestUtils.NOT_FOUND(com.net2plan.internal.Constants.NetworkElementType.NODE);
+        if(layer == null)
+            return RestUtils.NOT_FOUND(com.net2plan.internal.Constants.NetworkElementType.LAYER);
         Demand d = netPlan.addDemand(ingressNode,egressNode,demand.getOfferedTraffic(), Constants.RoutingType.valueOf(demand.getRoutingType()),null, layer);
         if(d == null)
             return Response.serverError().entity("Couldn't add a new demand").build();
@@ -365,7 +366,7 @@ public class RestController
     {
         NetworkLayer layer = netPlan.getNetworkLayer(layerIndex);
         if(layer == null)
-            return RestUtils.NOT_FOUND;
+            return RestUtils.NOT_FOUND(com.net2plan.internal.Constants.NetworkElementType.LAYER);
         netPlan.removeAllDemands(layer);
         return RestUtils.OK(null);
     }
@@ -377,10 +378,10 @@ public class RestController
     {
         NetworkLayer layer = netPlan.getNetworkLayer(layerIndex);
         if(layer == null)
-            return RestUtils.NOT_FOUND;
+            return RestUtils.NOT_FOUND(com.net2plan.internal.Constants.NetworkElementType.LAYER);
         Demand d = netPlan.getDemand(demandIndex, layer);
         if(d == null)
-            return RestUtils.NOT_FOUND;
+            return RestUtils.NOT_FOUND(com.net2plan.internal.Constants.NetworkElementType.DEMAND);
         return RestUtils.OK(new RestDemand(d));
     }
 
@@ -391,10 +392,10 @@ public class RestController
     {
         NetworkLayer layer = netPlan.getNetworkLayer(layerIndex);
         if(layer == null)
-            return RestUtils.NOT_FOUND;
+            return RestUtils.NOT_FOUND(com.net2plan.internal.Constants.NetworkElementType.LAYER);
         Demand d = netPlan.getDemand(demandIndex, layer);
         if(d == null)
-            return RestUtils.NOT_FOUND;
+            return RestUtils.NOT_FOUND(com.net2plan.internal.Constants.NetworkElementType.DEMAND);
         d.remove();
         return RestUtils.OK(null);
     }
@@ -406,7 +407,7 @@ public class RestController
     {
         Demand d = netPlan.getDemandFromId(demandId);
         if(d == null)
-            return Response.status(Response.Status.NOT_FOUND).build();
+            return RestUtils.NOT_FOUND(com.net2plan.internal.Constants.NetworkElementType.DEMAND);
         return RestUtils.OK(new RestDemand(d));
     }
 
@@ -417,7 +418,7 @@ public class RestController
     {
         Demand d = netPlan.getDemandFromId(demandId);
         if(d == null)
-            return RestUtils.NOT_FOUND;
+            return RestUtils.NOT_FOUND(com.net2plan.internal.Constants.NetworkElementType.DEMAND);
         d.remove();
         return RestUtils.OK(null);
     }

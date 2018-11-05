@@ -1,6 +1,7 @@
 package com.net2plan.utils;
 
 import com.net2plan.interfaces.networkDesign.NetPlan;
+import com.net2plan.internal.Constants;
 
 import javax.ws.rs.core.Response;
 import java.io.*;
@@ -8,12 +9,10 @@ import java.io.*;
 public class RestUtils
 {
     public static NetPlan netPlan;
-    public static Response NOT_FOUND;
 
     static
     {
         netPlan = new NetPlan();
-        NOT_FOUND = Response.status(Response.Status.NOT_FOUND).build();
     }
 
     public static Response OK(Object answer)
@@ -22,6 +21,14 @@ public class RestUtils
             return Response.ok().build();
         else
             return Response.ok(answer).build();
+    }
+
+    public static Response NOT_FOUND(Constants.NetworkElementType type)
+    {
+        if(type != null)
+            return Response.status(Response.Status.NOT_FOUND).entity(type.toString()+" not found.").build();
+
+        return Response.status(Response.Status.NOT_FOUND).entity("algorithm not found.").build();
     }
 
     public static void uploadFile(InputStream uploadedInputStream, String uploadedFileLocation)

@@ -109,16 +109,16 @@
             <outputDirectory/>
             <outputFileNameMapping>Net2Plan.jar</outputFileNameMapping>
         </dependencySet>
-        <!--REST Main-->
+        <!--REST API-->
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
             <useTransitiveDependencies>false</useTransitiveDependencies>
             <unpack>false</unpack>
             <includes>
-                <include>${project.groupId}:net2plan-rest:*</include>
+                <include>${project.groupId}.net2plan-rest-api:net2plan-rest-api-server:*</include>
             </includes>
-            <outputDirectory/>
-            <outputFileNameMapping>Net2Plan-REST.war</outputFileNameMapping>
+            <outputDirectory>rest</outputDirectory>
+            <outputFileNameMapping>Net2Plan-REST-API.war</outputFileNameMapping>
         </dependencySet>
         <!--External resources-->
         <dependencySet>
@@ -145,8 +145,8 @@
         </dependencySet>
     </dependencySets>
 
-    <!-- Javadoc -->
     <moduleSets>
+        <!-- Javadoc -->
         <moduleSet>
             <useAllReactorProjects>true</useAllReactorProjects>
             <includes>
