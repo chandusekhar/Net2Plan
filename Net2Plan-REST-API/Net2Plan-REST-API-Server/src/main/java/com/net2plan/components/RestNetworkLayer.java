@@ -9,15 +9,17 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class RestNetworkLayer
 {
     private String name, description, linkCapacityUnitsName, demandTrafficUnitsName;
+    private RestMap attributesMap;
 
     public RestNetworkLayer(){}
 
-    public RestNetworkLayer(String name, String description, String linkCapacityUnitsName, String demandTrafficUnitsName)
+    public RestNetworkLayer(String name, String description, String linkCapacityUnitsName, String demandTrafficUnitsName, RestMap attributesMap)
     {
         this.name = name;
         this.description = description;
         this.linkCapacityUnitsName = linkCapacityUnitsName;
         this.demandTrafficUnitsName = demandTrafficUnitsName;
+        this.attributesMap = attributesMap;
     }
 
     public RestNetworkLayer(NetworkLayer layer)
@@ -26,6 +28,7 @@ public class RestNetworkLayer
         this.description = layer.getDescription();
         this.linkCapacityUnitsName = layer.getLinkCapacityUnits();
         this.demandTrafficUnitsName = layer.getDemandTrafficUnits();
+        this.attributesMap = new RestMap(layer.getAttributes());
     }
 
     public void setName(String name)
@@ -66,5 +69,15 @@ public class RestNetworkLayer
     public String getDemandTrafficUnitsName()
     {
         return demandTrafficUnitsName;
+    }
+
+    public void setAttributesMap(RestMap attributesMap)
+    {
+        this.attributesMap = attributesMap;
+    }
+
+    public RestMap getAttributesMap()
+    {
+        return attributesMap;
     }
 }

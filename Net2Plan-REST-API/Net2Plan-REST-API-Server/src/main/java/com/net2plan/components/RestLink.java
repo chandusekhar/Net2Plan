@@ -9,16 +9,18 @@ public class RestLink
 {
     private int originNodeIndex, destinationNodeIndex;
     private double capacity, lengthInKm, propagationSpeedInKmPerSecond;
+    private RestMap attributesMap;
 
     public RestLink(){}
 
-    public RestLink(int originNodeIndex, int destinationNodeIndex, double capacity, double lengthInKm, double propagationSpeedInKmPerSecond)
+    public RestLink(int originNodeIndex, int destinationNodeIndex, double capacity, double lengthInKm, double propagationSpeedInKmPerSecond, RestMap attributesMap)
     {
         this.originNodeIndex = originNodeIndex;
         this.destinationNodeIndex = destinationNodeIndex;
         this.capacity = capacity;
         this.lengthInKm = lengthInKm;
         this.propagationSpeedInKmPerSecond = propagationSpeedInKmPerSecond;
+        this.attributesMap = attributesMap;
     }
 
     public RestLink(Link link)
@@ -28,6 +30,7 @@ public class RestLink
         this.capacity = link.getCapacity();
         this.lengthInKm = link.getLengthInKm();
         this.propagationSpeedInKmPerSecond = link.getPropagationSpeedInKmPerSecond();
+        this.attributesMap = new RestMap(link.getAttributes());
     }
 
     public void setOriginNodeIndex(int originNodeIndex)
@@ -78,5 +81,15 @@ public class RestLink
     public double getPropagationSpeedInKmPerSecond()
     {
         return propagationSpeedInKmPerSecond;
+    }
+
+    public void setAttributesMap(RestMap attributesMap)
+    {
+        this.attributesMap = attributesMap;
+    }
+
+    public RestMap getAttributesMap()
+    {
+        return attributesMap;
     }
 }

@@ -1,9 +1,6 @@
 package com.net2plan;
 
-import com.net2plan.components.RestDemand;
-import com.net2plan.components.RestLink;
-import com.net2plan.components.RestNetworkLayer;
-import com.net2plan.components.RestNode;
+import com.net2plan.components.*;
 import com.net2plan.examples.ExamplesController;
 import com.net2plan.interfaces.networkDesign.*;
 import com.net2plan.utils.Constants;
@@ -15,6 +12,7 @@ import javax.ws.rs.core.Response;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Root resource (exposed at "design" path)
@@ -87,10 +85,11 @@ public class Net2PlanAPI
     @Path("/nodes")
     public Response addNode(RestNode node)
     {
-        Node n = netPlan.addNode(node.getxCoord(), node.getyCoord(), node.getName(), null);
+        Map<String, String> attributes = (node.getAttributesMap() == null) ? null : node.getAttributesMap().getMap();
+        Node n = netPlan.addNode(node.getxCoord(), node.getyCoord(), node.getName(), attributes);
         if(n == null)
             return Response.serverError().entity("Couldn't add a new node").build();
-        return RestUtils.OK(null);
+        return RestUtils.OK(new RestNode(n));
     }
 
     @DELETE
@@ -191,10 +190,11 @@ public class Net2PlanAPI
     @Path("/layers")
     public Response addLayer(RestNetworkLayer layer)
     {
-        NetworkLayer networkLayer = netPlan.addLayer(layer.getName(), layer.getDescription(), layer.getLinkCapacityUnitsName(), layer.getDemandTrafficUnitsName(),null, null);
+        Map<String, String> attributes = (layer.getAttributesMap() == null) ? null : layer.getAttributesMap().getMap();
+        NetworkLayer networkLayer = netPlan.addLayer(layer.getName(), layer.getDescription(), layer.getLinkCapacityUnitsName(), layer.getDemandTrafficUnitsName(),null, attributes);
         if(networkLayer == null)
             return Response.serverError().entity("Couldn't add a new network layer").build();
-        return RestUtils.OK(null);
+        return RestUtils.OK(new RestNetworkLayer(networkLayer));
     }
 
     @DELETE
@@ -256,10 +256,11 @@ public class Net2PlanAPI
             return RestUtils.NOT_FOUND(com.net2plan.internal.Constants.NetworkElementType.NODE);
         if(layer == null)
             return RestUtils.NOT_FOUND(com.net2plan.internal.Constants.NetworkElementType.LAYER);
-        Link l = netPlan.addLink(originNode, destinationNode, link.getCapacity(), link.getLengthInKm(), link.getPropagationSpeedInKmPerSecond(), null, layer);
+        Map<String, String> attributes = (link.getAttributesMap() == null) ? null : link.getAttributesMap().getMap();
+        Link l = netPlan.addLink(originNode, destinationNode, link.getCapacity(), link.getLengthInKm(), link.getPropagationSpeedInKmPerSecond(), attributes, layer);
         if(l == null)
             return Response.serverError().entity("Couldn't add a new link").build();
-        return RestUtils.OK(null);
+        return RestUtils.OK(new RestLink(l));
     }
 
     @DELETE
@@ -353,10 +354,11 @@ public class Net2PlanAPI
             return RestUtils.NOT_FOUND(com.net2plan.internal.Constants.NetworkElementType.NODE);
         if(layer == null)
             return RestUtils.NOT_FOUND(com.net2plan.internal.Constants.NetworkElementType.LAYER);
-        Demand d = netPlan.addDemand(ingressNode,egressNode,demand.getOfferedTraffic(), Constants.RoutingType.valueOf(demand.getRoutingType()),null, layer);
+        Map<String, String> attributes = (demand.getAttributesMap() == null) ? null : demand.getAttributesMap().getMap();
+        Demand d = netPlan.addDemand(ingressNode,egressNode,demand.getOfferedTraffic(), Constants.RoutingType.valueOf(demand.getRoutingType()),attributes, layer);
         if(d == null)
             return Response.serverError().entity("Couldn't add a new demand").build();
-        return RestUtils.OK(null);
+        return RestUtils.OK(new RestDemand(d));
     }
 
     @DELETE
@@ -422,6 +424,108 @@ public class Net2PlanAPI
         d.remove();
         return RestUtils.OK(null);
     }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/layers/{layerindex}/routes")
+    public Response getRoutes(@PathParam("layerindex") int layerIndex)
+    {
+        NetworkLayer layer = netPlan.getNetworkLayer(layerIndex);
+        if(layer == null)
+            return RestUtils.NOT_FOUND(com.net2plan.internal.Constants.NetworkElementType.LAYER);
+        List<Route> routes = netPlan.getRoutes(layer);
+        List<RestRoute> restRoutes = new LinkedList<>();
+        routes.stream().forEach(r -> restRoutes.add(new RestRoute(r)));
+        return RestUtils.OK(restRoutes);
+    }
+
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/layers/{layerindex}/routes")
+    public Response addRoute(@PathParam("layerindex") int layerIndex, RestRoute route)
+    {
+        NetworkLayer layer = netPlan.getNetworkLayer(layerIndex);
+        if(layer == null)
+            return RestUtils.NOT_FOUND(com.net2plan.internal.Constants.NetworkElementType.LAYER);
+        Demand demand = netPlan.getDemand(route.getDemandIndex(), layer);
+        if(demand == null)
+            return RestUtils.NOT_FOUND(com.net2plan.internal.Constants.NetworkElementType.DEMAND);
+        List<Integer> linkIndexes = route.getSequenceOfLinkIndexes();
+        List<Link> links = new LinkedList<>();
+        linkIndexes.stream().forEach(linkIndex -> links.add(netPlan.getLink(linkIndex)));
+        Map<String, String> attributes = (route.getAttributesMap() == null) ? null : route.getAttributesMap().getMap();
+        Route r = netPlan.addRoute(demand, route.getCarriedTraffic(), route.getOccupiedLinkCapacity(), links, attributes);
+        if(r == null)
+            return Response.serverError().entity("Couldn't add a new route").build();
+        return RestUtils.OK(new RestRoute(r));
+    }
+
+    @DELETE
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/layers/{layerindex}/routes")
+    public Response removeAllRoutes(@PathParam("layerindex") int layerIndex)
+    {
+        NetworkLayer layer = netPlan.getNetworkLayer(layerIndex);
+        if(layer == null)
+            return RestUtils.NOT_FOUND(com.net2plan.internal.Constants.NetworkElementType.LAYER);
+        netPlan.removeAllRoutes(layer);
+        return RestUtils.OK(null);
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/layers/{layerindex}/routes/index/{routeindex}")
+    public Response getRouteByIndex(@PathParam("layerindex") int layerIndex, @PathParam("routeindex") int routeIndex)
+    {
+        NetworkLayer layer = netPlan.getNetworkLayer(layerIndex);
+        if(layer == null)
+            return RestUtils.NOT_FOUND(com.net2plan.internal.Constants.NetworkElementType.LAYER);
+        Route r = netPlan.getRoute(routeIndex, layer);
+        if(r == null)
+            return RestUtils.NOT_FOUND(com.net2plan.internal.Constants.NetworkElementType.ROUTE);
+        return RestUtils.OK(new RestRoute(r));
+    }
+
+    @DELETE
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/layers/{layerindex}/routes/index/{routeindex}")
+    public Response removeRouteByIndex(@PathParam("layerindex") int layerIndex, @PathParam("routeindex") int routeIndex)
+    {
+        NetworkLayer layer = netPlan.getNetworkLayer(layerIndex);
+        if(layer == null)
+            return RestUtils.NOT_FOUND(com.net2plan.internal.Constants.NetworkElementType.LAYER);
+        Route r = netPlan.getRoute(routeIndex, layer);
+        if(r == null)
+            return RestUtils.NOT_FOUND(com.net2plan.internal.Constants.NetworkElementType.ROUTE);
+        r.remove();
+        return RestUtils.OK(null);
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/routes/id/{routeid}")
+    public Response getRouteFromId(@PathParam("routeid") long routeId)
+    {
+        Route r = netPlan.getRouteFromId(routeId);
+        if(r == null)
+            return RestUtils.NOT_FOUND(com.net2plan.internal.Constants.NetworkElementType.ROUTE);
+        return RestUtils.OK(new RestRoute(r));
+    }
+
+    @DELETE
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/routes/id/{routeid}")
+    public Response removeRouteFromId(@PathParam("routeid") long routeId)
+    {
+        Route r = netPlan.getRouteFromId(routeId);
+        if(r == null)
+            return RestUtils.NOT_FOUND(com.net2plan.internal.Constants.NetworkElementType.ROUTE);
+        r.remove();
+        return RestUtils.OK(null);
+    }
+
+
 
 
 }
