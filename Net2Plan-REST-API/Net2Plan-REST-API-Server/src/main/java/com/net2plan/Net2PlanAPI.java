@@ -5,6 +5,7 @@ import com.net2plan.examples.ExamplesController;
 import com.net2plan.interfaces.networkDesign.*;
 import com.net2plan.utils.Constants;
 import com.net2plan.utils.RestUtils;
+import com.net2plan.utils.Triple;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -32,37 +33,43 @@ public class Net2PlanAPI
         return RestUtils.OK(netPlan.toString());
     }
 
-    /*@POST
-    @Consumes(MediaType.MULTIPART_FORM_DATA)
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("/")
-    public Response setDesign(@FormDataParam("file") InputStream uploadedInputStream, @FormDataParam("file") FormDataContentDisposition fileDetail)
-    {
-        String uploadedFileLocation = SystemUtils.getCurrentDir() + File.separator + fileDetail.getName();
-        System.out.println(uploadedFileLocation);
-
-        RestUtils.uploadFile(uploadedInputStream, uploadedFileLocation);
-
-        File newDesign = new File(uploadedFileLocation);
-
-        if(newDesign == null || !newDesign.exists())
-            return Response.serverError().entity("Couldn't set a new design").build();
-
-        RestUtils.netPlan = new NetPlan(newDesign);
-
-        return Response.ok().build();
-
-    }*/
 
     @POST
     @Produces(MediaType.TEXT_PLAIN)
     @Path("/execute/{algorithmname}")
-    public Response executeAlgorithm(@PathParam("algorithmname") String algorithmName)
+    public Response executeAlgorithm(@PathParam("algorithmname") String algorithmName, RestMap parametersMap)
     {
         IAlgorithm algorithm = ExamplesController.getAlgorithm(algorithmName);
         if(algorithm == null)
             return RestUtils.NOT_FOUND(null);
-        String response = algorithm.executeAlgorithm(netPlan, new LinkedHashMap<>(), new LinkedHashMap<>());
+
+        List<Triple<String, String, String>> algorithmParameters_raw = algorithm.getParameters();
+        Map<String, String> algorithmParameters = new LinkedHashMap<>();
+        algorithmParameters_raw.stream().forEach(t -> algorithmParameters.put(t.getFirst(), t.getSecond()));
+
+        Map<String, String> userParametersMap = (parametersMap == null) ? null : parametersMap.getMap();
+        if(userParametersMap != null)
+        {
+            for(Map.Entry<String, String> entry : userParametersMap.entrySet())
+            {
+                String paramName = entry.getKey();
+                String paramValue = entry.getValue();
+                if(algorithmParameters.containsKey(paramName))
+                {
+                    algorithmParameters.put(paramName, paramValue);
+                }
+                else{
+                    return RestUtils.SERVER_ERROR("Undefined parameter "+paramName+" for this algorithm: "+algorithm.getClass().getName());
+                }
+            }
+        }
+
+        List<Triple<String, String, String>> net2planParameters_raw = Configuration.getNet2PlanParameters();
+        Map<String, String> net2planParameters = new LinkedHashMap<>();
+        net2planParameters_raw.stream().forEach(t -> net2planParameters.put(t.getFirst(), t.getSecond()));
+
+        String response = algorithm.executeAlgorithm(netPlan, algorithmParameters, net2planParameters);
+
         return RestUtils.OK(response);
     }
 
@@ -88,7 +95,7 @@ public class Net2PlanAPI
         Map<String, String> attributes = (node.getAttributesMap() == null) ? null : node.getAttributesMap().getMap();
         Node n = netPlan.addNode(node.getxCoord(), node.getyCoord(), node.getName(), attributes);
         if(n == null)
-            return Response.serverError().entity("Couldn't add a new node").build();
+            return RestUtils.SERVER_ERROR("Couldn't add a new node");
         return RestUtils.OK(new RestNode(n));
     }
 
@@ -193,7 +200,7 @@ public class Net2PlanAPI
         Map<String, String> attributes = (layer.getAttributesMap() == null) ? null : layer.getAttributesMap().getMap();
         NetworkLayer networkLayer = netPlan.addLayer(layer.getName(), layer.getDescription(), layer.getLinkCapacityUnitsName(), layer.getDemandTrafficUnitsName(),null, attributes);
         if(networkLayer == null)
-            return Response.serverError().entity("Couldn't add a new network layer").build();
+            return RestUtils.SERVER_ERROR("Couldn't add a new network layer");
         return RestUtils.OK(new RestNetworkLayer(networkLayer));
     }
 
@@ -259,7 +266,7 @@ public class Net2PlanAPI
         Map<String, String> attributes = (link.getAttributesMap() == null) ? null : link.getAttributesMap().getMap();
         Link l = netPlan.addLink(originNode, destinationNode, link.getCapacity(), link.getLengthInKm(), link.getPropagationSpeedInKmPerSecond(), attributes, layer);
         if(l == null)
-            return Response.serverError().entity("Couldn't add a new link").build();
+            return RestUtils.SERVER_ERROR("Couldn't add a new link");
         return RestUtils.OK(new RestLink(l));
     }
 
@@ -357,7 +364,7 @@ public class Net2PlanAPI
         Map<String, String> attributes = (demand.getAttributesMap() == null) ? null : demand.getAttributesMap().getMap();
         Demand d = netPlan.addDemand(ingressNode,egressNode,demand.getOfferedTraffic(), Constants.RoutingType.valueOf(demand.getRoutingType()),attributes, layer);
         if(d == null)
-            return Response.serverError().entity("Couldn't add a new demand").build();
+            return RestUtils.SERVER_ERROR("Couldn't add a new demand");
         return RestUtils.OK(new RestDemand(d));
     }
 
@@ -457,7 +464,7 @@ public class Net2PlanAPI
         Map<String, String> attributes = (route.getAttributesMap() == null) ? null : route.getAttributesMap().getMap();
         Route r = netPlan.addRoute(demand, route.getCarriedTraffic(), route.getOccupiedLinkCapacity(), links, attributes);
         if(r == null)
-            return Response.serverError().entity("Couldn't add a new route").build();
+            return RestUtils.SERVER_ERROR("Couldn't add a new route");
         return RestUtils.OK(new RestRoute(r));
     }
 

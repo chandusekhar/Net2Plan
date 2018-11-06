@@ -47,4 +47,39 @@ public class RestResource
         this.capacityIOccupyInBaseResource = new RestMap<>(capacityBaseResourceIndexes);
         this.attributes = new RestMap<>(res.getAttributes());
     }
+
+    public void setType(String type)
+    {
+        this.type = type;
+    }
+
+    public String getType()
+    {
+        return type;
+    }
+
+    public void setName(String name)
+    {
+        this.name = name;
+    }
+
+    public String getName()
+    {
+        return name;
+    }
+
+    public void setHostNodeIndex(int hostNodeIndex)
+    {
+        this.hostNodeIndex = hostNodeIndex;
+    }
+
+    public int getHostNodeIndex()
+    {
+        return hostNodeIndex;
+    }
+
+    public String getCapacityMeasurementUnits()
+    {
+        return capacityMeasurementUnits;
+    }
 }

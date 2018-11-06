@@ -15,12 +15,12 @@ public class RestUtils
         netPlan = new NetPlan();
     }
 
-    public static Response OK(Object answer)
+    public static Response OK(Object message)
     {
-        if(answer == null)
+        if(message == null)
             return Response.ok().build();
         else
-            return Response.ok(answer).build();
+            return Response.ok(message).build();
     }
 
     public static Response NOT_FOUND(Constants.NetworkElementType type)
@@ -31,26 +31,12 @@ public class RestUtils
         return Response.status(Response.Status.NOT_FOUND).entity("algorithm not found.").build();
     }
 
-    public static void uploadFile(InputStream uploadedInputStream, String uploadedFileLocation)
+    public static Response SERVER_ERROR(Object message)
     {
-
-        try {
-            OutputStream out = new FileOutputStream(new File(uploadedFileLocation));
-            int read = 0;
-            byte[] bytes = new byte[1024];
-
-            while ((read = uploadedInputStream.read(bytes)) != -1)
-            {
-                out.write(bytes, 0, read);
-            }
-            out.flush();
-            out.close();
-        } catch (IOException e) {
-
-            e.printStackTrace();
-        }
-
+        if(message == null)
+            return Response.serverError().build();
+        else
+            return Response.serverError().entity(message).build();
     }
-
 
 }
