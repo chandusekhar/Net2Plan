@@ -6,7 +6,10 @@ import java.util.Map;
 public class RestMap<K,V>
 {
     private Map<K, V> map;
-    public RestMap(){}
+    public RestMap()
+    {
+        this.map = new LinkedHashMap<>();
+    }
 
     public RestMap(Map<K,V> map)
     {
