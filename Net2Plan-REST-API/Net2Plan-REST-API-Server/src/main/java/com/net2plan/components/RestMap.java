@@ -3,23 +3,23 @@ package com.net2plan.components;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class RestMap
+public class RestMap<K,V>
 {
-    private Map<String, String> map;
+    private Map<K, V> map;
     public RestMap(){}
 
-    public RestMap(Map<String, String> map)
+    public RestMap(Map<K,V> map)
     {
         this.map = new LinkedHashMap<>();
         this.map.putAll(map);
     }
 
-    public void setMap(Map<String, String> map)
+    public void setMap(Map<K,V> map)
     {
         this.map = map;
     }
 
-    public Map<String, String> getMap()
+    public Map<K,V> getMap()
     {
         return map;
     }
