@@ -12,14 +12,9 @@
 package com.net2plan.interfaces.networkDesign;
 
 import java.awt.geom.Point2D;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -6046,6 +6041,41 @@ public class NetPlan extends NetworkElement
                 e.printStackTrace();
             }
         }
+    }
+
+    /**
+     * <p>Saves the current network plan to a XML formatted string.</p>
+     *
+     * @return XML formatted String
+     */
+    public String save()
+    {
+        ByteArrayOutputStream baos = null;
+        String xmlResponse = "";
+        try
+        {
+            baos = new ByteArrayOutputStream();
+            saveToOutputStream(baos);
+            xmlResponse = baos.toString(StandardCharsets.UTF_8.name());
+        } catch (UnsupportedEncodingException e)
+        {
+            throw new Net2PlanException(e.getMessage());
+        } finally
+        {
+            try
+            {
+                if (baos != null)
+                {
+                    baos.close();
+                }
+            } catch (IOException e)
+            {
+                e.printStackTrace();
+            }
+        }
+
+
+        return xmlResponse;
     }
 
     /**

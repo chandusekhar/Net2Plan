@@ -32,40 +32,15 @@ public class Net2PlanAPI
     @Path("/")
     public Response getDesign()
     {
-        DateFormat dateFormat = new SimpleDateFormat("yyyyy-mm-dd-hh-mm-ss");
-        Date date = new Date();
-        String currentData = dateFormat.format(date);
-        String currentDirPath = SystemUtils.getCurrentDir().getAbsolutePath();
-        String netPlanFilePath = currentDirPath + File.separator + "Net2Plan-" + currentData + ".n2p";
-        File netPlanFile = new File(netPlanFilePath);
-        netPlan.saveToFile(netPlanFile);
-        BufferedReader b;
-        StringBuffer xmlResponse = new StringBuffer();
-        try
-        {
-            b = new BufferedReader(new FileReader(netPlanFile));
-            String line = "";
-            while((line = b.readLine()) != null)
-            {
-                xmlResponse.append(line+"\r\n");
-            }
-            b.close();
-        } catch (FileNotFoundException e)
-        {
-            e.printStackTrace();
-        } catch (IOException e)
-        {
-            e.printStackTrace();
-        }
-
-        return RestUtils.OK(xmlResponse.toString());
+        String xmlResponse = netPlan.save();
+        return RestUtils.OK(xmlResponse);
     }
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/")
-    public Response setDesign(RestFile file)
+    public Response setDesign(RestNetPlanFile file)
     {
         RestUtils.netPlan = new NetPlan(file.getFile());
         return RestUtils.OK(null);
@@ -155,8 +130,6 @@ public class Net2PlanAPI
         Map<String, String> net2planParameters = new LinkedHashMap<>();
         net2planParameters_raw.stream().forEach(t -> net2planParameters.put(t.getFirst(), t.getSecond()));
 
-        System.out.println(algorithmParameters);
-        System.out.println(net2planParameters);
         String response = algorithm.executeAlgorithm(netPlan, algorithmParameters, net2planParameters);
 
         return RestUtils.OK(response);

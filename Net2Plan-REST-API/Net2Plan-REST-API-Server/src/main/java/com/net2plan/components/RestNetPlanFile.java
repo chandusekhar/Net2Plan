@@ -4,13 +4,13 @@ import javax.xml.bind.annotation.XmlRootElement;
 import java.io.File;
 
 @XmlRootElement
-public class RestFile
+public class RestNetPlanFile
 {
     private File file;
 
-    public RestFile(){}
+    public RestNetPlanFile(){}
 
-    public RestFile(File file)
+    public RestNetPlanFile(File file)
     {
         this.file = file;
     }
