@@ -6,6 +6,7 @@ import com.net2plan.interfaces.networkDesign.*;
 import com.net2plan.internal.SystemUtils;
 import com.net2plan.utils.Constants;
 import com.net2plan.utils.RestUtils;
+import com.net2plan.utils.StringUtils;
 import com.net2plan.utils.Triple;
 
 import javax.ws.rs.*;
@@ -72,7 +73,7 @@ public class Net2PlanAPI
 
     @POST
     @Produces(MediaType.TEXT_PLAIN)
-    @Path("/execute/{algorithmname}")
+    @Path("/algorithm/{algorithmname}")
     public Response executeAlgorithm(@PathParam("algorithmname") String algorithmName, RestMap parametersMap)
     {
         IAlgorithm algorithm = ExamplesController.getAlgorithm(algorithmName);
@@ -81,7 +82,12 @@ public class Net2PlanAPI
 
         List<Triple<String, String, String>> algorithmParameters_raw = algorithm.getParameters();
         Map<String, String> algorithmParameters = new LinkedHashMap<>();
-        algorithmParameters_raw.stream().forEach(t -> algorithmParameters.put(t.getFirst(), t.getSecond()));
+        for(Triple<String, String, String> t : algorithmParameters_raw)
+        {
+            String paramName = t.getFirst();
+            String paramDefaultValue = t.getSecond();
+            algorithmParameters.put(paramName, paramDefaultValue);
+        }
 
         Map<String, String> userParametersMap = (parametersMap == null) ? null : parametersMap.getMap();
         if(userParametersMap != null)
@@ -89,14 +95,59 @@ public class Net2PlanAPI
             for(Map.Entry<String, String> entry : userParametersMap.entrySet())
             {
                 String paramName = entry.getKey();
-                String paramValue = entry.getValue();
+                String userParamValue = entry.getValue();
                 if(algorithmParameters.containsKey(paramName))
                 {
-                    algorithmParameters.put(paramName, paramValue);
+                    String paramDefaultValue = algorithmParameters.get(paramName);
+                    if(paramDefaultValue.startsWith("#select#"))
+                    {
+                        List<String> possibleValues = StringUtils.toList(StringUtils.split(paramDefaultValue.replace("#select# ","")));
+                        if(possibleValues.contains(userParamValue))
+                        {
+                            algorithmParameters.put(paramName, userParamValue);
+                        }
+                        else{
+                            return RestUtils.SERVER_ERROR("Parameter "+paramName+ " can't be set as "+userParamValue+". Its possible values are: "+possibleValues);
+                        }
+                    }
+                    else if(paramDefaultValue.startsWith("#boolean#"))
+                    {
+                        if(userParamValue.equals("true") || userParamValue.equals("false"))
+                        {
+                            algorithmParameters.put(paramName, userParamValue);
+                        }
+                        else{
+                            return RestUtils.SERVER_ERROR("Parameter "+paramName+ " can't be set as "+userParamValue+". Its possible values are true or false");
+                        }
+                    }
+                    else{
+                        algorithmParameters.put(paramName, userParamValue);
+                    }
                 }
                 else{
                     return RestUtils.SERVER_ERROR("Undefined parameter "+paramName+" for this algorithm: "+algorithm.getClass().getName());
                 }
+            }
+        }
+        else{
+            for(Map.Entry<String, String> entry : algorithmParameters.entrySet())
+            {
+                String paramName = entry.getKey();
+                String paramDefaultValue = entry.getValue();
+                String paramValue = "";
+                if(paramDefaultValue.startsWith("#select#"))
+                {
+                    paramValue = StringUtils.split(paramDefaultValue.replace("#select# ",""))[0];
+                }
+                else if(paramDefaultValue.startsWith("#boolean#"))
+                {
+                    paramValue = paramDefaultValue.replace("#boolean# ","");
+                }
+                else{
+                    paramValue = paramDefaultValue;
+                }
+
+                algorithmParameters.put(paramName, paramValue);
             }
         }
 

@@ -45,6 +45,7 @@ public class RestResource
             capacityBaseResourceIndexes.put(entry.getKey().getIndex(), entry.getValue());
         }
         this.capacityIOccupyInBaseResource = new RestMap<>(capacityBaseResourceIndexes);
+        this.processingTimeToTraversingTrafficInMs = res.getProcessingTimeToTraversingTrafficInMs();
         this.attributes = new RestMap<>(res.getAttributes());
     }
 
@@ -78,8 +79,52 @@ public class RestResource
         return hostNodeIndex;
     }
 
+    public void setCapacity(double capacity)
+    {
+        this.capacity = capacity;
+    }
+
+    public double getCapacity()
+    {
+        return capacity;
+    }
+
+    public void setCapacityMeasurementUnits(String capacityMeasurementUnits)
+    {
+        this.capacityMeasurementUnits = capacityMeasurementUnits;
+    }
+
     public String getCapacityMeasurementUnits()
     {
         return capacityMeasurementUnits;
+    }
+
+    public void setCapacityIOccupyInBaseResource(RestMap<Integer, Double> capacityIOccupyInBaseResource)
+    {
+        this.capacityIOccupyInBaseResource = capacityIOccupyInBaseResource;
+    }
+
+    public RestMap<Integer, Double> getCapacityIOccupyInBaseResource()
+    {
+        return capacityIOccupyInBaseResource;
+    }
+
+    public void setProcessingTimeToTraversingTrafficInMs(double processingTimeToTraversingTrafficInMs)
+    {
+        this.processingTimeToTraversingTrafficInMs = processingTimeToTraversingTrafficInMs;
+    }
+
+    public double getProcessingTimeToTraversingTrafficInMs()
+    {
+        return processingTimeToTraversingTrafficInMs;
+    }
+
+    public void setAttributes(RestMap<String, String> attributes)
+    {
+        this.attributes = attributes;
+    }
+
+    public RestMap<String, String> getAttributes() {
+        return attributes;
     }
 }
