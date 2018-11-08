@@ -37,6 +37,8 @@ import javax.xml.stream.FactoryConfigurationError;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.XMLEvent;
 
+import com.shc.easyjson.JSONObject;
+import com.shc.easyjson.JSONValue;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.codehaus.stax2.XMLInputFactory2;
 import org.codehaus.stax2.XMLOutputFactory2;
@@ -6570,34 +6572,21 @@ public class NetPlan extends NetworkElement
 
             case JSON:
                 try {
-                    XMLOutputFactory2 output = (XMLOutputFactory2) XMLOutputFactory2.newFactory();
-                    writer = (XMLStreamWriter2) output.createXMLStreamWriter(outputStream);
+                    JSONObject networkJSON = new JSONObject();
+                    networkJSON.put("description",new JSONValue(getDescription()));
+                    networkJSON.put("name",new JSONValue(getName()));
+                    networkJSON.put("currentPlotNodeLayout", new JSONValue(this.currentPlotNodeLayout));
+                    networkJSON.put("cache_definedPlotNodeLayouts", new JSONValue(StringUtils.createEscapedString_asStringList(this.cache_definedPlotNodeLayouts)));
+                    networkJSON.put("version", new JSONValue(Version.getFileFormatVersion()));
+                    networkJSON.put("nextElementId", new JSONValue(nextElementId.toString()));
 
-                    writer.writeStartDocument("UTF-8", "1.0");
-
-                    XMLUtils.indent(writer, 0);
-                    writer.writeStartElement("network");
-                    writer.writeAttribute("description", getDescription());
-                    writer.writeAttribute("name", getName());
-                    writer.writeAttribute("currentPlotNodeLayout", this.currentPlotNodeLayout);
-                    writer.writeAttribute("cache_definedPlotNodeLayouts", StringUtils.createEscapedString_asStringList(this.cache_definedPlotNodeLayouts));
-                    writer.writeAttribute("version", Version.getFileFormatVersion());
-                    writer.writeAttribute("nextElementId", nextElementId.toString());
                     int counter = 0;
                     for (String planningDomain : this.cache_planningDomain2nodes.keySet())
-                        writer.writeAttribute("planningDomain_" + (counter++), planningDomain);
+                        networkJSON.put("planningDomain_" + (counter++), new JSONValue(planningDomain));
 
 
-//            for (String planningDomain : this.cache_planningDomain2nodes.keySet())
-//            {
-//                XMLUtils.indent(writer, 2);
-//                writer.writeEmptyElement("planningDomain");
-//                writer.writeAttribute("name", "");
-//                writer.writeAttribute("value", planningDomain);
-//            }
-
-                    //SortedSet<Long> nodeIds_thisNetPlan = new TreeSet<Long> (getNodeIds());
-                    for (Node node : nodes) {
+                    for (Node node : nodes)
+                    {
                         XMLUtils.indent(writer, 1);
                         writer.writeStartElement("node");
 
@@ -6645,7 +6634,8 @@ public class NetPlan extends NetworkElement
                         writer.writeEndElement();
                     }
 
-                    for (Resource res : resources) {
+                    for (Resource res : resources)
+                    {
                         XMLUtils.indent(writer, 1);
                         writer.writeStartElement("resource");
 
