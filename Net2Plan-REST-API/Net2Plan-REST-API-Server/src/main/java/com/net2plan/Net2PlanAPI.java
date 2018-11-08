@@ -3,7 +3,6 @@ package com.net2plan;
 import com.net2plan.components.*;
 import com.net2plan.examples.ExamplesController;
 import com.net2plan.interfaces.networkDesign.*;
-import com.net2plan.internal.SystemUtils;
 import com.net2plan.utils.Constants;
 import com.net2plan.utils.RestUtils;
 import com.net2plan.utils.StringUtils;
@@ -12,9 +11,6 @@ import com.net2plan.utils.Triple;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.io.*;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -28,12 +24,12 @@ public class Net2PlanAPI
     // Design methods
 
     @GET
-    @Produces(MediaType.APPLICATION_XML)
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("/")
     public Response getDesign()
     {
-        String xmlResponse = netPlan.save();
-        return RestUtils.OK(xmlResponse);
+        String jsonResponse = netPlan.saveToJSON();
+        return RestUtils.OK(jsonResponse);
     }
 
     @POST

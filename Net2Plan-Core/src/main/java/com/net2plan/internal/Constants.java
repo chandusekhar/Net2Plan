@@ -79,7 +79,7 @@ public class Constants
 
         /**
          * {@link com.net2plan.internal.plugins.IOFilter IOFilter} implementation able to
-         * save designs.
+         * saveToXML designs.
          *
          * @since 0.3.1
          */
@@ -95,7 +95,7 @@ public class Constants
 
         /**
          * {@link com.net2plan.internal.plugins.IOFilter IOFilter} implementation able to
-         * save only traffic demands.
+         * saveToXML only traffic demands.
          *
          * @since 0.3.0
          */

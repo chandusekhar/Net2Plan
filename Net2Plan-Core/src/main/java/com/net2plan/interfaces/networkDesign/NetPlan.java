@@ -68,6 +68,7 @@ import cern.colt.matrix.tdouble.DoubleFactory1D;
 import cern.colt.matrix.tdouble.DoubleFactory2D;
 import cern.colt.matrix.tdouble.DoubleMatrix1D;
 import cern.colt.matrix.tdouble.DoubleMatrix2D;
+import org.json.XML;
 
 /**
  * <p>Class defining a complete multi-layer network structure. Layers may
@@ -131,6 +132,11 @@ public class NetPlan extends NetworkElement
     final static String TEMPLATE_MULTICASTTREE_NOT_ALL_LINKS_SAME_LAYER = "Not all of the links of the multicast tree belong to the same layer";
     final static String UNMODIFIABLE_EXCEPTION_STRING = "Unmodifiable NetState object - can't be changed";
 //    final static String KEY_STRING_BIDIRECTIONALCOUPLE = "bidirectionalCouple";
+
+    private enum Net2PlanFormat
+    {
+        XML, JSON
+    };
 
     RoutingType DEFAULT_ROUTING_TYPE = RoutingType.SOURCE_ROUTING;
     boolean isModifiable;
@@ -6010,13 +6016,22 @@ public class NetPlan extends NetworkElement
     }
 
     /**
-     * <p>Saves the current network plan to a given file. If extension {@code .n2p}
+     * <p>Saves the current network plan to a given file in XML or JSON format. If extension {@code .n2p}
      * is not in the file name, it will be added automatically.</p>
      *
      * @param file Output file
+     * @param outputFormat optional output format (default value: xml)
      */
-    public void saveToFile(File file)
+    public void saveToFile(File file, Net2PlanFormat... outputFormat)
     {
+        Net2PlanFormat format;
+        if(outputFormat.length == 0)
+            format = Net2PlanFormat.XML;
+        else if(outputFormat.length == 1)
+            format = outputFormat[0];
+        else
+            throw new RuntimeException();
+
         String filePath = file.getPath();
         if (!filePath.toLowerCase(Locale.getDefault()).endsWith(".n2p")) file = new File(filePath + ".n2p");
 
@@ -6024,7 +6039,8 @@ public class NetPlan extends NetworkElement
         try
         {
             fos = new FileOutputStream(file);
-            saveToOutputStream(fos);
+            saveToOutputStream(fos, format);
+
         } catch (FileNotFoundException e)
         {
             throw new Net2PlanException(e.getMessage());
@@ -6048,14 +6064,14 @@ public class NetPlan extends NetworkElement
      *
      * @return XML formatted String
      */
-    public String save()
+    public String saveToXML()
     {
         ByteArrayOutputStream baos = null;
         String xmlResponse = "";
         try
         {
             baos = new ByteArrayOutputStream();
-            saveToOutputStream(baos);
+            saveToOutputStream(baos, Net2PlanFormat.XML);
             xmlResponse = baos.toString(StandardCharsets.UTF_8.name());
         } catch (UnsupportedEncodingException e)
         {
@@ -6073,9 +6089,17 @@ public class NetPlan extends NetworkElement
                 e.printStackTrace();
             }
         }
-
-
         return xmlResponse;
+    }
+
+    /**
+     * <p>Saves the current network plan to a JSON formatted string.</p>
+     *
+     * @return JSON formatted String
+     */
+    public String saveToJSON()
+    {
+        return "";
     }
 
     /**
@@ -6083,29 +6107,32 @@ public class NetPlan extends NetworkElement
      *
      * @param outputStream Output stream
      */
-    public void saveToOutputStream(OutputStream outputStream)
+    public void saveToOutputStream(OutputStream outputStream, Net2PlanFormat format)
     {
-        XMLStreamWriter2 writer = null;
-        try
+        if(format == null) throw new RuntimeException();
+        switch(format)
         {
-            XMLOutputFactory2 output = (XMLOutputFactory2) XMLOutputFactory2.newFactory();
-            writer = (XMLStreamWriter2) output.createXMLStreamWriter(outputStream);
+            case XML:
+                XMLStreamWriter2 writer = null;
+                try {
+                    XMLOutputFactory2 output = (XMLOutputFactory2) XMLOutputFactory2.newFactory();
+                    writer = (XMLStreamWriter2) output.createXMLStreamWriter(outputStream);
 
-            writer.writeStartDocument("UTF-8", "1.0");
+                    writer.writeStartDocument("UTF-8", "1.0");
 
-            XMLUtils.indent(writer, 0);
-            writer.writeStartElement("network");
-            writer.writeAttribute("description", getDescription());
-            writer.writeAttribute("name", getName());
-            writer.writeAttribute("currentPlotNodeLayout", this.currentPlotNodeLayout);
-            writer.writeAttribute("cache_definedPlotNodeLayouts", StringUtils.createEscapedString_asStringList(this.cache_definedPlotNodeLayouts));
-            writer.writeAttribute("version", Version.getFileFormatVersion());
-            writer.writeAttribute("nextElementId", nextElementId.toString());
-            int counter = 0; 
-            for (String planningDomain : this.cache_planningDomain2nodes.keySet())
-            	writer.writeAttribute("planningDomain_" + (counter++), planningDomain); 
-            
-            
+                    XMLUtils.indent(writer, 0);
+                    writer.writeStartElement("network");
+                    writer.writeAttribute("description", getDescription());
+                    writer.writeAttribute("name", getName());
+                    writer.writeAttribute("currentPlotNodeLayout", this.currentPlotNodeLayout);
+                    writer.writeAttribute("cache_definedPlotNodeLayouts", StringUtils.createEscapedString_asStringList(this.cache_definedPlotNodeLayouts));
+                    writer.writeAttribute("version", Version.getFileFormatVersion());
+                    writer.writeAttribute("nextElementId", nextElementId.toString());
+                    int counter = 0;
+                    for (String planningDomain : this.cache_planningDomain2nodes.keySet())
+                        writer.writeAttribute("planningDomain_" + (counter++), planningDomain);
+
+
 //            for (String planningDomain : this.cache_planningDomain2nodes.keySet())
 //            {
 //                XMLUtils.indent(writer, 2);
@@ -6114,426 +6141,881 @@ public class NetPlan extends NetworkElement
 //                writer.writeAttribute("value", planningDomain);
 //            }
 
-            //SortedSet<Long> nodeIds_thisNetPlan = new TreeSet<Long> (getNodeIds());
-            for (Node node : nodes)
-            {
-                XMLUtils.indent(writer, 1);
-                writer.writeStartElement("node");
+                    //SortedSet<Long> nodeIds_thisNetPlan = new TreeSet<Long> (getNodeIds());
+                    for (Node node : nodes) {
+                        XMLUtils.indent(writer, 1);
+                        writer.writeStartElement("node");
 
-                final Point2D position = node.getXYPositionMap();
-                writer.writeAttribute("id", Long.toString(node.id));
-                writer.writeAttribute("description", node.getDescription());
-                writer.writeAttribute("name", node.getName());
-                writer.writeAttribute("xCoord", Double.toString(position.getX()));
-                writer.writeAttribute("yCoord", Double.toString(position.getY()));
-                final List<String> mapLayoutPositionsStream = node.mapLayout2NodeXYPositionMap.entrySet().stream().
-                        map(e->Arrays.asList(e.getKey() , "" + e.getValue().getX() , "" + e.getValue().getY())).
-                        flatMap(e->e.stream()).
-                        collect(Collectors.toList());
-                writer.writeAttribute("mapLayout2NodeXYPositionMap", StringUtils.createEscapedString_asStringList(mapLayoutPositionsStream));
-                
-                writer.writeAttribute("population", Double.toString(node.population));
-                if (node.siteName != null) writer.writeAttribute("siteName", node.siteName);
-                writer.writeAttribute("isUp", Boolean.toString(node.isUp));
-                int pdCounter = 0; for (String pd : node.getPlanningDomains()) 
-                	writer.writeAttribute("planningDomain_" + (pdCounter++), pd); 
-                
-                final SortedSet<NetworkLayer> layersWithIcons = layers.stream().filter(l -> node.getUrlNodeIcon(l) != null).collect(Collectors.toCollection(TreeSet::new));
-                final List<Long> idsLayersWithIcons = layersWithIcons.stream().map(l -> l.getId()).collect(Collectors.toList());
-                writer.writeAttribute("layersWithIconsDefined", CollectionUtils.join(idsLayersWithIcons, " "));
-                for (NetworkLayer layer : layersWithIcons)
-                    if (node.getUrlNodeIcon(layer) != null)
-                    {
-                        writer.writeAttribute("nodeIconURLLayer_" + layer.getId(), node.getUrlNodeIcon(layer).toString());
-                        writer.writeAttribute("nodeIconRelativeSizeLayer_" + layer.getId(), "" + node.getNodeIconRelativeSize(layer));
-                    }
-                for (String tag : node.tags) { XMLUtils.indent(writer, 2); writer.writeEmptyElement("tag"); writer.writeAttribute("value", tag); }
+                        final Point2D position = node.getXYPositionMap();
+                        writer.writeAttribute("id", Long.toString(node.id));
+                        writer.writeAttribute("description", node.getDescription());
+                        writer.writeAttribute("name", node.getName());
+                        writer.writeAttribute("xCoord", Double.toString(position.getX()));
+                        writer.writeAttribute("yCoord", Double.toString(position.getY()));
+                        final List<String> mapLayoutPositionsStream = node.mapLayout2NodeXYPositionMap.entrySet().stream().
+                                map(e -> Arrays.asList(e.getKey(), "" + e.getValue().getX(), "" + e.getValue().getY())).
+                                flatMap(e -> e.stream()).
+                                collect(Collectors.toList());
+                        writer.writeAttribute("mapLayout2NodeXYPositionMap", StringUtils.createEscapedString_asStringList(mapLayoutPositionsStream));
 
-                for (Entry<String, String> entry : node.attributes.entrySet())
-                {
-                    XMLUtils.indent(writer, 2);
-                    writer.writeEmptyElement("attribute");
-                    writer.writeAttribute("key", entry.getKey());
-                    writer.writeAttribute("value", entry.getValue());
-                }
+                        writer.writeAttribute("population", Double.toString(node.population));
+                        if (node.siteName != null) writer.writeAttribute("siteName", node.siteName);
+                        writer.writeAttribute("isUp", Boolean.toString(node.isUp));
+                        int pdCounter = 0;
+                        for (String pd : node.getPlanningDomains())
+                            writer.writeAttribute("planningDomain_" + (pdCounter++), pd);
 
-                XMLUtils.indent(writer, 1);
-                writer.writeEndElement();
-            }
-
-            for (Resource res : resources)
-            {
-                XMLUtils.indent(writer, 1);
-                writer.writeStartElement("resource");
-
-                writer.writeAttribute("id", Long.toString(res.id));
-                writer.writeAttribute("description", res.getDescription());
-                writer.writeAttribute("name", res.getName());
-                writer.writeAttribute("hostNodeId", Long.toString(res.iAttachedToANode()? res.hostNode.get().id : -1));
-                writer.writeAttribute("type", res.type);
-                writer.writeAttribute("capacityMeasurementUnits", res.capacityMeasurementUnits);
-                writer.writeAttribute("processingTimeToTraversingTrafficInMs", Double.toString(res.processingTimeToTraversingTrafficInMs));
-                writer.writeAttribute("capacity", Double.toString(res.capacity));
-                if (res.urlIcon != null) writer.writeAttribute("urlIcon", res.urlIcon.toString());
-
-                List<Double> baseResourceAndOccupiedCapacitiesMap = new LinkedList<Double>();
-                for (Entry<Resource, Double> br : res.capacityIOccupyInBaseResource.entrySet())
-                {
-                    baseResourceAndOccupiedCapacitiesMap.add((double) br.getKey().id);
-                    baseResourceAndOccupiedCapacitiesMap.add(br.getValue());
-                }
-                writer.writeAttribute("baseResourceAndOccupiedCapacitiesMap", CollectionUtils.join(baseResourceAndOccupiedCapacitiesMap, " "));
-
-                for (String tag : res.tags) { XMLUtils.indent(writer, 2); writer.writeEmptyElement("tag"); writer.writeAttribute("value", tag); }
-
-                for (Entry<String, String> entry : res.attributes.entrySet())
-                {
-                    XMLUtils.indent(writer, 2);
-                    writer.writeEmptyElement("attribute");
-                    writer.writeAttribute("key", entry.getKey());
-                    writer.writeAttribute("value", entry.getValue());
-                }
-
-                XMLUtils.indent(writer, 1);
-                writer.writeEndElement();
-            }
-
-            for (NetworkLayer layer : layers)
-            {
-                XMLUtils.indent(writer, 1);
-                writer.writeStartElement("layer");
-
-                writer.writeAttribute("id", Long.toString(layer.id));
-                writer.writeAttribute("description", layer.getDescription());
-                writer.writeAttribute("name", layer.getName());
-                writer.writeAttribute("isDefaultLayer", Boolean.toString(defaultLayer == layer));
-                writer.writeAttribute("linkCapacityUnitsName", layer.linkCapacityUnitsName);
-                writer.writeAttribute("demandTrafficUnitsName", layer.demandTrafficUnitsName);
-                if (layer.defaultNodeIconURL != null)
-                    writer.writeAttribute("defaultNodeIconURL", layer.defaultNodeIconURL.toString());
-
-                for (Link link : layer.links)
-                {
-                    XMLUtils.indent(writer, 2);
-                    writer.writeStartElement("link");
-
-                    writer.writeAttribute("id", Long.toString(link.id));
-                    writer.writeAttribute("description", link.getDescription());
-                    writer.writeAttribute("name", link.getName());
-                    writer.writeAttribute("originNodeId", Long.toString(link.originNode.id));
-                    writer.writeAttribute("destinationNodeId", Long.toString(link.destinationNode.id));
-                    writer.writeAttribute("capacity", Double.toString(link.capacity));
-                    writer.writeAttribute("lengthInKm", Double.toString(link.lengthInKm));
-                    writer.writeAttribute("bidirectionalPairId", Long.toString(link.bidirectionalPair == null? -1 : link.bidirectionalPair.id));
-                    writer.writeAttribute("propagationSpeedInKmPerSecond", Double.toString(link.propagationSpeedInKmPerSecond));
-                    writer.writeAttribute("isUp", Boolean.toString(link.isUp));
-                    writer.writeAttribute("monitoredOrForecastedTraffics", StringUtils.createEscapedString_asStringList(link.getMonitoredOrForecastedCarriedTraffic().toStringList()));
-
-                    for (String tag : link.tags) { XMLUtils.indent(writer, 3); writer.writeEmptyElement("tag"); writer.writeAttribute("value", tag); }
-
-                    for (Entry<String, String> entry : link.attributes.entrySet())
-                    {
-                        XMLUtils.indent(writer, 3);
-                        writer.writeEmptyElement("attribute");
-                        writer.writeAttribute("key", entry.getKey());
-                        writer.writeAttribute("value", entry.getValue());
-                    }
-
-                    XMLUtils.indent(writer, 2);
-                    writer.writeEndElement();
-                }
-
-                for (Demand demand : layer.demands)
-                {
-                    XMLUtils.indent(writer, 2);
-                    writer.writeStartElement("demand");
-
-                    writer.writeAttribute("id", Long.toString(demand.id));
-                    writer.writeAttribute("description", demand.getDescription());
-                    writer.writeAttribute("name", demand.getName());
-                    writer.writeAttribute("ingressNodeId", Long.toString(demand.ingressNode.id));
-                    writer.writeAttribute("egressNodeId", Long.toString(demand.egressNode.id));
-                    writer.writeAttribute("offeredTraffic", Double.toString(demand.offeredTraffic));
-                    writer.writeAttribute("intendedRecoveryType", demand.recoveryType.toString());
-                    writer.writeAttribute("routingType", demand.routingType.name());
-                    writer.writeAttribute("bidirectionalPairId", Long.toString(demand.bidirectionalPair == null? -1 : demand.bidirectionalPair.id));
-                    writer.writeAttribute("maximumAcceptableE2EWorstCaseLatencyInMs", Double.toString(demand.maximumAcceptableE2EWorstCaseLatencyInMs));
-                    writer.writeAttribute("offeredTrafficGrowthFactorPerPeriodZeroIsNoGrowth", Double.toString(demand.offeredTrafficGrowthFactorPerPeriodZeroIsNoGrowth));
-                    writer.writeAttribute("monitoredOrForecastedTraffics", StringUtils.createEscapedString_asStringList(demand.getMonitoredOrForecastedOfferedTraffic().toStringList()));
-                    writer.writeAttribute("qosType", demand.qosType);
-                    
-                    for (String type : demand.mandatorySequenceOfTraversedResourceTypes)
-                    {
-                        XMLUtils.indent(writer, 2);
-                        writer.writeEmptyElement("serviceChainResourceTypeOfSequence");
-                        writer.writeAttribute("type", type);
-                    }
-
-                    for (String tag : demand.tags) { XMLUtils.indent(writer, 3); writer.writeEmptyElement("tag"); writer.writeAttribute("value", tag); }
-
-                    for (Entry<String, String> entry : demand.attributes.entrySet())
-                    {
-                        XMLUtils.indent(writer, 3);
-                        writer.writeEmptyElement("attribute");
-                        writer.writeAttribute("key", entry.getKey());
-                        writer.writeAttribute("value", entry.getValue());
-                    }
-
-                    XMLUtils.indent(writer, 2);
-                    writer.writeEndElement();
-                }
-
-                for (MulticastDemand demand : layer.multicastDemands)
-                {
-                    XMLUtils.indent(writer, 2);
-                    writer.writeStartElement("multicastDemand");
-                    writer.writeAttribute("id", Long.toString(demand.id));
-                    writer.writeAttribute("description", demand.getDescription());
-                    writer.writeAttribute("name", demand.getName());
-                    writer.writeAttribute("ingressNodeId", Long.toString(demand.ingressNode.id));
-                    List<Long> egressNodeIds = new LinkedList<Long>();
-                    for (Node n : demand.egressNodes) egressNodeIds.add(n.id);
-                    writer.writeAttribute("egressNodeIds", CollectionUtils.join(egressNodeIds, " "));
-                    writer.writeAttribute("offeredTraffic", Double.toString(demand.offeredTraffic));
-                    writer.writeAttribute("maximumAcceptableE2EWorstCaseLatencyInMs", Double.toString(demand.maximumAcceptableE2EWorstCaseLatencyInMs));
-                    writer.writeAttribute("offeredTrafficGrowthFactorPerPeriodZeroIsNoGrowth", Double.toString(demand.offeredTrafficGrowthFactorPerPeriodZeroIsNoGrowth));
-                    writer.writeAttribute("qosType", demand.qosType);
-                    writer.writeAttribute("monitoredOrForecastedTraffics", StringUtils.createEscapedString_asStringList(demand.getMonitoredOrForecastedOfferedTraffic().toStringList()));
-
-                    for (String tag : demand.tags) { XMLUtils.indent(writer, 3); writer.writeEmptyElement("tag"); writer.writeAttribute("value", tag); }
-
-                    for (Entry<String, String> entry : demand.attributes.entrySet())
-                    {
-                        XMLUtils.indent(writer, 3);
-                        writer.writeEmptyElement("attribute");
-                        writer.writeAttribute("key", entry.getKey());
-                        writer.writeAttribute("value", entry.getValue());
-                    }
-
-                    XMLUtils.indent(writer, 2);
-                    writer.writeEndElement();
-                }
-
-                for (MulticastTree tree : layer.multicastTrees)
-                {
-                    XMLUtils.indent(writer, 3);
-                    writer.writeStartElement("multicastTree");
-
-                    writer.writeAttribute("id", Long.toString(tree.id));
-                    writer.writeAttribute("description", tree.getDescription());
-                    writer.writeAttribute("name", tree.getName());
-                    writer.writeAttribute("demandId", Long.toString(tree.demand.id));
-                    writer.writeAttribute("carriedTrafficIfNotFailing", Double.toString(tree.carriedTrafficIfNotFailing));
-                    writer.writeAttribute("occupiedLinkCapacityIfNotFailing", Double.toString(tree.occupiedLinkCapacityIfNotFailing));
-
-                    List<Long> linkIds = new LinkedList<Long>();
-                    for (Link e : tree.linkSet) linkIds.add(e.id);
-                    writer.writeAttribute("currentSetLinks", CollectionUtils.join(linkIds, " "));
-                    /* If the original link set was removed, it is replaced by the current link set */
-                    boolean initialLinkSetNotRemoved = true;
-                    for (Link e : tree.initialSetLinksWhenWasCreated)
-                        if (e.netPlan == null)
-                        {
-                            initialLinkSetNotRemoved = false;
-                            break;
+                        final SortedSet<NetworkLayer> layersWithIcons = layers.stream().filter(l -> node.getUrlNodeIcon(l) != null).collect(Collectors.toCollection(TreeSet::new));
+                        final List<Long> idsLayersWithIcons = layersWithIcons.stream().map(l -> l.getId()).collect(Collectors.toList());
+                        writer.writeAttribute("layersWithIconsDefined", CollectionUtils.join(idsLayersWithIcons, " "));
+                        for (NetworkLayer layer : layersWithIcons)
+                            if (node.getUrlNodeIcon(layer) != null) {
+                                writer.writeAttribute("nodeIconURLLayer_" + layer.getId(), node.getUrlNodeIcon(layer).toString());
+                                writer.writeAttribute("nodeIconRelativeSizeLayer_" + layer.getId(), "" + node.getNodeIconRelativeSize(layer));
+                            }
+                        for (String tag : node.tags) {
+                            XMLUtils.indent(writer, 2);
+                            writer.writeEmptyElement("tag");
+                            writer.writeAttribute("value", tag);
                         }
-                    linkIds = new LinkedList<Long>();
-                    for (Link e : initialLinkSetNotRemoved ? tree.initialSetLinksWhenWasCreated : tree.linkSet)
-                        linkIds.add(e.id);
-                    writer.writeAttribute("initialSetLinks", CollectionUtils.join(linkIds, " "));
 
-                    for (String tag : tree.tags) { XMLUtils.indent(writer, 3); writer.writeEmptyElement("tag"); writer.writeAttribute("value", tag); }
-
-                    for (Entry<String, String> entry : tree.attributes.entrySet())
-                    {
-                        XMLUtils.indent(writer, 3);
-                        writer.writeEmptyElement("attribute");
-                        writer.writeAttribute("key", entry.getKey());
-                        writer.writeAttribute("value", entry.getValue());
-                    }
-
-                    XMLUtils.indent(writer, 3);
-                    writer.writeEndElement();
-                }
-
-
-//                if (layer.routingType == RoutingType.SOURCE_ROUTING)
-                /* source routing information */
-                {
-                    XMLUtils.indent(writer, 2);
-                    writer.writeStartElement("sourceRouting");
-
-                    for (Route route : layer.routes)
-                    {
-                        XMLUtils.indent(writer, 3);
-                        writer.writeStartElement("route");
-
-                        writer.writeAttribute("id", Long.toString(route.id));
-                        writer.writeAttribute("description", route.getDescription());
-                        writer.writeAttribute("name", route.getName());
-                        writer.writeAttribute("demandId", Long.toString(route.demand.id));
-
-                        writer.writeAttribute("currentCarriedTrafficIfNotFailing", Double.toString(route.currentCarriedTrafficIfNotFailing));
-                        writer.writeAttribute("currentLinksAndResourcesOccupationIfNotFailing", CollectionUtils.join(route.currentLinksAndResourcesOccupationIfNotFailing, " "));
-                        writer.writeAttribute("currentPath", CollectionUtils.join(NetPlan.getIds(route.currentPath), " "));
-                        writer.writeAttribute("bidirectionalPairId", Long.toString(route.bidirectionalPair == null? -1 : route.bidirectionalPair.id));
-
-                        writer.writeAttribute("initialStateCarriedTrafficIfNotFailing", Double.toString(route.initialStateCarriedTrafficIfNotFailing));
-                        writer.writeAttribute("initialStateOccupationIfNotFailing", CollectionUtils.join(route.initialStateOccupationIfNotFailing, " "));
-                        writer.writeAttribute("initialStatePath", CollectionUtils.join(NetPlan.getIds(route.initialStatePath), " "));
-
-                        writer.writeAttribute("backupRoutes", CollectionUtils.join(NetPlan.getIds(route.backupRoutes), " "));
-
-                        for (String tag : route.tags) { XMLUtils.indent(writer, 4); writer.writeEmptyElement("tag"); writer.writeAttribute("value", tag); }
-
-                        for (Entry<String, String> entry : route.attributes.entrySet())
-                        {
-                            XMLUtils.indent(writer, 4);
+                        for (Entry<String, String> entry : node.attributes.entrySet()) {
+                            XMLUtils.indent(writer, 2);
                             writer.writeEmptyElement("attribute");
                             writer.writeAttribute("key", entry.getKey());
                             writer.writeAttribute("value", entry.getValue());
                         }
 
-                        XMLUtils.indent(writer, 3);
+                        XMLUtils.indent(writer, 1);
                         writer.writeEndElement();
                     }
 
-                    XMLUtils.indent(writer, 2);
-                    writer.writeEndElement();
-                } 
-                /* hop-by-hop information */
-                {
-                    XMLUtils.indent(writer, 2);
-                    writer.writeStartElement("hopByHopRouting");
-                    for (Demand d : layer.demands)
-                    	for (Entry<Link,Double> fr : d.cacheHbH_frs.entrySet())
-                    	{
-                            final int indexDemand = d.index;
-                            final int indexLink = fr.getKey().index;
-                            final double splittingRatio = fr.getValue();
-                            XMLUtils.indent(writer, 3);
-                            writer.writeEmptyElement("forwardingRule");
-                            writer.writeAttribute("demandId", Long.toString(layer.demands.get(indexDemand).id));
-                            writer.writeAttribute("linkId", Long.toString(layer.links.get(indexLink).id));
-                            writer.writeAttribute("splittingRatio", Double.toString(splittingRatio));
-                    	}
-                    XMLUtils.indent(writer, 2);
-                    writer.writeEndElement();
-                }
-
-                for (String tag : layer.tags) { XMLUtils.indent(writer, 2); writer.writeEmptyElement("tag"); writer.writeAttribute("value", tag); }
-
-                for (Entry<String, String> entry : layer.attributes.entrySet())
-                {
-                    XMLUtils.indent(writer, 2);
-                    writer.writeEmptyElement("attribute");
-                    writer.writeAttribute("key", entry.getKey());
-                    writer.writeAttribute("value", entry.getValue());
-                }
-
-                XMLUtils.indent(writer, 1);
-                writer.writeEndElement();
-            }
-
-            for (SharedRiskGroup srg : srgs)
-            {
-                XMLUtils.indent(writer, 1);
-                writer.writeStartElement("srg");
-
-                writer.writeAttribute("id", Long.toString(srg.id));
-                writer.writeAttribute("description", srg.getDescription());
-                writer.writeAttribute("name", srg.getName());
-                writer.writeAttribute("meanTimeToFailInHours", Double.toString(srg.meanTimeToFailInHours));
-                writer.writeAttribute("meanTimeToRepairInHours", Double.toString(srg.meanTimeToRepairInHours));
-                writer.writeAttribute("isDynamic", Boolean.toString(srg.isDynamicSrg()));
-                if (srg.isDynamicSrg())
-                {
-                    writer.writeAttribute("dynamicSrgClassName", srg.getDynamicSrgImplementation().getClass().getName());
-                    writer.writeAttribute("dynamicSrgConfigString", srg.getDynamicSrgImplementation().getInitializationString());
-                }
-                else
-                {
-                    writer.writeAttribute("nodes", CollectionUtils.join(NetPlan.getIds(srg.getNodes()), " "));
-                    writer.writeAttribute("links", CollectionUtils.join(NetPlan.getIds(srg.getLinksAllLayers()), " "));
-                }
-                
-
-                for (String tag : srg.tags) { XMLUtils.indent(writer, 2); writer.writeEmptyElement("tag"); writer.writeAttribute("value", tag); }
-
-                for (Entry<String, String> entry : srg.attributes.entrySet())
-                {
-                    XMLUtils.indent(writer, 2);
-                    writer.writeEmptyElement("attribute");
-                    writer.writeAttribute("key", entry.getKey());
-                    writer.writeAttribute("value", entry.getValue());
-                }
-
-                XMLUtils.indent(writer, 1);
-                writer.writeEndElement();
-            }
-
-            for (DemandLinkMapping d_e : interLayerCoupling.edgeSet())
-            {
-                for (Entry<Demand, Link> coupling : d_e.demandLinkMapping.entrySet())
-                {
-                    XMLUtils.indent(writer, 1);
-                    writer.writeEmptyElement("layerCouplingDemand");
-                    writer.writeAttribute("lowerLayerDemandId", "" + coupling.getKey().id);
-                    writer.writeAttribute("upperLayerLinkId", "" + coupling.getValue().id);
-                }
-                for (Entry<MulticastDemand, SortedSet<Link>> coupling : d_e.multicastDemandLinkMapping.entrySet())
-                {
-                    XMLUtils.indent(writer, 1);
-                    writer.writeEmptyElement("layerCouplingMulticastDemand");
-                    List<Long> linkIds = new LinkedList<Long>();
-                    for (Link e : coupling.getValue()) linkIds.add(e.id);
-                    writer.writeAttribute("lowerLayerDemandId", "" + coupling.getKey().id);
-                    writer.writeAttribute("upperLayerLinkIds", CollectionUtils.join(linkIds, " "));
-                }
-            }
-            
-            for (NetworkLayer layer : this.layers)
-            {
-                for (Demand coupling : getDemandsCoupled(layer))
-                {
-                    if (coupling.isCoupledInSameLayer())
-                    {
+                    for (Resource res : resources) {
                         XMLUtils.indent(writer, 1);
-                        writer.writeEmptyElement("sameLayerCouplingDemand");
-                        writer.writeAttribute("layerDemandId", "" + coupling.id);
-                        writer.writeAttribute("layerLinkId", "" + coupling.coupledUpperOrSameLayerLink.id);
+                        writer.writeStartElement("resource");
+
+                        writer.writeAttribute("id", Long.toString(res.id));
+                        writer.writeAttribute("description", res.getDescription());
+                        writer.writeAttribute("name", res.getName());
+                        writer.writeAttribute("hostNodeId", Long.toString(res.iAttachedToANode() ? res.hostNode.get().id : -1));
+                        writer.writeAttribute("type", res.type);
+                        writer.writeAttribute("capacityMeasurementUnits", res.capacityMeasurementUnits);
+                        writer.writeAttribute("processingTimeToTraversingTrafficInMs", Double.toString(res.processingTimeToTraversingTrafficInMs));
+                        writer.writeAttribute("capacity", Double.toString(res.capacity));
+                        if (res.urlIcon != null) writer.writeAttribute("urlIcon", res.urlIcon.toString());
+
+                        List<Double> baseResourceAndOccupiedCapacitiesMap = new LinkedList<Double>();
+                        for (Entry<Resource, Double> br : res.capacityIOccupyInBaseResource.entrySet()) {
+                            baseResourceAndOccupiedCapacitiesMap.add((double) br.getKey().id);
+                            baseResourceAndOccupiedCapacitiesMap.add(br.getValue());
+                        }
+                        writer.writeAttribute("baseResourceAndOccupiedCapacitiesMap", CollectionUtils.join(baseResourceAndOccupiedCapacitiesMap, " "));
+
+                        for (String tag : res.tags) {
+                            XMLUtils.indent(writer, 2);
+                            writer.writeEmptyElement("tag");
+                            writer.writeAttribute("value", tag);
+                        }
+
+                        for (Entry<String, String> entry : res.attributes.entrySet()) {
+                            XMLUtils.indent(writer, 2);
+                            writer.writeEmptyElement("attribute");
+                            writer.writeAttribute("key", entry.getKey());
+                            writer.writeAttribute("value", entry.getValue());
+                        }
+
+                        XMLUtils.indent(writer, 1);
+                        writer.writeEndElement();
+                    }
+
+                    for (NetworkLayer layer : layers) {
+                        XMLUtils.indent(writer, 1);
+                        writer.writeStartElement("layer");
+
+                        writer.writeAttribute("id", Long.toString(layer.id));
+                        writer.writeAttribute("description", layer.getDescription());
+                        writer.writeAttribute("name", layer.getName());
+                        writer.writeAttribute("isDefaultLayer", Boolean.toString(defaultLayer == layer));
+                        writer.writeAttribute("linkCapacityUnitsName", layer.linkCapacityUnitsName);
+                        writer.writeAttribute("demandTrafficUnitsName", layer.demandTrafficUnitsName);
+                        if (layer.defaultNodeIconURL != null)
+                            writer.writeAttribute("defaultNodeIconURL", layer.defaultNodeIconURL.toString());
+
+                        for (Link link : layer.links) {
+                            XMLUtils.indent(writer, 2);
+                            writer.writeStartElement("link");
+
+                            writer.writeAttribute("id", Long.toString(link.id));
+                            writer.writeAttribute("description", link.getDescription());
+                            writer.writeAttribute("name", link.getName());
+                            writer.writeAttribute("originNodeId", Long.toString(link.originNode.id));
+                            writer.writeAttribute("destinationNodeId", Long.toString(link.destinationNode.id));
+                            writer.writeAttribute("capacity", Double.toString(link.capacity));
+                            writer.writeAttribute("lengthInKm", Double.toString(link.lengthInKm));
+                            writer.writeAttribute("bidirectionalPairId", Long.toString(link.bidirectionalPair == null ? -1 : link.bidirectionalPair.id));
+                            writer.writeAttribute("propagationSpeedInKmPerSecond", Double.toString(link.propagationSpeedInKmPerSecond));
+                            writer.writeAttribute("isUp", Boolean.toString(link.isUp));
+                            writer.writeAttribute("monitoredOrForecastedTraffics", StringUtils.createEscapedString_asStringList(link.getMonitoredOrForecastedCarriedTraffic().toStringList()));
+
+                            for (String tag : link.tags) {
+                                XMLUtils.indent(writer, 3);
+                                writer.writeEmptyElement("tag");
+                                writer.writeAttribute("value", tag);
+                            }
+
+                            for (Entry<String, String> entry : link.attributes.entrySet()) {
+                                XMLUtils.indent(writer, 3);
+                                writer.writeEmptyElement("attribute");
+                                writer.writeAttribute("key", entry.getKey());
+                                writer.writeAttribute("value", entry.getValue());
+                            }
+
+                            XMLUtils.indent(writer, 2);
+                            writer.writeEndElement();
+                        }
+
+                        for (Demand demand : layer.demands) {
+                            XMLUtils.indent(writer, 2);
+                            writer.writeStartElement("demand");
+
+                            writer.writeAttribute("id", Long.toString(demand.id));
+                            writer.writeAttribute("description", demand.getDescription());
+                            writer.writeAttribute("name", demand.getName());
+                            writer.writeAttribute("ingressNodeId", Long.toString(demand.ingressNode.id));
+                            writer.writeAttribute("egressNodeId", Long.toString(demand.egressNode.id));
+                            writer.writeAttribute("offeredTraffic", Double.toString(demand.offeredTraffic));
+                            writer.writeAttribute("intendedRecoveryType", demand.recoveryType.toString());
+                            writer.writeAttribute("routingType", demand.routingType.name());
+                            writer.writeAttribute("bidirectionalPairId", Long.toString(demand.bidirectionalPair == null ? -1 : demand.bidirectionalPair.id));
+                            writer.writeAttribute("maximumAcceptableE2EWorstCaseLatencyInMs", Double.toString(demand.maximumAcceptableE2EWorstCaseLatencyInMs));
+                            writer.writeAttribute("offeredTrafficGrowthFactorPerPeriodZeroIsNoGrowth", Double.toString(demand.offeredTrafficGrowthFactorPerPeriodZeroIsNoGrowth));
+                            writer.writeAttribute("monitoredOrForecastedTraffics", StringUtils.createEscapedString_asStringList(demand.getMonitoredOrForecastedOfferedTraffic().toStringList()));
+                            writer.writeAttribute("qosType", demand.qosType);
+
+                            for (String type : demand.mandatorySequenceOfTraversedResourceTypes) {
+                                XMLUtils.indent(writer, 2);
+                                writer.writeEmptyElement("serviceChainResourceTypeOfSequence");
+                                writer.writeAttribute("type", type);
+                            }
+
+                            for (String tag : demand.tags) {
+                                XMLUtils.indent(writer, 3);
+                                writer.writeEmptyElement("tag");
+                                writer.writeAttribute("value", tag);
+                            }
+
+                            for (Entry<String, String> entry : demand.attributes.entrySet()) {
+                                XMLUtils.indent(writer, 3);
+                                writer.writeEmptyElement("attribute");
+                                writer.writeAttribute("key", entry.getKey());
+                                writer.writeAttribute("value", entry.getValue());
+                            }
+
+                            XMLUtils.indent(writer, 2);
+                            writer.writeEndElement();
+                        }
+
+                        for (MulticastDemand demand : layer.multicastDemands) {
+                            XMLUtils.indent(writer, 2);
+                            writer.writeStartElement("multicastDemand");
+                            writer.writeAttribute("id", Long.toString(demand.id));
+                            writer.writeAttribute("description", demand.getDescription());
+                            writer.writeAttribute("name", demand.getName());
+                            writer.writeAttribute("ingressNodeId", Long.toString(demand.ingressNode.id));
+                            List<Long> egressNodeIds = new LinkedList<Long>();
+                            for (Node n : demand.egressNodes) egressNodeIds.add(n.id);
+                            writer.writeAttribute("egressNodeIds", CollectionUtils.join(egressNodeIds, " "));
+                            writer.writeAttribute("offeredTraffic", Double.toString(demand.offeredTraffic));
+                            writer.writeAttribute("maximumAcceptableE2EWorstCaseLatencyInMs", Double.toString(demand.maximumAcceptableE2EWorstCaseLatencyInMs));
+                            writer.writeAttribute("offeredTrafficGrowthFactorPerPeriodZeroIsNoGrowth", Double.toString(demand.offeredTrafficGrowthFactorPerPeriodZeroIsNoGrowth));
+                            writer.writeAttribute("qosType", demand.qosType);
+                            writer.writeAttribute("monitoredOrForecastedTraffics", StringUtils.createEscapedString_asStringList(demand.getMonitoredOrForecastedOfferedTraffic().toStringList()));
+
+                            for (String tag : demand.tags) {
+                                XMLUtils.indent(writer, 3);
+                                writer.writeEmptyElement("tag");
+                                writer.writeAttribute("value", tag);
+                            }
+
+                            for (Entry<String, String> entry : demand.attributes.entrySet()) {
+                                XMLUtils.indent(writer, 3);
+                                writer.writeEmptyElement("attribute");
+                                writer.writeAttribute("key", entry.getKey());
+                                writer.writeAttribute("value", entry.getValue());
+                            }
+
+                            XMLUtils.indent(writer, 2);
+                            writer.writeEndElement();
+                        }
+
+                        for (MulticastTree tree : layer.multicastTrees) {
+                            XMLUtils.indent(writer, 3);
+                            writer.writeStartElement("multicastTree");
+
+                            writer.writeAttribute("id", Long.toString(tree.id));
+                            writer.writeAttribute("description", tree.getDescription());
+                            writer.writeAttribute("name", tree.getName());
+                            writer.writeAttribute("demandId", Long.toString(tree.demand.id));
+                            writer.writeAttribute("carriedTrafficIfNotFailing", Double.toString(tree.carriedTrafficIfNotFailing));
+                            writer.writeAttribute("occupiedLinkCapacityIfNotFailing", Double.toString(tree.occupiedLinkCapacityIfNotFailing));
+
+                            List<Long> linkIds = new LinkedList<Long>();
+                            for (Link e : tree.linkSet) linkIds.add(e.id);
+                            writer.writeAttribute("currentSetLinks", CollectionUtils.join(linkIds, " "));
+                            /* If the original link set was removed, it is replaced by the current link set */
+                            boolean initialLinkSetNotRemoved = true;
+                            for (Link e : tree.initialSetLinksWhenWasCreated)
+                                if (e.netPlan == null) {
+                                    initialLinkSetNotRemoved = false;
+                                    break;
+                                }
+                            linkIds = new LinkedList<Long>();
+                            for (Link e : initialLinkSetNotRemoved ? tree.initialSetLinksWhenWasCreated : tree.linkSet)
+                                linkIds.add(e.id);
+                            writer.writeAttribute("initialSetLinks", CollectionUtils.join(linkIds, " "));
+
+                            for (String tag : tree.tags) {
+                                XMLUtils.indent(writer, 3);
+                                writer.writeEmptyElement("tag");
+                                writer.writeAttribute("value", tag);
+                            }
+
+                            for (Entry<String, String> entry : tree.attributes.entrySet()) {
+                                XMLUtils.indent(writer, 3);
+                                writer.writeEmptyElement("attribute");
+                                writer.writeAttribute("key", entry.getKey());
+                                writer.writeAttribute("value", entry.getValue());
+                            }
+
+                            XMLUtils.indent(writer, 3);
+                            writer.writeEndElement();
+                        }
+
+
+//                if (layer.routingType == RoutingType.SOURCE_ROUTING)
+                        /* source routing information */
+                        {
+                            XMLUtils.indent(writer, 2);
+                            writer.writeStartElement("sourceRouting");
+
+                            for (Route route : layer.routes) {
+                                XMLUtils.indent(writer, 3);
+                                writer.writeStartElement("route");
+
+                                writer.writeAttribute("id", Long.toString(route.id));
+                                writer.writeAttribute("description", route.getDescription());
+                                writer.writeAttribute("name", route.getName());
+                                writer.writeAttribute("demandId", Long.toString(route.demand.id));
+
+                                writer.writeAttribute("currentCarriedTrafficIfNotFailing", Double.toString(route.currentCarriedTrafficIfNotFailing));
+                                writer.writeAttribute("currentLinksAndResourcesOccupationIfNotFailing", CollectionUtils.join(route.currentLinksAndResourcesOccupationIfNotFailing, " "));
+                                writer.writeAttribute("currentPath", CollectionUtils.join(NetPlan.getIds(route.currentPath), " "));
+                                writer.writeAttribute("bidirectionalPairId", Long.toString(route.bidirectionalPair == null ? -1 : route.bidirectionalPair.id));
+
+                                writer.writeAttribute("initialStateCarriedTrafficIfNotFailing", Double.toString(route.initialStateCarriedTrafficIfNotFailing));
+                                writer.writeAttribute("initialStateOccupationIfNotFailing", CollectionUtils.join(route.initialStateOccupationIfNotFailing, " "));
+                                writer.writeAttribute("initialStatePath", CollectionUtils.join(NetPlan.getIds(route.initialStatePath), " "));
+
+                                writer.writeAttribute("backupRoutes", CollectionUtils.join(NetPlan.getIds(route.backupRoutes), " "));
+
+                                for (String tag : route.tags) {
+                                    XMLUtils.indent(writer, 4);
+                                    writer.writeEmptyElement("tag");
+                                    writer.writeAttribute("value", tag);
+                                }
+
+                                for (Entry<String, String> entry : route.attributes.entrySet()) {
+                                    XMLUtils.indent(writer, 4);
+                                    writer.writeEmptyElement("attribute");
+                                    writer.writeAttribute("key", entry.getKey());
+                                    writer.writeAttribute("value", entry.getValue());
+                                }
+
+                                XMLUtils.indent(writer, 3);
+                                writer.writeEndElement();
+                            }
+
+                            XMLUtils.indent(writer, 2);
+                            writer.writeEndElement();
+                        }
+                        /* hop-by-hop information */
+                        {
+                            XMLUtils.indent(writer, 2);
+                            writer.writeStartElement("hopByHopRouting");
+                            for (Demand d : layer.demands)
+                                for (Entry<Link, Double> fr : d.cacheHbH_frs.entrySet()) {
+                                    final int indexDemand = d.index;
+                                    final int indexLink = fr.getKey().index;
+                                    final double splittingRatio = fr.getValue();
+                                    XMLUtils.indent(writer, 3);
+                                    writer.writeEmptyElement("forwardingRule");
+                                    writer.writeAttribute("demandId", Long.toString(layer.demands.get(indexDemand).id));
+                                    writer.writeAttribute("linkId", Long.toString(layer.links.get(indexLink).id));
+                                    writer.writeAttribute("splittingRatio", Double.toString(splittingRatio));
+                                }
+                            XMLUtils.indent(writer, 2);
+                            writer.writeEndElement();
+                        }
+
+                        for (String tag : layer.tags) {
+                            XMLUtils.indent(writer, 2);
+                            writer.writeEmptyElement("tag");
+                            writer.writeAttribute("value", tag);
+                        }
+
+                        for (Entry<String, String> entry : layer.attributes.entrySet()) {
+                            XMLUtils.indent(writer, 2);
+                            writer.writeEmptyElement("attribute");
+                            writer.writeAttribute("key", entry.getKey());
+                            writer.writeAttribute("value", entry.getValue());
+                        }
+
+                        XMLUtils.indent(writer, 1);
+                        writer.writeEndElement();
+                    }
+
+                    for (SharedRiskGroup srg : srgs) {
+                        XMLUtils.indent(writer, 1);
+                        writer.writeStartElement("srg");
+
+                        writer.writeAttribute("id", Long.toString(srg.id));
+                        writer.writeAttribute("description", srg.getDescription());
+                        writer.writeAttribute("name", srg.getName());
+                        writer.writeAttribute("meanTimeToFailInHours", Double.toString(srg.meanTimeToFailInHours));
+                        writer.writeAttribute("meanTimeToRepairInHours", Double.toString(srg.meanTimeToRepairInHours));
+                        writer.writeAttribute("isDynamic", Boolean.toString(srg.isDynamicSrg()));
+                        if (srg.isDynamicSrg()) {
+                            writer.writeAttribute("dynamicSrgClassName", srg.getDynamicSrgImplementation().getClass().getName());
+                            writer.writeAttribute("dynamicSrgConfigString", srg.getDynamicSrgImplementation().getInitializationString());
+                        } else {
+                            writer.writeAttribute("nodes", CollectionUtils.join(NetPlan.getIds(srg.getNodes()), " "));
+                            writer.writeAttribute("links", CollectionUtils.join(NetPlan.getIds(srg.getLinksAllLayers()), " "));
+                        }
+
+
+                        for (String tag : srg.tags) {
+                            XMLUtils.indent(writer, 2);
+                            writer.writeEmptyElement("tag");
+                            writer.writeAttribute("value", tag);
+                        }
+
+                        for (Entry<String, String> entry : srg.attributes.entrySet()) {
+                            XMLUtils.indent(writer, 2);
+                            writer.writeEmptyElement("attribute");
+                            writer.writeAttribute("key", entry.getKey());
+                            writer.writeAttribute("value", entry.getValue());
+                        }
+
+                        XMLUtils.indent(writer, 1);
+                        writer.writeEndElement();
+                    }
+
+                    for (DemandLinkMapping d_e : interLayerCoupling.edgeSet()) {
+                        for (Entry<Demand, Link> coupling : d_e.demandLinkMapping.entrySet()) {
+                            XMLUtils.indent(writer, 1);
+                            writer.writeEmptyElement("layerCouplingDemand");
+                            writer.writeAttribute("lowerLayerDemandId", "" + coupling.getKey().id);
+                            writer.writeAttribute("upperLayerLinkId", "" + coupling.getValue().id);
+                        }
+                        for (Entry<MulticastDemand, SortedSet<Link>> coupling : d_e.multicastDemandLinkMapping.entrySet()) {
+                            XMLUtils.indent(writer, 1);
+                            writer.writeEmptyElement("layerCouplingMulticastDemand");
+                            List<Long> linkIds = new LinkedList<Long>();
+                            for (Link e : coupling.getValue()) linkIds.add(e.id);
+                            writer.writeAttribute("lowerLayerDemandId", "" + coupling.getKey().id);
+                            writer.writeAttribute("upperLayerLinkIds", CollectionUtils.join(linkIds, " "));
+                        }
+                    }
+
+                    for (NetworkLayer layer : this.layers) {
+                        for (Demand coupling : getDemandsCoupled(layer)) {
+                            if (coupling.isCoupledInSameLayer()) {
+                                XMLUtils.indent(writer, 1);
+                                writer.writeEmptyElement("sameLayerCouplingDemand");
+                                writer.writeAttribute("layerDemandId", "" + coupling.id);
+                                writer.writeAttribute("layerLinkId", "" + coupling.coupledUpperOrSameLayerLink.id);
+                            }
+                        }
+                    }
+
+
+                    for (String tag : this.tags) {
+                        XMLUtils.indent(writer, 1);
+                        writer.writeEmptyElement("tag");
+                        writer.writeAttribute("value", tag);
+                    }
+
+                    for (Entry<String, String> entry : this.attributes.entrySet()) {
+                        XMLUtils.indent(writer, 1);
+                        writer.writeEmptyElement("attribute");
+                        writer.writeAttribute("key", entry.getKey());
+                        writer.writeAttribute("value", entry.getValue());
+                    }
+
+                    XMLUtils.indent(writer, 0);
+                    writer.writeEndElement();
+                    writer.writeEndDocument();
+                    writer.flush();
+                } catch (XMLStreamException e) {
+                    throw new RuntimeException(e);
+                } finally {
+                    try {
+                        assert writer != null;
+                        writer.close();
+                    } catch (XMLStreamException e) {
+                        e.printStackTrace();
                     }
                 }
-            }
-            
-            
-            for (String tag : this.tags) { XMLUtils.indent(writer, 1); writer.writeEmptyElement("tag"); writer.writeAttribute("value", tag); }
+                break;
 
-            for (Entry<String, String> entry : this.attributes.entrySet())
-            {
-                XMLUtils.indent(writer, 1);
-                writer.writeEmptyElement("attribute");
-                writer.writeAttribute("key", entry.getKey());
-                writer.writeAttribute("value", entry.getValue());
-            }
+            case JSON:
+                try {
+                    XMLOutputFactory2 output = (XMLOutputFactory2) XMLOutputFactory2.newFactory();
+                    writer = (XMLStreamWriter2) output.createXMLStreamWriter(outputStream);
 
-            XMLUtils.indent(writer, 0);
-            writer.writeEndElement();
-            writer.writeEndDocument();
-            writer.flush();
-        } catch (XMLStreamException e)
-        {
-            throw new RuntimeException(e);
-        } finally
-        {
-            try
-            {
-                assert writer != null;
-                writer.close();
-            } catch (XMLStreamException e)
-            {
-                e.printStackTrace();
-            }
+                    writer.writeStartDocument("UTF-8", "1.0");
+
+                    XMLUtils.indent(writer, 0);
+                    writer.writeStartElement("network");
+                    writer.writeAttribute("description", getDescription());
+                    writer.writeAttribute("name", getName());
+                    writer.writeAttribute("currentPlotNodeLayout", this.currentPlotNodeLayout);
+                    writer.writeAttribute("cache_definedPlotNodeLayouts", StringUtils.createEscapedString_asStringList(this.cache_definedPlotNodeLayouts));
+                    writer.writeAttribute("version", Version.getFileFormatVersion());
+                    writer.writeAttribute("nextElementId", nextElementId.toString());
+                    int counter = 0;
+                    for (String planningDomain : this.cache_planningDomain2nodes.keySet())
+                        writer.writeAttribute("planningDomain_" + (counter++), planningDomain);
+
+
+//            for (String planningDomain : this.cache_planningDomain2nodes.keySet())
+//            {
+//                XMLUtils.indent(writer, 2);
+//                writer.writeEmptyElement("planningDomain");
+//                writer.writeAttribute("name", "");
+//                writer.writeAttribute("value", planningDomain);
+//            }
+
+                    //SortedSet<Long> nodeIds_thisNetPlan = new TreeSet<Long> (getNodeIds());
+                    for (Node node : nodes) {
+                        XMLUtils.indent(writer, 1);
+                        writer.writeStartElement("node");
+
+                        final Point2D position = node.getXYPositionMap();
+                        writer.writeAttribute("id", Long.toString(node.id));
+                        writer.writeAttribute("description", node.getDescription());
+                        writer.writeAttribute("name", node.getName());
+                        writer.writeAttribute("xCoord", Double.toString(position.getX()));
+                        writer.writeAttribute("yCoord", Double.toString(position.getY()));
+                        final List<String> mapLayoutPositionsStream = node.mapLayout2NodeXYPositionMap.entrySet().stream().
+                                map(e -> Arrays.asList(e.getKey(), "" + e.getValue().getX(), "" + e.getValue().getY())).
+                                flatMap(e -> e.stream()).
+                                collect(Collectors.toList());
+                        writer.writeAttribute("mapLayout2NodeXYPositionMap", StringUtils.createEscapedString_asStringList(mapLayoutPositionsStream));
+
+                        writer.writeAttribute("population", Double.toString(node.population));
+                        if (node.siteName != null) writer.writeAttribute("siteName", node.siteName);
+                        writer.writeAttribute("isUp", Boolean.toString(node.isUp));
+                        int pdCounter = 0;
+                        for (String pd : node.getPlanningDomains())
+                            writer.writeAttribute("planningDomain_" + (pdCounter++), pd);
+
+                        final SortedSet<NetworkLayer> layersWithIcons = layers.stream().filter(l -> node.getUrlNodeIcon(l) != null).collect(Collectors.toCollection(TreeSet::new));
+                        final List<Long> idsLayersWithIcons = layersWithIcons.stream().map(l -> l.getId()).collect(Collectors.toList());
+                        writer.writeAttribute("layersWithIconsDefined", CollectionUtils.join(idsLayersWithIcons, " "));
+                        for (NetworkLayer layer : layersWithIcons)
+                            if (node.getUrlNodeIcon(layer) != null) {
+                                writer.writeAttribute("nodeIconURLLayer_" + layer.getId(), node.getUrlNodeIcon(layer).toString());
+                                writer.writeAttribute("nodeIconRelativeSizeLayer_" + layer.getId(), "" + node.getNodeIconRelativeSize(layer));
+                            }
+                        for (String tag : node.tags) {
+                            XMLUtils.indent(writer, 2);
+                            writer.writeEmptyElement("tag");
+                            writer.writeAttribute("value", tag);
+                        }
+
+                        for (Entry<String, String> entry : node.attributes.entrySet()) {
+                            XMLUtils.indent(writer, 2);
+                            writer.writeEmptyElement("attribute");
+                            writer.writeAttribute("key", entry.getKey());
+                            writer.writeAttribute("value", entry.getValue());
+                        }
+
+                        XMLUtils.indent(writer, 1);
+                        writer.writeEndElement();
+                    }
+
+                    for (Resource res : resources) {
+                        XMLUtils.indent(writer, 1);
+                        writer.writeStartElement("resource");
+
+                        writer.writeAttribute("id", Long.toString(res.id));
+                        writer.writeAttribute("description", res.getDescription());
+                        writer.writeAttribute("name", res.getName());
+                        writer.writeAttribute("hostNodeId", Long.toString(res.iAttachedToANode() ? res.hostNode.get().id : -1));
+                        writer.writeAttribute("type", res.type);
+                        writer.writeAttribute("capacityMeasurementUnits", res.capacityMeasurementUnits);
+                        writer.writeAttribute("processingTimeToTraversingTrafficInMs", Double.toString(res.processingTimeToTraversingTrafficInMs));
+                        writer.writeAttribute("capacity", Double.toString(res.capacity));
+                        if (res.urlIcon != null) writer.writeAttribute("urlIcon", res.urlIcon.toString());
+
+                        List<Double> baseResourceAndOccupiedCapacitiesMap = new LinkedList<Double>();
+                        for (Entry<Resource, Double> br : res.capacityIOccupyInBaseResource.entrySet()) {
+                            baseResourceAndOccupiedCapacitiesMap.add((double) br.getKey().id);
+                            baseResourceAndOccupiedCapacitiesMap.add(br.getValue());
+                        }
+                        writer.writeAttribute("baseResourceAndOccupiedCapacitiesMap", CollectionUtils.join(baseResourceAndOccupiedCapacitiesMap, " "));
+
+                        for (String tag : res.tags) {
+                            XMLUtils.indent(writer, 2);
+                            writer.writeEmptyElement("tag");
+                            writer.writeAttribute("value", tag);
+                        }
+
+                        for (Entry<String, String> entry : res.attributes.entrySet()) {
+                            XMLUtils.indent(writer, 2);
+                            writer.writeEmptyElement("attribute");
+                            writer.writeAttribute("key", entry.getKey());
+                            writer.writeAttribute("value", entry.getValue());
+                        }
+
+                        XMLUtils.indent(writer, 1);
+                        writer.writeEndElement();
+                    }
+
+                    for (NetworkLayer layer : layers) {
+                        XMLUtils.indent(writer, 1);
+                        writer.writeStartElement("layer");
+
+                        writer.writeAttribute("id", Long.toString(layer.id));
+                        writer.writeAttribute("description", layer.getDescription());
+                        writer.writeAttribute("name", layer.getName());
+                        writer.writeAttribute("isDefaultLayer", Boolean.toString(defaultLayer == layer));
+                        writer.writeAttribute("linkCapacityUnitsName", layer.linkCapacityUnitsName);
+                        writer.writeAttribute("demandTrafficUnitsName", layer.demandTrafficUnitsName);
+                        if (layer.defaultNodeIconURL != null)
+                            writer.writeAttribute("defaultNodeIconURL", layer.defaultNodeIconURL.toString());
+
+                        for (Link link : layer.links) {
+                            XMLUtils.indent(writer, 2);
+                            writer.writeStartElement("link");
+
+                            writer.writeAttribute("id", Long.toString(link.id));
+                            writer.writeAttribute("description", link.getDescription());
+                            writer.writeAttribute("name", link.getName());
+                            writer.writeAttribute("originNodeId", Long.toString(link.originNode.id));
+                            writer.writeAttribute("destinationNodeId", Long.toString(link.destinationNode.id));
+                            writer.writeAttribute("capacity", Double.toString(link.capacity));
+                            writer.writeAttribute("lengthInKm", Double.toString(link.lengthInKm));
+                            writer.writeAttribute("bidirectionalPairId", Long.toString(link.bidirectionalPair == null ? -1 : link.bidirectionalPair.id));
+                            writer.writeAttribute("propagationSpeedInKmPerSecond", Double.toString(link.propagationSpeedInKmPerSecond));
+                            writer.writeAttribute("isUp", Boolean.toString(link.isUp));
+                            writer.writeAttribute("monitoredOrForecastedTraffics", StringUtils.createEscapedString_asStringList(link.getMonitoredOrForecastedCarriedTraffic().toStringList()));
+
+                            for (String tag : link.tags) {
+                                XMLUtils.indent(writer, 3);
+                                writer.writeEmptyElement("tag");
+                                writer.writeAttribute("value", tag);
+                            }
+
+                            for (Entry<String, String> entry : link.attributes.entrySet()) {
+                                XMLUtils.indent(writer, 3);
+                                writer.writeEmptyElement("attribute");
+                                writer.writeAttribute("key", entry.getKey());
+                                writer.writeAttribute("value", entry.getValue());
+                            }
+
+                            XMLUtils.indent(writer, 2);
+                            writer.writeEndElement();
+                        }
+
+                        for (Demand demand : layer.demands) {
+                            XMLUtils.indent(writer, 2);
+                            writer.writeStartElement("demand");
+
+                            writer.writeAttribute("id", Long.toString(demand.id));
+                            writer.writeAttribute("description", demand.getDescription());
+                            writer.writeAttribute("name", demand.getName());
+                            writer.writeAttribute("ingressNodeId", Long.toString(demand.ingressNode.id));
+                            writer.writeAttribute("egressNodeId", Long.toString(demand.egressNode.id));
+                            writer.writeAttribute("offeredTraffic", Double.toString(demand.offeredTraffic));
+                            writer.writeAttribute("intendedRecoveryType", demand.recoveryType.toString());
+                            writer.writeAttribute("routingType", demand.routingType.name());
+                            writer.writeAttribute("bidirectionalPairId", Long.toString(demand.bidirectionalPair == null ? -1 : demand.bidirectionalPair.id));
+                            writer.writeAttribute("maximumAcceptableE2EWorstCaseLatencyInMs", Double.toString(demand.maximumAcceptableE2EWorstCaseLatencyInMs));
+                            writer.writeAttribute("offeredTrafficGrowthFactorPerPeriodZeroIsNoGrowth", Double.toString(demand.offeredTrafficGrowthFactorPerPeriodZeroIsNoGrowth));
+                            writer.writeAttribute("monitoredOrForecastedTraffics", StringUtils.createEscapedString_asStringList(demand.getMonitoredOrForecastedOfferedTraffic().toStringList()));
+                            writer.writeAttribute("qosType", demand.qosType);
+
+                            for (String type : demand.mandatorySequenceOfTraversedResourceTypes) {
+                                XMLUtils.indent(writer, 2);
+                                writer.writeEmptyElement("serviceChainResourceTypeOfSequence");
+                                writer.writeAttribute("type", type);
+                            }
+
+                            for (String tag : demand.tags) {
+                                XMLUtils.indent(writer, 3);
+                                writer.writeEmptyElement("tag");
+                                writer.writeAttribute("value", tag);
+                            }
+
+                            for (Entry<String, String> entry : demand.attributes.entrySet()) {
+                                XMLUtils.indent(writer, 3);
+                                writer.writeEmptyElement("attribute");
+                                writer.writeAttribute("key", entry.getKey());
+                                writer.writeAttribute("value", entry.getValue());
+                            }
+
+                            XMLUtils.indent(writer, 2);
+                            writer.writeEndElement();
+                        }
+
+                        for (MulticastDemand demand : layer.multicastDemands) {
+                            XMLUtils.indent(writer, 2);
+                            writer.writeStartElement("multicastDemand");
+                            writer.writeAttribute("id", Long.toString(demand.id));
+                            writer.writeAttribute("description", demand.getDescription());
+                            writer.writeAttribute("name", demand.getName());
+                            writer.writeAttribute("ingressNodeId", Long.toString(demand.ingressNode.id));
+                            List<Long> egressNodeIds = new LinkedList<Long>();
+                            for (Node n : demand.egressNodes) egressNodeIds.add(n.id);
+                            writer.writeAttribute("egressNodeIds", CollectionUtils.join(egressNodeIds, " "));
+                            writer.writeAttribute("offeredTraffic", Double.toString(demand.offeredTraffic));
+                            writer.writeAttribute("maximumAcceptableE2EWorstCaseLatencyInMs", Double.toString(demand.maximumAcceptableE2EWorstCaseLatencyInMs));
+                            writer.writeAttribute("offeredTrafficGrowthFactorPerPeriodZeroIsNoGrowth", Double.toString(demand.offeredTrafficGrowthFactorPerPeriodZeroIsNoGrowth));
+                            writer.writeAttribute("qosType", demand.qosType);
+                            writer.writeAttribute("monitoredOrForecastedTraffics", StringUtils.createEscapedString_asStringList(demand.getMonitoredOrForecastedOfferedTraffic().toStringList()));
+
+                            for (String tag : demand.tags) {
+                                XMLUtils.indent(writer, 3);
+                                writer.writeEmptyElement("tag");
+                                writer.writeAttribute("value", tag);
+                            }
+
+                            for (Entry<String, String> entry : demand.attributes.entrySet()) {
+                                XMLUtils.indent(writer, 3);
+                                writer.writeEmptyElement("attribute");
+                                writer.writeAttribute("key", entry.getKey());
+                                writer.writeAttribute("value", entry.getValue());
+                            }
+
+                            XMLUtils.indent(writer, 2);
+                            writer.writeEndElement();
+                        }
+
+                        for (MulticastTree tree : layer.multicastTrees) {
+                            XMLUtils.indent(writer, 3);
+                            writer.writeStartElement("multicastTree");
+
+                            writer.writeAttribute("id", Long.toString(tree.id));
+                            writer.writeAttribute("description", tree.getDescription());
+                            writer.writeAttribute("name", tree.getName());
+                            writer.writeAttribute("demandId", Long.toString(tree.demand.id));
+                            writer.writeAttribute("carriedTrafficIfNotFailing", Double.toString(tree.carriedTrafficIfNotFailing));
+                            writer.writeAttribute("occupiedLinkCapacityIfNotFailing", Double.toString(tree.occupiedLinkCapacityIfNotFailing));
+
+                            List<Long> linkIds = new LinkedList<Long>();
+                            for (Link e : tree.linkSet) linkIds.add(e.id);
+                            writer.writeAttribute("currentSetLinks", CollectionUtils.join(linkIds, " "));
+                            /* If the original link set was removed, it is replaced by the current link set */
+                            boolean initialLinkSetNotRemoved = true;
+                            for (Link e : tree.initialSetLinksWhenWasCreated)
+                                if (e.netPlan == null) {
+                                    initialLinkSetNotRemoved = false;
+                                    break;
+                                }
+                            linkIds = new LinkedList<Long>();
+                            for (Link e : initialLinkSetNotRemoved ? tree.initialSetLinksWhenWasCreated : tree.linkSet)
+                                linkIds.add(e.id);
+                            writer.writeAttribute("initialSetLinks", CollectionUtils.join(linkIds, " "));
+
+                            for (String tag : tree.tags) {
+                                XMLUtils.indent(writer, 3);
+                                writer.writeEmptyElement("tag");
+                                writer.writeAttribute("value", tag);
+                            }
+
+                            for (Entry<String, String> entry : tree.attributes.entrySet()) {
+                                XMLUtils.indent(writer, 3);
+                                writer.writeEmptyElement("attribute");
+                                writer.writeAttribute("key", entry.getKey());
+                                writer.writeAttribute("value", entry.getValue());
+                            }
+
+                            XMLUtils.indent(writer, 3);
+                            writer.writeEndElement();
+                        }
+
+
+//                if (layer.routingType == RoutingType.SOURCE_ROUTING)
+                        /* source routing information */
+                        {
+                            XMLUtils.indent(writer, 2);
+                            writer.writeStartElement("sourceRouting");
+
+                            for (Route route : layer.routes) {
+                                XMLUtils.indent(writer, 3);
+                                writer.writeStartElement("route");
+
+                                writer.writeAttribute("id", Long.toString(route.id));
+                                writer.writeAttribute("description", route.getDescription());
+                                writer.writeAttribute("name", route.getName());
+                                writer.writeAttribute("demandId", Long.toString(route.demand.id));
+
+                                writer.writeAttribute("currentCarriedTrafficIfNotFailing", Double.toString(route.currentCarriedTrafficIfNotFailing));
+                                writer.writeAttribute("currentLinksAndResourcesOccupationIfNotFailing", CollectionUtils.join(route.currentLinksAndResourcesOccupationIfNotFailing, " "));
+                                writer.writeAttribute("currentPath", CollectionUtils.join(NetPlan.getIds(route.currentPath), " "));
+                                writer.writeAttribute("bidirectionalPairId", Long.toString(route.bidirectionalPair == null ? -1 : route.bidirectionalPair.id));
+
+                                writer.writeAttribute("initialStateCarriedTrafficIfNotFailing", Double.toString(route.initialStateCarriedTrafficIfNotFailing));
+                                writer.writeAttribute("initialStateOccupationIfNotFailing", CollectionUtils.join(route.initialStateOccupationIfNotFailing, " "));
+                                writer.writeAttribute("initialStatePath", CollectionUtils.join(NetPlan.getIds(route.initialStatePath), " "));
+
+                                writer.writeAttribute("backupRoutes", CollectionUtils.join(NetPlan.getIds(route.backupRoutes), " "));
+
+                                for (String tag : route.tags) {
+                                    XMLUtils.indent(writer, 4);
+                                    writer.writeEmptyElement("tag");
+                                    writer.writeAttribute("value", tag);
+                                }
+
+                                for (Entry<String, String> entry : route.attributes.entrySet()) {
+                                    XMLUtils.indent(writer, 4);
+                                    writer.writeEmptyElement("attribute");
+                                    writer.writeAttribute("key", entry.getKey());
+                                    writer.writeAttribute("value", entry.getValue());
+                                }
+
+                                XMLUtils.indent(writer, 3);
+                                writer.writeEndElement();
+                            }
+
+                            XMLUtils.indent(writer, 2);
+                            writer.writeEndElement();
+                        }
+                        /* hop-by-hop information */
+                        {
+                            XMLUtils.indent(writer, 2);
+                            writer.writeStartElement("hopByHopRouting");
+                            for (Demand d : layer.demands)
+                                for (Entry<Link, Double> fr : d.cacheHbH_frs.entrySet()) {
+                                    final int indexDemand = d.index;
+                                    final int indexLink = fr.getKey().index;
+                                    final double splittingRatio = fr.getValue();
+                                    XMLUtils.indent(writer, 3);
+                                    writer.writeEmptyElement("forwardingRule");
+                                    writer.writeAttribute("demandId", Long.toString(layer.demands.get(indexDemand).id));
+                                    writer.writeAttribute("linkId", Long.toString(layer.links.get(indexLink).id));
+                                    writer.writeAttribute("splittingRatio", Double.toString(splittingRatio));
+                                }
+                            XMLUtils.indent(writer, 2);
+                            writer.writeEndElement();
+                        }
+
+                        for (String tag : layer.tags) {
+                            XMLUtils.indent(writer, 2);
+                            writer.writeEmptyElement("tag");
+                            writer.writeAttribute("value", tag);
+                        }
+
+                        for (Entry<String, String> entry : layer.attributes.entrySet()) {
+                            XMLUtils.indent(writer, 2);
+                            writer.writeEmptyElement("attribute");
+                            writer.writeAttribute("key", entry.getKey());
+                            writer.writeAttribute("value", entry.getValue());
+                        }
+
+                        XMLUtils.indent(writer, 1);
+                        writer.writeEndElement();
+                    }
+
+                    for (SharedRiskGroup srg : srgs) {
+                        XMLUtils.indent(writer, 1);
+                        writer.writeStartElement("srg");
+
+                        writer.writeAttribute("id", Long.toString(srg.id));
+                        writer.writeAttribute("description", srg.getDescription());
+                        writer.writeAttribute("name", srg.getName());
+                        writer.writeAttribute("meanTimeToFailInHours", Double.toString(srg.meanTimeToFailInHours));
+                        writer.writeAttribute("meanTimeToRepairInHours", Double.toString(srg.meanTimeToRepairInHours));
+                        writer.writeAttribute("isDynamic", Boolean.toString(srg.isDynamicSrg()));
+                        if (srg.isDynamicSrg()) {
+                            writer.writeAttribute("dynamicSrgClassName", srg.getDynamicSrgImplementation().getClass().getName());
+                            writer.writeAttribute("dynamicSrgConfigString", srg.getDynamicSrgImplementation().getInitializationString());
+                        } else {
+                            writer.writeAttribute("nodes", CollectionUtils.join(NetPlan.getIds(srg.getNodes()), " "));
+                            writer.writeAttribute("links", CollectionUtils.join(NetPlan.getIds(srg.getLinksAllLayers()), " "));
+                        }
+
+
+                        for (String tag : srg.tags) {
+                            XMLUtils.indent(writer, 2);
+                            writer.writeEmptyElement("tag");
+                            writer.writeAttribute("value", tag);
+                        }
+
+                        for (Entry<String, String> entry : srg.attributes.entrySet()) {
+                            XMLUtils.indent(writer, 2);
+                            writer.writeEmptyElement("attribute");
+                            writer.writeAttribute("key", entry.getKey());
+                            writer.writeAttribute("value", entry.getValue());
+                        }
+
+                        XMLUtils.indent(writer, 1);
+                        writer.writeEndElement();
+                    }
+
+                    for (DemandLinkMapping d_e : interLayerCoupling.edgeSet()) {
+                        for (Entry<Demand, Link> coupling : d_e.demandLinkMapping.entrySet()) {
+                            XMLUtils.indent(writer, 1);
+                            writer.writeEmptyElement("layerCouplingDemand");
+                            writer.writeAttribute("lowerLayerDemandId", "" + coupling.getKey().id);
+                            writer.writeAttribute("upperLayerLinkId", "" + coupling.getValue().id);
+                        }
+                        for (Entry<MulticastDemand, SortedSet<Link>> coupling : d_e.multicastDemandLinkMapping.entrySet()) {
+                            XMLUtils.indent(writer, 1);
+                            writer.writeEmptyElement("layerCouplingMulticastDemand");
+                            List<Long> linkIds = new LinkedList<Long>();
+                            for (Link e : coupling.getValue()) linkIds.add(e.id);
+                            writer.writeAttribute("lowerLayerDemandId", "" + coupling.getKey().id);
+                            writer.writeAttribute("upperLayerLinkIds", CollectionUtils.join(linkIds, " "));
+                        }
+                    }
+
+                    for (NetworkLayer layer : this.layers) {
+                        for (Demand coupling : getDemandsCoupled(layer)) {
+                            if (coupling.isCoupledInSameLayer()) {
+                                XMLUtils.indent(writer, 1);
+                                writer.writeEmptyElement("sameLayerCouplingDemand");
+                                writer.writeAttribute("layerDemandId", "" + coupling.id);
+                                writer.writeAttribute("layerLinkId", "" + coupling.coupledUpperOrSameLayerLink.id);
+                            }
+                        }
+                    }
+
+
+                    for (String tag : this.tags) {
+                        XMLUtils.indent(writer, 1);
+                        writer.writeEmptyElement("tag");
+                        writer.writeAttribute("value", tag);
+                    }
+
+                    for (Entry<String, String> entry : this.attributes.entrySet()) {
+                        XMLUtils.indent(writer, 1);
+                        writer.writeEmptyElement("attribute");
+                        writer.writeAttribute("key", entry.getKey());
+                        writer.writeAttribute("value", entry.getValue());
+                    }
+
+                    XMLUtils.indent(writer, 0);
+                    writer.writeEndElement();
+                    writer.writeEndDocument();
+                    writer.flush();
+                break;
+
+            default:
+                throw new RuntimeException();
+
         }
     }
 

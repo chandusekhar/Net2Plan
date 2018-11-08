@@ -221,7 +221,7 @@ public class ImageUtils
 	 * Writes an image to a file.
 	 *
 	 * @param file Output file
-	 * @param bufferedImage Image to save
+	 * @param bufferedImage Image to saveToXML
 	 * @param imageType Image type (bmp, jpg, png)
 	 */
 	public static void writeImageToFile(File file, BufferedImage bufferedImage, ImageType imageType)

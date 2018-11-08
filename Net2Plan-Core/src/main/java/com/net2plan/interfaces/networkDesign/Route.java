@@ -1,4 +1,4 @@
-// 20161205 sigo con reader v5 y con la parte de save, para el route
+// 20161205 sigo con reader v5 y con la parte de saveToXML, para el route
 
 /*******************************************************************************
  * Copyright (c) 2017 Pablo Pavon Marino and others.

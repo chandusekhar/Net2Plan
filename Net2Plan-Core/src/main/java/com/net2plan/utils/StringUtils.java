@@ -344,7 +344,7 @@ public class StringUtils
 	 * Outputs an {@code String} to a file.
 	 *
 	 * @param text {@code String} to be saved
-	 * @param file {@code File} where save the contents
+	 * @param file {@code File} where saveToXML the contents
 	 * 
 	 */
 	public static void saveToFile(String text, File file)
@@ -356,7 +356,7 @@ public class StringUtils
 	 * Outputs an {@code String} to a file.
 	 *
 	 * @param text {@code String} to be saved
-	 * @param file {@code File} where save the contents
+	 * @param file {@code File} where saveToXML the contents
 	 * @param append Indicates whether {@code file} must be overriden if already exists (if {@code true}), or {@code text} is append at the end (if {@code false})
 	 * 
 	 */
