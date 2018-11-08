@@ -47,7 +47,7 @@ public class Net2PlanAPI
     }
 
     @POST
-    @Produces(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("/algorithm/{algorithmname}")
     public Response executeAlgorithm(@PathParam("algorithmname") String algorithmName, RestMap parametersMap)
     {
@@ -131,6 +131,95 @@ public class Net2PlanAPI
         net2planParameters_raw.stream().forEach(t -> net2planParameters.put(t.getFirst(), t.getSecond()));
 
         String response = algorithm.executeAlgorithm(netPlan, algorithmParameters, net2planParameters);
+
+        return RestUtils.OK(response);
+    }
+
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/report/{reportname}")
+    public Response executeReport(@PathParam("reportname") String reportName, RestMap parametersMap)
+    {
+        IReport report = ExamplesController.getReport(reportName);
+        if(report == null)
+            return RestUtils.NOT_FOUND(RestUtils.NotFoundResponseType.REPORT);
+
+        List<Triple<String, String, String>> reportParameters_raw = report.getParameters();
+        Map<String, String> reportParameters = new LinkedHashMap<>();
+        for(Triple<String, String, String> t : reportParameters_raw)
+        {
+            String paramName = t.getFirst();
+            String paramDefaultValue = t.getSecond();
+            reportParameters.put(paramName, paramDefaultValue);
+        }
+
+        Map<String, String> userParametersMap = (parametersMap == null) ? null : parametersMap.getMap();
+        if(userParametersMap != null)
+        {
+            for(Map.Entry<String, String> entry : userParametersMap.entrySet())
+            {
+                String paramName = entry.getKey();
+                String userParamValue = entry.getValue();
+                if(reportParameters.containsKey(paramName))
+                {
+                    String paramDefaultValue = reportParameters.get(paramName);
+                    if(paramDefaultValue.startsWith("#select#"))
+                    {
+                        List<String> possibleValues = StringUtils.toList(StringUtils.split(paramDefaultValue.replace("#select# ","")));
+                        if(possibleValues.contains(userParamValue))
+                        {
+                            reportParameters.put(paramName, userParamValue);
+                        }
+                        else{
+                            return RestUtils.SERVER_ERROR("Parameter "+paramName+ " can't be set as "+userParamValue+". Its possible values are: "+possibleValues);
+                        }
+                    }
+                    else if(paramDefaultValue.startsWith("#boolean#"))
+                    {
+                        if(userParamValue.equals("true") || userParamValue.equals("false"))
+                        {
+                            reportParameters.put(paramName, userParamValue);
+                        }
+                        else{
+                            return RestUtils.SERVER_ERROR("Parameter "+paramName+ " can't be set as "+userParamValue+". Its possible values are true or false");
+                        }
+                    }
+                    else{
+                        reportParameters.put(paramName, userParamValue);
+                    }
+                }
+                else{
+                    return RestUtils.SERVER_ERROR("Undefined parameter "+paramName+" for this report: "+report.getClass().getName());
+                }
+            }
+        }
+        else{
+            for(Map.Entry<String, String> entry : reportParameters.entrySet())
+            {
+                String paramName = entry.getKey();
+                String paramDefaultValue = entry.getValue();
+                String paramValue = "";
+                if(paramDefaultValue.startsWith("#select#"))
+                {
+                    paramValue = StringUtils.split(paramDefaultValue.replace("#select# ",""))[0];
+                }
+                else if(paramDefaultValue.startsWith("#boolean#"))
+                {
+                    paramValue = paramDefaultValue.replace("#boolean# ","");
+                }
+                else{
+                    paramValue = paramDefaultValue;
+                }
+
+                reportParameters.put(paramName, paramValue);
+            }
+        }
+
+        List<Triple<String, String, String>> net2planParameters_raw = Configuration.getNet2PlanParameters();
+        Map<String, String> net2planParameters = new LinkedHashMap<>();
+        net2planParameters_raw.stream().forEach(t -> net2planParameters.put(t.getFirst(), t.getSecond()));
+
+        String response = report.executeReport(netPlan, reportParameters, net2planParameters);
 
         return RestUtils.OK(response);
     }

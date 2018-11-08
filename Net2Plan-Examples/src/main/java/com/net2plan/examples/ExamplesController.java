@@ -3,6 +3,10 @@ package com.net2plan.examples;
 import com.net2plan.examples.general.offline.Offline_ipOverWdm_routingSpectrumAndModulationAssignmentHeuristicNotGrooming;
 import com.net2plan.examples.general.offline.Offline_ipOverWdm_routingSpectrumAndModulationAssignmentILPNotGrooming;
 import com.net2plan.examples.general.offline.nfv.Offline_nfvPlacementILP_v1;
+import com.net2plan.examples.general.reports.Report_WDM_lineEngineering;
+import com.net2plan.examples.general.reports.Report_WDM_lineEngineering_GNModel;
+import com.net2plan.examples.general.reports.Report_WDM_pointToPointLineEngineering;
+import com.net2plan.examples.general.reports.Report_WDM_routingSpectrumAndModulationAssignments;
 import com.net2plan.examples.ocnbook.offline.*;
 import com.net2plan.interfaces.networkDesign.IAlgorithm;
 import com.net2plan.interfaces.networkDesign.IReport;
@@ -55,6 +59,11 @@ public class ExamplesController
 
 
         name2ReportMap = new LinkedHashMap<>();
+        name2ReportMap.put("WDM Line Engineering", new Report_WDM_lineEngineering());
+        name2ReportMap.put("WDM Line Engineering GN Model", new Report_WDM_lineEngineering_GNModel());
+        name2ReportMap.put("WDM Point to Point Line Engineering", new Report_WDM_pointToPointLineEngineering());
+        name2ReportMap.put("WDM Routing Spectrum and Modulation Assignments", new Report_WDM_routingSpectrumAndModulationAssignments());
+
     }
 
     public static IAlgorithm getAlgorithm(String name)

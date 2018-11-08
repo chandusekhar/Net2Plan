@@ -52,7 +52,7 @@ import java.util.stream.Collectors;
  * @net2plan.keywords WDM
  * @author Pablo Pavon-Marino
  */ 
-public class Report_wdm_routingSpectrumAndModulationAssignments implements IReport
+public class Report_WDM_routingSpectrumAndModulationAssignments implements IReport
 {
 	/* Input parameters */
 	private NetPlan netPlan;

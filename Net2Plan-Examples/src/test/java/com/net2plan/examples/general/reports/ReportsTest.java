@@ -106,7 +106,7 @@ public class ReportsTest
 	@Test
 	public void testReportWdmRoutingSpectrumAndModulationAssignments()
 	{
-		final IReport report = new Report_wdm_routingSpectrumAndModulationAssignments();
+		final IReport report = new Report_WDM_routingSpectrumAndModulationAssignments();
 		Map<String,List<String>> testingParameters = new HashMap<> ();
 		List<Map<String,String>> testsParam = InputParameter.getCartesianProductOfParameters (testingParameters);
 		if (testsParam.isEmpty()) testsParam = Arrays.asList(InputParameter.getDefaultParameters(report.getParameters()));
