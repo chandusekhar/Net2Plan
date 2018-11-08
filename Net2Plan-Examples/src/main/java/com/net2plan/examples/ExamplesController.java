@@ -5,6 +5,7 @@ import com.net2plan.examples.general.offline.Offline_ipOverWdm_routingSpectrumAn
 import com.net2plan.examples.general.offline.nfv.Offline_nfvPlacementILP_v1;
 import com.net2plan.examples.ocnbook.offline.*;
 import com.net2plan.interfaces.networkDesign.IAlgorithm;
+import com.net2plan.interfaces.networkDesign.IReport;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -14,6 +15,7 @@ public class ExamplesController
     private ExamplesController(){}
 
     private static Map<String, IAlgorithm> name2AlgorithmMap;
+    private static Map<String, IReport> name2ReportMap;
 
     static
     {
@@ -50,10 +52,18 @@ public class ExamplesController
         name2AlgorithmMap.put("TCFA General Multilayer", new Offline_tcfa_generalMultilayer());
         name2AlgorithmMap.put("TCFA WDM Physical Desing GRASP And ILP", new Offline_tcfa_wdmPhysicalDesign_graspAndILP());
         name2AlgorithmMap.put("TCFA XDE Formulations Minimum Link Cost", new Offline_tcfa_xdeFormulationsMinLinkCost());
+
+
+        name2ReportMap = new LinkedHashMap<>();
     }
 
     public static IAlgorithm getAlgorithm(String name)
     {
         return name2AlgorithmMap.get(name);
+    }
+
+    public static IReport getReport(String name)
+    {
+        return name2ReportMap.get(name);
     }
 }

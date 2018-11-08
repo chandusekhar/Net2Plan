@@ -13,12 +13,12 @@ public class RestResource
     private int hostNodeIndex;
     private double capacity, processingTimeToTraversingTrafficInMs;
     private RestMap<Integer, Double> capacityIOccupyInBaseResource;
-    private RestMap<String, String> attributes;
+    private RestMap<String, String> attributesMap;
 
     public RestResource(){}
 
     public RestResource(String type, String name, int hostNodeIndex, double capacity, String capacityMeasurementUnits,
-                        RestMap<Integer, Double> capacityIOccupyInBaseResource, double processingTimeToTraversingTrafficInMs, RestMap<String, String> attributes)
+                        RestMap<Integer, Double> capacityIOccupyInBaseResource, double processingTimeToTraversingTrafficInMs, RestMap<String, String> attributesMap)
     {
         this.type = type;
         this.name = name;
@@ -27,7 +27,7 @@ public class RestResource
         this.capacityMeasurementUnits = capacityMeasurementUnits;
         this.capacityIOccupyInBaseResource = capacityIOccupyInBaseResource;
         this.processingTimeToTraversingTrafficInMs = processingTimeToTraversingTrafficInMs;
-        this.attributes = attributes;
+        this.attributesMap = attributesMap;
     }
 
     public RestResource(Resource res)
@@ -46,7 +46,7 @@ public class RestResource
         }
         this.capacityIOccupyInBaseResource = new RestMap<>(capacityBaseResourceIndexes);
         this.processingTimeToTraversingTrafficInMs = res.getProcessingTimeToTraversingTrafficInMs();
-        this.attributes = new RestMap<>(res.getAttributes());
+        this.attributesMap = new RestMap<>(res.getAttributes());
     }
 
     public void setType(String type)
@@ -119,12 +119,12 @@ public class RestResource
         return processingTimeToTraversingTrafficInMs;
     }
 
-    public void setAttributes(RestMap<String, String> attributes)
+    public void setAttributesMap(RestMap<String, String> attributesMap)
     {
-        this.attributes = attributes;
+        this.attributesMap = attributesMap;
     }
 
-    public RestMap<String, String> getAttributes() {
-        return attributes;
+    public RestMap<String, String> getAttributesMap() {
+        return attributesMap;
     }
 }
