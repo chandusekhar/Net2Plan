@@ -1,11 +1,9 @@
-package com.net2plan.components;
+package com.net2plan.networkdesign.components;
 
-import com.net2plan.interfaces.networkDesign.Node;
 import com.net2plan.interfaces.networkDesign.Resource;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Optional;
 
 public class RestResource
 {

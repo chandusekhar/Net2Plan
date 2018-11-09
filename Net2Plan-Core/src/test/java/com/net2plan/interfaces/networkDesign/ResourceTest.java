@@ -366,7 +366,7 @@ public class ResourceTest
 			file = new File (TEST_FILE_DIRECTORY, TEST_FILE_NAME); //File.createTempFile("testN2p" , "n2p");
 		} catch (Exception e) { Assert.fail ("could not make the test: no temprary file creation possible"); }
 		assertTrue (file != null);
-		np.saveToFile(file);
+		np.saveToFile(file,  NetPlan.Net2PlanFormat.XML);
 		System.out.println(file);
 		NetPlan np2 = new NetPlan (file);
 		np.checkCachesConsistency();
@@ -389,7 +389,7 @@ public class ResourceTest
 		assertTrue (fileOut != null);
 		NetPlan np1 = new NetPlan (fileIn);
 		np1.checkCachesConsistency();
-		np1.saveToFile(fileOut);
+		np1.saveToFile(fileOut, NetPlan.Net2PlanFormat.XML);
 		try
 		{
 			BufferedReader reader = new BufferedReader(new FileReader(fileIn));

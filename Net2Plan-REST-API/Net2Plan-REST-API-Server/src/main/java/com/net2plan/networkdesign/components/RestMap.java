@@ -1,4 +1,4 @@
-package com.net2plan.components;
+package com.net2plan.networkdesign.components;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

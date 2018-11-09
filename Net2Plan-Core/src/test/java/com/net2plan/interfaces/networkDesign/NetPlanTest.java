@@ -258,7 +258,7 @@ public class NetPlanTest
         assertTrue (np2.isDeepCopy(np));
 
         File f = new File (TEST_FILE_DIRECTORY, TEST_FILE_NAME);
-        this.np.saveToFile(f);
+        this.np.saveToFile(f, NetPlan.Net2PlanFormat.XML);
         NetPlan readNp = new NetPlan (f);
         assertTrue(readNp.isDeepCopy(np));
         assertTrue(np.isDeepCopy(readNp));
@@ -266,7 +266,7 @@ public class NetPlanTest
         np.setPlotNodeLayoutCurrentlyActive(NetPlan.PLOTLAYTOUT_DEFAULTNODELAYOUTNAME);
         np.removePlotNodeLayout("New");
         f = new File (TEST_FILE_DIRECTORY, TEST_FILE_NAME);
-        this.np.saveToFile(f);
+        this.np.saveToFile(f, NetPlan.Net2PlanFormat.XML);
         readNp = new NetPlan (f);
         assertTrue(readNp.isDeepCopy(np));
         assertTrue(np.isDeepCopy(readNp));
@@ -349,14 +349,14 @@ public class NetPlanTest
 	public void testNetPlanFile()
 	{
 		File f = new File (TEST_FILE_DIRECTORY, TEST_FILE_NAME);
-		this.np.saveToFile(f);
+		this.np.saveToFile(f, NetPlan.Net2PlanFormat.XML);
 		NetPlan readNp = new NetPlan (f);
 		assertTrue(readNp.isDeepCopy(np));
 		assertTrue(np.isDeepCopy(readNp));
 
 		NetPlan np1 = new NetPlan (new File ("src/main/resources/data/networkTopologies/example7nodes_ipOverWDM.n2p"));
 		np1.checkCachesConsistency();
-		np1.saveToFile(f);
+		np1.saveToFile(f, NetPlan.Net2PlanFormat.XML);
 		NetPlan np2 = new NetPlan (new File(TEST_FILE_DIRECTORY, TEST_FILE_NAME));
 		np2.checkCachesConsistency();
 		assertTrue (np1.isDeepCopy(np2));

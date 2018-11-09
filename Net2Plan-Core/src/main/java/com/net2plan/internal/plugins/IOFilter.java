@@ -228,7 +228,7 @@ public abstract class IOFilter extends FileFilter implements Plugin
 	 * @param file Output file
 	 * @since 0.3.0
 	 */
-	public void saveDemandSetToFile(NetPlan netPlan, File file) { throw UNSUPPORTED_IO_OPERATION; }
+	public void saveDemandSetToFile(NetPlan netPlan, File file, NetPlan.Net2PlanFormat format) { throw UNSUPPORTED_IO_OPERATION; }
 
 	/**
 	 * Saves a network design to a given file.
@@ -237,5 +237,5 @@ public abstract class IOFilter extends FileFilter implements Plugin
 	 * @param file Output file
 	 * @since 0.3.0
 	 */
-	public void saveToFile(NetPlan netPlan, File file) { throw UNSUPPORTED_IO_OPERATION; }
+	public void saveToFile(NetPlan netPlan, File file, NetPlan.Net2PlanFormat format) { throw UNSUPPORTED_IO_OPERATION; }
 }

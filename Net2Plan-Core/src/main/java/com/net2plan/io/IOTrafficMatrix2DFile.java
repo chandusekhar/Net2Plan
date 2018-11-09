@@ -25,6 +25,7 @@ import com.net2plan.internal.plugins.IOFilter;
 import com.net2plan.utils.DoubleUtils;
 import com.net2plan.utils.Triple;
 import com.net2plan.utils.Constants.RoutingType;
+import sun.nio.ch.Net;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -76,7 +77,7 @@ public class IOTrafficMatrix2DFile extends IOFilter
 	}
 	
 	@Override
-	public void saveDemandSetToFile(NetPlan netPlan, File file)
+	public void saveDemandSetToFile(NetPlan netPlan, File file, NetPlan.Net2PlanFormat format)
 	{
 		DoubleMatrix2D trafficMatrix = netPlan.getMatrixNode2NodeOfferedTraffic();
 		int N = trafficMatrix.rows();

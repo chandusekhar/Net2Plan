@@ -108,8 +108,9 @@ public class WNet extends WAbstractNetworkElement
 	
 	/** Saves this network in the given file
 	 * @param f see above
+	 * @param format output format (XML or JSON)
 	 */
-	public void saveToFile (File f) { getNetPlan().saveToFile(f); }
+	public void saveToFile (File f, NetPlan.Net2PlanFormat format) { getNetPlan().saveToFile(f, format); }
 
 	/** Creates an empty design with no nodes, links etc.
 	 * @return see above

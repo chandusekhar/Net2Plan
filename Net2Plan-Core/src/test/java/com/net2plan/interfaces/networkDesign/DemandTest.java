@@ -113,7 +113,7 @@ public class DemandTest
 		assertEquals(scd123.getMaximumAcceptableE2EWorstCaseLatencyInMs(), 1, 0);
 		File f = new File(TEST_FILE_DIRECTORY, TEST_FILE_NAME);
 		try {
-			this.np.saveToFile(f);
+			this.np.saveToFile(f, NetPlan.Net2PlanFormat.XML);
 			NetPlan readNp = new NetPlan(f);
 			assertEquals(readNp.getDemandFromId(scd123.getId()).getMaximumAcceptableE2EWorstCaseLatencyInMs(), 1, 0);
 			scd123.setMaximumAcceptableE2EWorstCaseLatencyInMs(-1);
@@ -147,7 +147,7 @@ public class DemandTest
 		
 		File f = new File (TEST_FILE_DIRECTORY, TEST_FILE_NAME);
 		try{
-			this.np.saveToFile(f);
+			this.np.saveToFile(f, NetPlan.Net2PlanFormat.XML);
 			NetPlan readNp = new NetPlan (f);
 			assertTrue(readNp.isDeepCopy(np));
 			assertTrue(np.isDeepCopy(readNp));

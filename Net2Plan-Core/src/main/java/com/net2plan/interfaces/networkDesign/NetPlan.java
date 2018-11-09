@@ -37,6 +37,8 @@ import javax.xml.stream.FactoryConfigurationError;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.XMLEvent;
 
+import com.shc.easyjson.JSON;
+import com.shc.easyjson.JSONArray;
 import com.shc.easyjson.JSONObject;
 import com.shc.easyjson.JSONValue;
 import org.apache.commons.lang3.mutable.MutableLong;
@@ -70,7 +72,6 @@ import cern.colt.matrix.tdouble.DoubleFactory1D;
 import cern.colt.matrix.tdouble.DoubleFactory2D;
 import cern.colt.matrix.tdouble.DoubleMatrix1D;
 import cern.colt.matrix.tdouble.DoubleMatrix2D;
-import org.json.XML;
 
 /**
  * <p>Class defining a complete multi-layer network structure. Layers may
@@ -135,7 +136,7 @@ public class NetPlan extends NetworkElement
     final static String UNMODIFIABLE_EXCEPTION_STRING = "Unmodifiable NetState object - can't be changed";
 //    final static String KEY_STRING_BIDIRECTIONALCOUPLE = "bidirectionalCouple";
 
-    private enum Net2PlanFormat
+    public enum Net2PlanFormat
     {
         XML, JSON
     };
@@ -2618,7 +2619,7 @@ public class NetPlan extends NetworkElement
      * <p>Returns the set of unicast demands that are coupled.</p>
      *
      * @param optionalLayerParameter Network layer (optional)
-     * @return {@code SortedSet} of unicast demands that have blocked traffic for the given layer (or the defaukt layer if no input was provided)
+     * @return {@code SortedSet} of unicast demands that have blocked traffic for the given layer (or the default layer if no input was provided)
      */
     public SortedSet<Demand> getDemandsCoupled(NetworkLayer... optionalLayerParameter)
     {
@@ -6022,18 +6023,10 @@ public class NetPlan extends NetworkElement
      * is not in the file name, it will be added automatically.</p>
      *
      * @param file Output file
-     * @param outputFormat optional output format (default value: xml)
+     * @param outputFormat output format (XML or JSON)
      */
-    public void saveToFile(File file, Net2PlanFormat... outputFormat)
+    public void saveToFile(File file, Net2PlanFormat outputFormat)
     {
-        Net2PlanFormat format;
-        if(outputFormat.length == 0)
-            format = Net2PlanFormat.XML;
-        else if(outputFormat.length == 1)
-            format = outputFormat[0];
-        else
-            throw new RuntimeException();
-
         String filePath = file.getPath();
         if (!filePath.toLowerCase(Locale.getDefault()).endsWith(".n2p")) file = new File(filePath + ".n2p");
 
@@ -6041,7 +6034,7 @@ public class NetPlan extends NetworkElement
         try
         {
             fos = new FileOutputStream(file);
-            saveToOutputStream(fos, format);
+            saveToOutputStream(fos, outputFormat);
 
         } catch (FileNotFoundException e)
         {
@@ -6101,7 +6094,30 @@ public class NetPlan extends NetworkElement
      */
     public String saveToJSON()
     {
-        return "";
+        ByteArrayOutputStream baos = null;
+        String jsonResponse = "";
+        try
+        {
+            baos = new ByteArrayOutputStream();
+            saveToOutputStream(baos, Net2PlanFormat.JSON);
+            jsonResponse = baos.toString(StandardCharsets.UTF_8.name());
+        } catch (UnsupportedEncodingException e)
+        {
+            throw new Net2PlanException(e.getMessage());
+        } finally
+        {
+            try
+            {
+                if (baos != null)
+                {
+                    baos.close();
+                }
+            } catch (IOException e)
+            {
+                e.printStackTrace();
+            }
+        }
+        return jsonResponse;
     }
 
     /**
@@ -6133,456 +6149,6 @@ public class NetPlan extends NetworkElement
                     int counter = 0;
                     for (String planningDomain : this.cache_planningDomain2nodes.keySet())
                         writer.writeAttribute("planningDomain_" + (counter++), planningDomain);
-
-
-//            for (String planningDomain : this.cache_planningDomain2nodes.keySet())
-//            {
-//                XMLUtils.indent(writer, 2);
-//                writer.writeEmptyElement("planningDomain");
-//                writer.writeAttribute("name", "");
-//                writer.writeAttribute("value", planningDomain);
-//            }
-
-                    //SortedSet<Long> nodeIds_thisNetPlan = new TreeSet<Long> (getNodeIds());
-                    for (Node node : nodes) {
-                        XMLUtils.indent(writer, 1);
-                        writer.writeStartElement("node");
-
-                        final Point2D position = node.getXYPositionMap();
-                        writer.writeAttribute("id", Long.toString(node.id));
-                        writer.writeAttribute("description", node.getDescription());
-                        writer.writeAttribute("name", node.getName());
-                        writer.writeAttribute("xCoord", Double.toString(position.getX()));
-                        writer.writeAttribute("yCoord", Double.toString(position.getY()));
-                        final List<String> mapLayoutPositionsStream = node.mapLayout2NodeXYPositionMap.entrySet().stream().
-                                map(e -> Arrays.asList(e.getKey(), "" + e.getValue().getX(), "" + e.getValue().getY())).
-                                flatMap(e -> e.stream()).
-                                collect(Collectors.toList());
-                        writer.writeAttribute("mapLayout2NodeXYPositionMap", StringUtils.createEscapedString_asStringList(mapLayoutPositionsStream));
-
-                        writer.writeAttribute("population", Double.toString(node.population));
-                        if (node.siteName != null) writer.writeAttribute("siteName", node.siteName);
-                        writer.writeAttribute("isUp", Boolean.toString(node.isUp));
-                        int pdCounter = 0;
-                        for (String pd : node.getPlanningDomains())
-                            writer.writeAttribute("planningDomain_" + (pdCounter++), pd);
-
-                        final SortedSet<NetworkLayer> layersWithIcons = layers.stream().filter(l -> node.getUrlNodeIcon(l) != null).collect(Collectors.toCollection(TreeSet::new));
-                        final List<Long> idsLayersWithIcons = layersWithIcons.stream().map(l -> l.getId()).collect(Collectors.toList());
-                        writer.writeAttribute("layersWithIconsDefined", CollectionUtils.join(idsLayersWithIcons, " "));
-                        for (NetworkLayer layer : layersWithIcons)
-                            if (node.getUrlNodeIcon(layer) != null) {
-                                writer.writeAttribute("nodeIconURLLayer_" + layer.getId(), node.getUrlNodeIcon(layer).toString());
-                                writer.writeAttribute("nodeIconRelativeSizeLayer_" + layer.getId(), "" + node.getNodeIconRelativeSize(layer));
-                            }
-                        for (String tag : node.tags) {
-                            XMLUtils.indent(writer, 2);
-                            writer.writeEmptyElement("tag");
-                            writer.writeAttribute("value", tag);
-                        }
-
-                        for (Entry<String, String> entry : node.attributes.entrySet()) {
-                            XMLUtils.indent(writer, 2);
-                            writer.writeEmptyElement("attribute");
-                            writer.writeAttribute("key", entry.getKey());
-                            writer.writeAttribute("value", entry.getValue());
-                        }
-
-                        XMLUtils.indent(writer, 1);
-                        writer.writeEndElement();
-                    }
-
-                    for (Resource res : resources) {
-                        XMLUtils.indent(writer, 1);
-                        writer.writeStartElement("resource");
-
-                        writer.writeAttribute("id", Long.toString(res.id));
-                        writer.writeAttribute("description", res.getDescription());
-                        writer.writeAttribute("name", res.getName());
-                        writer.writeAttribute("hostNodeId", Long.toString(res.iAttachedToANode() ? res.hostNode.get().id : -1));
-                        writer.writeAttribute("type", res.type);
-                        writer.writeAttribute("capacityMeasurementUnits", res.capacityMeasurementUnits);
-                        writer.writeAttribute("processingTimeToTraversingTrafficInMs", Double.toString(res.processingTimeToTraversingTrafficInMs));
-                        writer.writeAttribute("capacity", Double.toString(res.capacity));
-                        if (res.urlIcon != null) writer.writeAttribute("urlIcon", res.urlIcon.toString());
-
-                        List<Double> baseResourceAndOccupiedCapacitiesMap = new LinkedList<Double>();
-                        for (Entry<Resource, Double> br : res.capacityIOccupyInBaseResource.entrySet()) {
-                            baseResourceAndOccupiedCapacitiesMap.add((double) br.getKey().id);
-                            baseResourceAndOccupiedCapacitiesMap.add(br.getValue());
-                        }
-                        writer.writeAttribute("baseResourceAndOccupiedCapacitiesMap", CollectionUtils.join(baseResourceAndOccupiedCapacitiesMap, " "));
-
-                        for (String tag : res.tags) {
-                            XMLUtils.indent(writer, 2);
-                            writer.writeEmptyElement("tag");
-                            writer.writeAttribute("value", tag);
-                        }
-
-                        for (Entry<String, String> entry : res.attributes.entrySet()) {
-                            XMLUtils.indent(writer, 2);
-                            writer.writeEmptyElement("attribute");
-                            writer.writeAttribute("key", entry.getKey());
-                            writer.writeAttribute("value", entry.getValue());
-                        }
-
-                        XMLUtils.indent(writer, 1);
-                        writer.writeEndElement();
-                    }
-
-                    for (NetworkLayer layer : layers) {
-                        XMLUtils.indent(writer, 1);
-                        writer.writeStartElement("layer");
-
-                        writer.writeAttribute("id", Long.toString(layer.id));
-                        writer.writeAttribute("description", layer.getDescription());
-                        writer.writeAttribute("name", layer.getName());
-                        writer.writeAttribute("isDefaultLayer", Boolean.toString(defaultLayer == layer));
-                        writer.writeAttribute("linkCapacityUnitsName", layer.linkCapacityUnitsName);
-                        writer.writeAttribute("demandTrafficUnitsName", layer.demandTrafficUnitsName);
-                        if (layer.defaultNodeIconURL != null)
-                            writer.writeAttribute("defaultNodeIconURL", layer.defaultNodeIconURL.toString());
-
-                        for (Link link : layer.links) {
-                            XMLUtils.indent(writer, 2);
-                            writer.writeStartElement("link");
-
-                            writer.writeAttribute("id", Long.toString(link.id));
-                            writer.writeAttribute("description", link.getDescription());
-                            writer.writeAttribute("name", link.getName());
-                            writer.writeAttribute("originNodeId", Long.toString(link.originNode.id));
-                            writer.writeAttribute("destinationNodeId", Long.toString(link.destinationNode.id));
-                            writer.writeAttribute("capacity", Double.toString(link.capacity));
-                            writer.writeAttribute("lengthInKm", Double.toString(link.lengthInKm));
-                            writer.writeAttribute("bidirectionalPairId", Long.toString(link.bidirectionalPair == null ? -1 : link.bidirectionalPair.id));
-                            writer.writeAttribute("propagationSpeedInKmPerSecond", Double.toString(link.propagationSpeedInKmPerSecond));
-                            writer.writeAttribute("isUp", Boolean.toString(link.isUp));
-                            writer.writeAttribute("monitoredOrForecastedTraffics", StringUtils.createEscapedString_asStringList(link.getMonitoredOrForecastedCarriedTraffic().toStringList()));
-
-                            for (String tag : link.tags) {
-                                XMLUtils.indent(writer, 3);
-                                writer.writeEmptyElement("tag");
-                                writer.writeAttribute("value", tag);
-                            }
-
-                            for (Entry<String, String> entry : link.attributes.entrySet()) {
-                                XMLUtils.indent(writer, 3);
-                                writer.writeEmptyElement("attribute");
-                                writer.writeAttribute("key", entry.getKey());
-                                writer.writeAttribute("value", entry.getValue());
-                            }
-
-                            XMLUtils.indent(writer, 2);
-                            writer.writeEndElement();
-                        }
-
-                        for (Demand demand : layer.demands) {
-                            XMLUtils.indent(writer, 2);
-                            writer.writeStartElement("demand");
-
-                            writer.writeAttribute("id", Long.toString(demand.id));
-                            writer.writeAttribute("description", demand.getDescription());
-                            writer.writeAttribute("name", demand.getName());
-                            writer.writeAttribute("ingressNodeId", Long.toString(demand.ingressNode.id));
-                            writer.writeAttribute("egressNodeId", Long.toString(demand.egressNode.id));
-                            writer.writeAttribute("offeredTraffic", Double.toString(demand.offeredTraffic));
-                            writer.writeAttribute("intendedRecoveryType", demand.recoveryType.toString());
-                            writer.writeAttribute("routingType", demand.routingType.name());
-                            writer.writeAttribute("bidirectionalPairId", Long.toString(demand.bidirectionalPair == null ? -1 : demand.bidirectionalPair.id));
-                            writer.writeAttribute("maximumAcceptableE2EWorstCaseLatencyInMs", Double.toString(demand.maximumAcceptableE2EWorstCaseLatencyInMs));
-                            writer.writeAttribute("offeredTrafficGrowthFactorPerPeriodZeroIsNoGrowth", Double.toString(demand.offeredTrafficGrowthFactorPerPeriodZeroIsNoGrowth));
-                            writer.writeAttribute("monitoredOrForecastedTraffics", StringUtils.createEscapedString_asStringList(demand.getMonitoredOrForecastedOfferedTraffic().toStringList()));
-                            writer.writeAttribute("qosType", demand.qosType);
-
-                            for (String type : demand.mandatorySequenceOfTraversedResourceTypes) {
-                                XMLUtils.indent(writer, 2);
-                                writer.writeEmptyElement("serviceChainResourceTypeOfSequence");
-                                writer.writeAttribute("type", type);
-                            }
-
-                            for (String tag : demand.tags) {
-                                XMLUtils.indent(writer, 3);
-                                writer.writeEmptyElement("tag");
-                                writer.writeAttribute("value", tag);
-                            }
-
-                            for (Entry<String, String> entry : demand.attributes.entrySet()) {
-                                XMLUtils.indent(writer, 3);
-                                writer.writeEmptyElement("attribute");
-                                writer.writeAttribute("key", entry.getKey());
-                                writer.writeAttribute("value", entry.getValue());
-                            }
-
-                            XMLUtils.indent(writer, 2);
-                            writer.writeEndElement();
-                        }
-
-                        for (MulticastDemand demand : layer.multicastDemands) {
-                            XMLUtils.indent(writer, 2);
-                            writer.writeStartElement("multicastDemand");
-                            writer.writeAttribute("id", Long.toString(demand.id));
-                            writer.writeAttribute("description", demand.getDescription());
-                            writer.writeAttribute("name", demand.getName());
-                            writer.writeAttribute("ingressNodeId", Long.toString(demand.ingressNode.id));
-                            List<Long> egressNodeIds = new LinkedList<Long>();
-                            for (Node n : demand.egressNodes) egressNodeIds.add(n.id);
-                            writer.writeAttribute("egressNodeIds", CollectionUtils.join(egressNodeIds, " "));
-                            writer.writeAttribute("offeredTraffic", Double.toString(demand.offeredTraffic));
-                            writer.writeAttribute("maximumAcceptableE2EWorstCaseLatencyInMs", Double.toString(demand.maximumAcceptableE2EWorstCaseLatencyInMs));
-                            writer.writeAttribute("offeredTrafficGrowthFactorPerPeriodZeroIsNoGrowth", Double.toString(demand.offeredTrafficGrowthFactorPerPeriodZeroIsNoGrowth));
-                            writer.writeAttribute("qosType", demand.qosType);
-                            writer.writeAttribute("monitoredOrForecastedTraffics", StringUtils.createEscapedString_asStringList(demand.getMonitoredOrForecastedOfferedTraffic().toStringList()));
-
-                            for (String tag : demand.tags) {
-                                XMLUtils.indent(writer, 3);
-                                writer.writeEmptyElement("tag");
-                                writer.writeAttribute("value", tag);
-                            }
-
-                            for (Entry<String, String> entry : demand.attributes.entrySet()) {
-                                XMLUtils.indent(writer, 3);
-                                writer.writeEmptyElement("attribute");
-                                writer.writeAttribute("key", entry.getKey());
-                                writer.writeAttribute("value", entry.getValue());
-                            }
-
-                            XMLUtils.indent(writer, 2);
-                            writer.writeEndElement();
-                        }
-
-                        for (MulticastTree tree : layer.multicastTrees) {
-                            XMLUtils.indent(writer, 3);
-                            writer.writeStartElement("multicastTree");
-
-                            writer.writeAttribute("id", Long.toString(tree.id));
-                            writer.writeAttribute("description", tree.getDescription());
-                            writer.writeAttribute("name", tree.getName());
-                            writer.writeAttribute("demandId", Long.toString(tree.demand.id));
-                            writer.writeAttribute("carriedTrafficIfNotFailing", Double.toString(tree.carriedTrafficIfNotFailing));
-                            writer.writeAttribute("occupiedLinkCapacityIfNotFailing", Double.toString(tree.occupiedLinkCapacityIfNotFailing));
-
-                            List<Long> linkIds = new LinkedList<Long>();
-                            for (Link e : tree.linkSet) linkIds.add(e.id);
-                            writer.writeAttribute("currentSetLinks", CollectionUtils.join(linkIds, " "));
-                            /* If the original link set was removed, it is replaced by the current link set */
-                            boolean initialLinkSetNotRemoved = true;
-                            for (Link e : tree.initialSetLinksWhenWasCreated)
-                                if (e.netPlan == null) {
-                                    initialLinkSetNotRemoved = false;
-                                    break;
-                                }
-                            linkIds = new LinkedList<Long>();
-                            for (Link e : initialLinkSetNotRemoved ? tree.initialSetLinksWhenWasCreated : tree.linkSet)
-                                linkIds.add(e.id);
-                            writer.writeAttribute("initialSetLinks", CollectionUtils.join(linkIds, " "));
-
-                            for (String tag : tree.tags) {
-                                XMLUtils.indent(writer, 3);
-                                writer.writeEmptyElement("tag");
-                                writer.writeAttribute("value", tag);
-                            }
-
-                            for (Entry<String, String> entry : tree.attributes.entrySet()) {
-                                XMLUtils.indent(writer, 3);
-                                writer.writeEmptyElement("attribute");
-                                writer.writeAttribute("key", entry.getKey());
-                                writer.writeAttribute("value", entry.getValue());
-                            }
-
-                            XMLUtils.indent(writer, 3);
-                            writer.writeEndElement();
-                        }
-
-
-//                if (layer.routingType == RoutingType.SOURCE_ROUTING)
-                        /* source routing information */
-                        {
-                            XMLUtils.indent(writer, 2);
-                            writer.writeStartElement("sourceRouting");
-
-                            for (Route route : layer.routes) {
-                                XMLUtils.indent(writer, 3);
-                                writer.writeStartElement("route");
-
-                                writer.writeAttribute("id", Long.toString(route.id));
-                                writer.writeAttribute("description", route.getDescription());
-                                writer.writeAttribute("name", route.getName());
-                                writer.writeAttribute("demandId", Long.toString(route.demand.id));
-
-                                writer.writeAttribute("currentCarriedTrafficIfNotFailing", Double.toString(route.currentCarriedTrafficIfNotFailing));
-                                writer.writeAttribute("currentLinksAndResourcesOccupationIfNotFailing", CollectionUtils.join(route.currentLinksAndResourcesOccupationIfNotFailing, " "));
-                                writer.writeAttribute("currentPath", CollectionUtils.join(NetPlan.getIds(route.currentPath), " "));
-                                writer.writeAttribute("bidirectionalPairId", Long.toString(route.bidirectionalPair == null ? -1 : route.bidirectionalPair.id));
-
-                                writer.writeAttribute("initialStateCarriedTrafficIfNotFailing", Double.toString(route.initialStateCarriedTrafficIfNotFailing));
-                                writer.writeAttribute("initialStateOccupationIfNotFailing", CollectionUtils.join(route.initialStateOccupationIfNotFailing, " "));
-                                writer.writeAttribute("initialStatePath", CollectionUtils.join(NetPlan.getIds(route.initialStatePath), " "));
-
-                                writer.writeAttribute("backupRoutes", CollectionUtils.join(NetPlan.getIds(route.backupRoutes), " "));
-
-                                for (String tag : route.tags) {
-                                    XMLUtils.indent(writer, 4);
-                                    writer.writeEmptyElement("tag");
-                                    writer.writeAttribute("value", tag);
-                                }
-
-                                for (Entry<String, String> entry : route.attributes.entrySet()) {
-                                    XMLUtils.indent(writer, 4);
-                                    writer.writeEmptyElement("attribute");
-                                    writer.writeAttribute("key", entry.getKey());
-                                    writer.writeAttribute("value", entry.getValue());
-                                }
-
-                                XMLUtils.indent(writer, 3);
-                                writer.writeEndElement();
-                            }
-
-                            XMLUtils.indent(writer, 2);
-                            writer.writeEndElement();
-                        }
-                        /* hop-by-hop information */
-                        {
-                            XMLUtils.indent(writer, 2);
-                            writer.writeStartElement("hopByHopRouting");
-                            for (Demand d : layer.demands)
-                                for (Entry<Link, Double> fr : d.cacheHbH_frs.entrySet()) {
-                                    final int indexDemand = d.index;
-                                    final int indexLink = fr.getKey().index;
-                                    final double splittingRatio = fr.getValue();
-                                    XMLUtils.indent(writer, 3);
-                                    writer.writeEmptyElement("forwardingRule");
-                                    writer.writeAttribute("demandId", Long.toString(layer.demands.get(indexDemand).id));
-                                    writer.writeAttribute("linkId", Long.toString(layer.links.get(indexLink).id));
-                                    writer.writeAttribute("splittingRatio", Double.toString(splittingRatio));
-                                }
-                            XMLUtils.indent(writer, 2);
-                            writer.writeEndElement();
-                        }
-
-                        for (String tag : layer.tags) {
-                            XMLUtils.indent(writer, 2);
-                            writer.writeEmptyElement("tag");
-                            writer.writeAttribute("value", tag);
-                        }
-
-                        for (Entry<String, String> entry : layer.attributes.entrySet()) {
-                            XMLUtils.indent(writer, 2);
-                            writer.writeEmptyElement("attribute");
-                            writer.writeAttribute("key", entry.getKey());
-                            writer.writeAttribute("value", entry.getValue());
-                        }
-
-                        XMLUtils.indent(writer, 1);
-                        writer.writeEndElement();
-                    }
-
-                    for (SharedRiskGroup srg : srgs) {
-                        XMLUtils.indent(writer, 1);
-                        writer.writeStartElement("srg");
-
-                        writer.writeAttribute("id", Long.toString(srg.id));
-                        writer.writeAttribute("description", srg.getDescription());
-                        writer.writeAttribute("name", srg.getName());
-                        writer.writeAttribute("meanTimeToFailInHours", Double.toString(srg.meanTimeToFailInHours));
-                        writer.writeAttribute("meanTimeToRepairInHours", Double.toString(srg.meanTimeToRepairInHours));
-                        writer.writeAttribute("isDynamic", Boolean.toString(srg.isDynamicSrg()));
-                        if (srg.isDynamicSrg()) {
-                            writer.writeAttribute("dynamicSrgClassName", srg.getDynamicSrgImplementation().getClass().getName());
-                            writer.writeAttribute("dynamicSrgConfigString", srg.getDynamicSrgImplementation().getInitializationString());
-                        } else {
-                            writer.writeAttribute("nodes", CollectionUtils.join(NetPlan.getIds(srg.getNodes()), " "));
-                            writer.writeAttribute("links", CollectionUtils.join(NetPlan.getIds(srg.getLinksAllLayers()), " "));
-                        }
-
-
-                        for (String tag : srg.tags) {
-                            XMLUtils.indent(writer, 2);
-                            writer.writeEmptyElement("tag");
-                            writer.writeAttribute("value", tag);
-                        }
-
-                        for (Entry<String, String> entry : srg.attributes.entrySet()) {
-                            XMLUtils.indent(writer, 2);
-                            writer.writeEmptyElement("attribute");
-                            writer.writeAttribute("key", entry.getKey());
-                            writer.writeAttribute("value", entry.getValue());
-                        }
-
-                        XMLUtils.indent(writer, 1);
-                        writer.writeEndElement();
-                    }
-
-                    for (DemandLinkMapping d_e : interLayerCoupling.edgeSet()) {
-                        for (Entry<Demand, Link> coupling : d_e.demandLinkMapping.entrySet()) {
-                            XMLUtils.indent(writer, 1);
-                            writer.writeEmptyElement("layerCouplingDemand");
-                            writer.writeAttribute("lowerLayerDemandId", "" + coupling.getKey().id);
-                            writer.writeAttribute("upperLayerLinkId", "" + coupling.getValue().id);
-                        }
-                        for (Entry<MulticastDemand, SortedSet<Link>> coupling : d_e.multicastDemandLinkMapping.entrySet()) {
-                            XMLUtils.indent(writer, 1);
-                            writer.writeEmptyElement("layerCouplingMulticastDemand");
-                            List<Long> linkIds = new LinkedList<Long>();
-                            for (Link e : coupling.getValue()) linkIds.add(e.id);
-                            writer.writeAttribute("lowerLayerDemandId", "" + coupling.getKey().id);
-                            writer.writeAttribute("upperLayerLinkIds", CollectionUtils.join(linkIds, " "));
-                        }
-                    }
-
-                    for (NetworkLayer layer : this.layers) {
-                        for (Demand coupling : getDemandsCoupled(layer)) {
-                            if (coupling.isCoupledInSameLayer()) {
-                                XMLUtils.indent(writer, 1);
-                                writer.writeEmptyElement("sameLayerCouplingDemand");
-                                writer.writeAttribute("layerDemandId", "" + coupling.id);
-                                writer.writeAttribute("layerLinkId", "" + coupling.coupledUpperOrSameLayerLink.id);
-                            }
-                        }
-                    }
-
-
-                    for (String tag : this.tags) {
-                        XMLUtils.indent(writer, 1);
-                        writer.writeEmptyElement("tag");
-                        writer.writeAttribute("value", tag);
-                    }
-
-                    for (Entry<String, String> entry : this.attributes.entrySet()) {
-                        XMLUtils.indent(writer, 1);
-                        writer.writeEmptyElement("attribute");
-                        writer.writeAttribute("key", entry.getKey());
-                        writer.writeAttribute("value", entry.getValue());
-                    }
-
-                    XMLUtils.indent(writer, 0);
-                    writer.writeEndElement();
-                    writer.writeEndDocument();
-                    writer.flush();
-                } catch (XMLStreamException e) {
-                    throw new RuntimeException(e);
-                } finally {
-                    try {
-                        assert writer != null;
-                        writer.close();
-                    } catch (XMLStreamException e) {
-                        e.printStackTrace();
-                    }
-                }
-                break;
-
-            case JSON:
-                try {
-                    JSONObject networkJSON = new JSONObject();
-                    networkJSON.put("description",new JSONValue(getDescription()));
-                    networkJSON.put("name",new JSONValue(getName()));
-                    networkJSON.put("currentPlotNodeLayout", new JSONValue(this.currentPlotNodeLayout));
-                    networkJSON.put("cache_definedPlotNodeLayouts", new JSONValue(StringUtils.createEscapedString_asStringList(this.cache_definedPlotNodeLayouts)));
-                    networkJSON.put("version", new JSONValue(Version.getFileFormatVersion()));
-                    networkJSON.put("nextElementId", new JSONValue(nextElementId.toString()));
-
-                    int counter = 0;
-                    for (String planningDomain : this.cache_planningDomain2nodes.keySet())
-                        networkJSON.put("planningDomain_" + (counter++), new JSONValue(planningDomain));
 
 
                     for (Node node : nodes)
@@ -6617,13 +6183,15 @@ public class NetPlan extends NetworkElement
                                 writer.writeAttribute("nodeIconURLLayer_" + layer.getId(), node.getUrlNodeIcon(layer).toString());
                                 writer.writeAttribute("nodeIconRelativeSizeLayer_" + layer.getId(), "" + node.getNodeIconRelativeSize(layer));
                             }
-                        for (String tag : node.tags) {
+                        for (String tag : node.tags)
+                        {
                             XMLUtils.indent(writer, 2);
                             writer.writeEmptyElement("tag");
                             writer.writeAttribute("value", tag);
                         }
 
-                        for (Entry<String, String> entry : node.attributes.entrySet()) {
+                        for (Entry<String, String> entry : node.attributes.entrySet())
+                        {
                             XMLUtils.indent(writer, 2);
                             writer.writeEmptyElement("attribute");
                             writer.writeAttribute("key", entry.getKey());
@@ -6650,19 +6218,22 @@ public class NetPlan extends NetworkElement
                         if (res.urlIcon != null) writer.writeAttribute("urlIcon", res.urlIcon.toString());
 
                         List<Double> baseResourceAndOccupiedCapacitiesMap = new LinkedList<Double>();
-                        for (Entry<Resource, Double> br : res.capacityIOccupyInBaseResource.entrySet()) {
+                        for (Entry<Resource, Double> br : res.capacityIOccupyInBaseResource.entrySet())
+                        {
                             baseResourceAndOccupiedCapacitiesMap.add((double) br.getKey().id);
                             baseResourceAndOccupiedCapacitiesMap.add(br.getValue());
                         }
                         writer.writeAttribute("baseResourceAndOccupiedCapacitiesMap", CollectionUtils.join(baseResourceAndOccupiedCapacitiesMap, " "));
 
-                        for (String tag : res.tags) {
+                        for (String tag : res.tags)
+                        {
                             XMLUtils.indent(writer, 2);
                             writer.writeEmptyElement("tag");
                             writer.writeAttribute("value", tag);
                         }
 
-                        for (Entry<String, String> entry : res.attributes.entrySet()) {
+                        for (Entry<String, String> entry : res.attributes.entrySet())
+                        {
                             XMLUtils.indent(writer, 2);
                             writer.writeEmptyElement("attribute");
                             writer.writeAttribute("key", entry.getKey());
@@ -6673,7 +6244,8 @@ public class NetPlan extends NetworkElement
                         writer.writeEndElement();
                     }
 
-                    for (NetworkLayer layer : layers) {
+                    for (NetworkLayer layer : layers)
+                    {
                         XMLUtils.indent(writer, 1);
                         writer.writeStartElement("layer");
 
@@ -6686,7 +6258,8 @@ public class NetPlan extends NetworkElement
                         if (layer.defaultNodeIconURL != null)
                             writer.writeAttribute("defaultNodeIconURL", layer.defaultNodeIconURL.toString());
 
-                        for (Link link : layer.links) {
+                        for (Link link : layer.links)
+                        {
                             XMLUtils.indent(writer, 2);
                             writer.writeStartElement("link");
 
@@ -6702,13 +6275,15 @@ public class NetPlan extends NetworkElement
                             writer.writeAttribute("isUp", Boolean.toString(link.isUp));
                             writer.writeAttribute("monitoredOrForecastedTraffics", StringUtils.createEscapedString_asStringList(link.getMonitoredOrForecastedCarriedTraffic().toStringList()));
 
-                            for (String tag : link.tags) {
+                            for (String tag : link.tags)
+                            {
                                 XMLUtils.indent(writer, 3);
                                 writer.writeEmptyElement("tag");
                                 writer.writeAttribute("value", tag);
                             }
 
-                            for (Entry<String, String> entry : link.attributes.entrySet()) {
+                            for (Entry<String, String> entry : link.attributes.entrySet())
+                            {
                                 XMLUtils.indent(writer, 3);
                                 writer.writeEmptyElement("attribute");
                                 writer.writeAttribute("key", entry.getKey());
@@ -6719,7 +6294,8 @@ public class NetPlan extends NetworkElement
                             writer.writeEndElement();
                         }
 
-                        for (Demand demand : layer.demands) {
+                        for (Demand demand : layer.demands)
+                        {
                             XMLUtils.indent(writer, 2);
                             writer.writeStartElement("demand");
 
@@ -6737,19 +6313,22 @@ public class NetPlan extends NetworkElement
                             writer.writeAttribute("monitoredOrForecastedTraffics", StringUtils.createEscapedString_asStringList(demand.getMonitoredOrForecastedOfferedTraffic().toStringList()));
                             writer.writeAttribute("qosType", demand.qosType);
 
-                            for (String type : demand.mandatorySequenceOfTraversedResourceTypes) {
+                            for (String type : demand.mandatorySequenceOfTraversedResourceTypes)
+                            {
                                 XMLUtils.indent(writer, 2);
                                 writer.writeEmptyElement("serviceChainResourceTypeOfSequence");
                                 writer.writeAttribute("type", type);
                             }
 
-                            for (String tag : demand.tags) {
+                            for (String tag : demand.tags)
+                            {
                                 XMLUtils.indent(writer, 3);
                                 writer.writeEmptyElement("tag");
                                 writer.writeAttribute("value", tag);
                             }
 
-                            for (Entry<String, String> entry : demand.attributes.entrySet()) {
+                            for (Entry<String, String> entry : demand.attributes.entrySet())
+                            {
                                 XMLUtils.indent(writer, 3);
                                 writer.writeEmptyElement("attribute");
                                 writer.writeAttribute("key", entry.getKey());
@@ -6760,7 +6339,8 @@ public class NetPlan extends NetworkElement
                             writer.writeEndElement();
                         }
 
-                        for (MulticastDemand demand : layer.multicastDemands) {
+                        for (MulticastDemand demand : layer.multicastDemands)
+                        {
                             XMLUtils.indent(writer, 2);
                             writer.writeStartElement("multicastDemand");
                             writer.writeAttribute("id", Long.toString(demand.id));
@@ -6776,13 +6356,15 @@ public class NetPlan extends NetworkElement
                             writer.writeAttribute("qosType", demand.qosType);
                             writer.writeAttribute("monitoredOrForecastedTraffics", StringUtils.createEscapedString_asStringList(demand.getMonitoredOrForecastedOfferedTraffic().toStringList()));
 
-                            for (String tag : demand.tags) {
+                            for (String tag : demand.tags)
+                            {
                                 XMLUtils.indent(writer, 3);
                                 writer.writeEmptyElement("tag");
                                 writer.writeAttribute("value", tag);
                             }
 
-                            for (Entry<String, String> entry : demand.attributes.entrySet()) {
+                            for (Entry<String, String> entry : demand.attributes.entrySet())
+                            {
                                 XMLUtils.indent(writer, 3);
                                 writer.writeEmptyElement("attribute");
                                 writer.writeAttribute("key", entry.getKey());
@@ -6793,7 +6375,8 @@ public class NetPlan extends NetworkElement
                             writer.writeEndElement();
                         }
 
-                        for (MulticastTree tree : layer.multicastTrees) {
+                        for (MulticastTree tree : layer.multicastTrees)
+                        {
                             XMLUtils.indent(writer, 3);
                             writer.writeStartElement("multicastTree");
 
@@ -6819,13 +6402,15 @@ public class NetPlan extends NetworkElement
                                 linkIds.add(e.id);
                             writer.writeAttribute("initialSetLinks", CollectionUtils.join(linkIds, " "));
 
-                            for (String tag : tree.tags) {
+                            for (String tag : tree.tags)
+                            {
                                 XMLUtils.indent(writer, 3);
                                 writer.writeEmptyElement("tag");
                                 writer.writeAttribute("value", tag);
                             }
 
-                            for (Entry<String, String> entry : tree.attributes.entrySet()) {
+                            for (Entry<String, String> entry : tree.attributes.entrySet())
+                            {
                                 XMLUtils.indent(writer, 3);
                                 writer.writeEmptyElement("attribute");
                                 writer.writeAttribute("key", entry.getKey());
@@ -6843,7 +6428,8 @@ public class NetPlan extends NetworkElement
                             XMLUtils.indent(writer, 2);
                             writer.writeStartElement("sourceRouting");
 
-                            for (Route route : layer.routes) {
+                            for (Route route : layer.routes)
+                            {
                                 XMLUtils.indent(writer, 3);
                                 writer.writeStartElement("route");
 
@@ -6863,13 +6449,15 @@ public class NetPlan extends NetworkElement
 
                                 writer.writeAttribute("backupRoutes", CollectionUtils.join(NetPlan.getIds(route.backupRoutes), " "));
 
-                                for (String tag : route.tags) {
+                                for (String tag : route.tags)
+                                {
                                     XMLUtils.indent(writer, 4);
                                     writer.writeEmptyElement("tag");
                                     writer.writeAttribute("value", tag);
                                 }
 
-                                for (Entry<String, String> entry : route.attributes.entrySet()) {
+                                for (Entry<String, String> entry : route.attributes.entrySet())
+                                {
                                     XMLUtils.indent(writer, 4);
                                     writer.writeEmptyElement("attribute");
                                     writer.writeAttribute("key", entry.getKey());
@@ -6888,7 +6476,8 @@ public class NetPlan extends NetworkElement
                             XMLUtils.indent(writer, 2);
                             writer.writeStartElement("hopByHopRouting");
                             for (Demand d : layer.demands)
-                                for (Entry<Link, Double> fr : d.cacheHbH_frs.entrySet()) {
+                                for (Entry<Link, Double> fr : d.cacheHbH_frs.entrySet())
+                                {
                                     final int indexDemand = d.index;
                                     final int indexLink = fr.getKey().index;
                                     final double splittingRatio = fr.getValue();
@@ -6902,13 +6491,15 @@ public class NetPlan extends NetworkElement
                             writer.writeEndElement();
                         }
 
-                        for (String tag : layer.tags) {
+                        for (String tag : layer.tags)
+                        {
                             XMLUtils.indent(writer, 2);
                             writer.writeEmptyElement("tag");
                             writer.writeAttribute("value", tag);
                         }
 
-                        for (Entry<String, String> entry : layer.attributes.entrySet()) {
+                        for (Entry<String, String> entry : layer.attributes.entrySet())
+                        {
                             XMLUtils.indent(writer, 2);
                             writer.writeEmptyElement("attribute");
                             writer.writeAttribute("key", entry.getKey());
@@ -6919,7 +6510,8 @@ public class NetPlan extends NetworkElement
                         writer.writeEndElement();
                     }
 
-                    for (SharedRiskGroup srg : srgs) {
+                    for (SharedRiskGroup srg : srgs)
+                    {
                         XMLUtils.indent(writer, 1);
                         writer.writeStartElement("srg");
 
@@ -6929,7 +6521,8 @@ public class NetPlan extends NetworkElement
                         writer.writeAttribute("meanTimeToFailInHours", Double.toString(srg.meanTimeToFailInHours));
                         writer.writeAttribute("meanTimeToRepairInHours", Double.toString(srg.meanTimeToRepairInHours));
                         writer.writeAttribute("isDynamic", Boolean.toString(srg.isDynamicSrg()));
-                        if (srg.isDynamicSrg()) {
+                        if (srg.isDynamicSrg())
+                        {
                             writer.writeAttribute("dynamicSrgClassName", srg.getDynamicSrgImplementation().getClass().getName());
                             writer.writeAttribute("dynamicSrgConfigString", srg.getDynamicSrgImplementation().getInitializationString());
                         } else {
@@ -6938,13 +6531,15 @@ public class NetPlan extends NetworkElement
                         }
 
 
-                        for (String tag : srg.tags) {
+                        for (String tag : srg.tags)
+                        {
                             XMLUtils.indent(writer, 2);
                             writer.writeEmptyElement("tag");
                             writer.writeAttribute("value", tag);
                         }
 
-                        for (Entry<String, String> entry : srg.attributes.entrySet()) {
+                        for (Entry<String, String> entry : srg.attributes.entrySet())
+                        {
                             XMLUtils.indent(writer, 2);
                             writer.writeEmptyElement("attribute");
                             writer.writeAttribute("key", entry.getKey());
@@ -6955,14 +6550,17 @@ public class NetPlan extends NetworkElement
                         writer.writeEndElement();
                     }
 
-                    for (DemandLinkMapping d_e : interLayerCoupling.edgeSet()) {
-                        for (Entry<Demand, Link> coupling : d_e.demandLinkMapping.entrySet()) {
+                    for (DemandLinkMapping d_e : interLayerCoupling.edgeSet())
+                    {
+                        for (Entry<Demand, Link> coupling : d_e.demandLinkMapping.entrySet())
+                        {
                             XMLUtils.indent(writer, 1);
                             writer.writeEmptyElement("layerCouplingDemand");
                             writer.writeAttribute("lowerLayerDemandId", "" + coupling.getKey().id);
                             writer.writeAttribute("upperLayerLinkId", "" + coupling.getValue().id);
                         }
-                        for (Entry<MulticastDemand, SortedSet<Link>> coupling : d_e.multicastDemandLinkMapping.entrySet()) {
+                        for (Entry<MulticastDemand, SortedSet<Link>> coupling : d_e.multicastDemandLinkMapping.entrySet())
+                        {
                             XMLUtils.indent(writer, 1);
                             writer.writeEmptyElement("layerCouplingMulticastDemand");
                             List<Long> linkIds = new LinkedList<Long>();
@@ -6972,9 +6570,12 @@ public class NetPlan extends NetworkElement
                         }
                     }
 
-                    for (NetworkLayer layer : this.layers) {
-                        for (Demand coupling : getDemandsCoupled(layer)) {
-                            if (coupling.isCoupledInSameLayer()) {
+                    for (NetworkLayer layer : this.layers)
+                    {
+                        for (Demand coupling : getDemandsCoupled(layer))
+                        {
+                            if (coupling.isCoupledInSameLayer())
+                            {
                                 XMLUtils.indent(writer, 1);
                                 writer.writeEmptyElement("sameLayerCouplingDemand");
                                 writer.writeAttribute("layerDemandId", "" + coupling.id);
@@ -6984,13 +6585,15 @@ public class NetPlan extends NetworkElement
                     }
 
 
-                    for (String tag : this.tags) {
+                    for (String tag : this.tags)
+                    {
                         XMLUtils.indent(writer, 1);
                         writer.writeEmptyElement("tag");
                         writer.writeAttribute("value", tag);
                     }
 
-                    for (Entry<String, String> entry : this.attributes.entrySet()) {
+                    for (Entry<String, String> entry : this.attributes.entrySet())
+                    {
                         XMLUtils.indent(writer, 1);
                         writer.writeEmptyElement("attribute");
                         writer.writeAttribute("key", entry.getKey());
@@ -7001,12 +6604,546 @@ public class NetPlan extends NetworkElement
                     writer.writeEndElement();
                     writer.writeEndDocument();
                     writer.flush();
+                } catch (XMLStreamException e) {
+                    throw new RuntimeException(e);
+                } finally {
+                    try {
+                        assert writer != null;
+                        writer.close();
+                    } catch (XMLStreamException e) {
+                        e.printStackTrace();
+                    }
+                }
                 break;
 
-            default:
-                throw new RuntimeException();
+            case JSON:
+                    JSONObject networkJSON = new JSONObject();
+                    networkJSON.put("description", new JSONValue(getDescription()));
+                    networkJSON.put("name", new JSONValue(getName()));
+                    networkJSON.put("currentPlotNodeLayout", new JSONValue(this.currentPlotNodeLayout));
+                    networkJSON.put("cache_definedPlotNodeLayouts", new JSONValue(StringUtils.createEscapedString_asStringList(this.cache_definedPlotNodeLayouts)));
+                    networkJSON.put("version", new JSONValue(Version.getFileFormatVersion()));
+                    networkJSON.put("nextElementId", new JSONValue(nextElementId.toString()));
 
-        }
+                    int counter = 0;
+                    for (String planningDomain : this.cache_planningDomain2nodes.keySet())
+                        networkJSON.put("planningDomain_" + (counter++), new JSONValue(planningDomain));
+
+                    JSONArray nodesJSON = new JSONArray();
+                    for (Node node : nodes)
+                    {
+                        JSONObject nodeJSON = new JSONObject();
+
+                        final Point2D position = node.getXYPositionMap();
+                        nodeJSON.put("id", new JSONValue(Long.toString(node.id)));
+                        nodeJSON.put("description", new JSONValue(node.getDescription()));
+                        nodeJSON.put("name", new JSONValue(node.getName()));
+                        nodeJSON.put("xCoord", new JSONValue(Double.toString(position.getX())));
+                        nodeJSON.put("yCoord", new JSONValue(Double.toString(position.getY())));
+                        final List<String> mapLayoutPositionsStream = node.mapLayout2NodeXYPositionMap.entrySet().stream().
+                                map(e -> Arrays.asList(e.getKey(), "" + e.getValue().getX(), "" + e.getValue().getY())).
+                                flatMap(e -> e.stream()).
+                                collect(Collectors.toList());
+                        nodeJSON.put("mapLayout2NodeXYPositionMap", new JSONValue(StringUtils.createEscapedString_asStringList(mapLayoutPositionsStream)));
+                        nodeJSON.put("population", new JSONValue(Double.toString(node.population)));
+                        if (node.siteName != null)
+                            nodeJSON.put("siteName", new JSONValue(node.siteName));
+                        nodeJSON.put("isUp", new JSONValue(Boolean.toString(node.isUp)));
+
+                        JSONArray pdJSON = new JSONArray();
+                        for (String pd : node.getPlanningDomains())
+                            pdJSON.add(new JSONValue(pd));
+                        nodeJSON.put("planningDomains", new JSONValue(pdJSON));
+
+                        final SortedSet<NetworkLayer> layersWithIcons = layers.stream().filter(l -> node.getUrlNodeIcon(l) != null).collect(Collectors.toCollection(TreeSet::new));
+                        final List<Long> idsLayersWithIcons = layersWithIcons.stream().map(l -> l.getId()).collect(Collectors.toList());
+                        nodeJSON.put("layersWithIconsDefined", new JSONValue(CollectionUtils.join(idsLayersWithIcons, " ")));
+                        JSONArray layersIconsJSON = new JSONArray();
+                        for (NetworkLayer layer : layersWithIcons)
+                        {
+                            if (node.getUrlNodeIcon(layer) != null)
+                            {
+                                JSONObject this_layerJSON = new JSONObject();
+                                this_layerJSON.put("nodeIconURLLayer_" + layer.getId(), new JSONValue(node.getUrlNodeIcon(layer).toString()));
+                                this_layerJSON.put("nodeIconRelativeSizeLayer_" + layer.getId(), new JSONValue("" + node.getNodeIconRelativeSize(layer)));
+                                layersIconsJSON.add(new JSONValue(this_layerJSON));
+                            }
+                        }
+
+                        nodeJSON.put("nodeIcons", new JSONValue(layersIconsJSON));
+
+                        JSONArray tagsJSON = new JSONArray();
+                        for (String tag : node.tags)
+                        {
+                            tagsJSON.add(new JSONValue(tag));
+                        }
+                        nodeJSON.put("tags", new JSONValue(tagsJSON));
+
+                        JSONArray attributesJSON = new JSONArray();
+                        for (Entry<String, String> entry : node.attributes.entrySet())
+                        {
+                            JSONObject this_attributeJSON = new JSONObject();
+                            this_attributeJSON.put("key", new JSONValue(entry.getKey()));
+                            this_attributeJSON.put("value", new JSONValue(entry.getValue()));
+                            attributesJSON.add(new JSONValue(this_attributeJSON));
+                        }
+
+                        nodeJSON.put("attributes", new JSONValue(attributesJSON));
+                        nodesJSON.add(new JSONValue(nodeJSON));
+                    }
+
+                    networkJSON.put("nodes", new JSONValue(nodesJSON));
+
+                    JSONArray resourcesJSON = new JSONArray();
+                    for (Resource res : resources)
+                    {
+                        JSONObject resourceJSON = new JSONObject();
+
+                        resourceJSON.put("id", new JSONValue(Long.toString(res.id)));
+                        resourceJSON.put("description", new JSONValue(res.getDescription()));
+                        resourceJSON.put("name", new JSONValue(res.getName()));
+                        resourceJSON.put("hostNodeId", new JSONValue(Long.toString(res.iAttachedToANode() ? res.hostNode.get().id : -1)));
+                        resourceJSON.put("type", new JSONValue(res.type));
+                        resourceJSON.put("capacityMeasurementUnits", new JSONValue(res.capacityMeasurementUnits));
+                        resourceJSON.put("processingTimeToTraversingTrafficInMs", new JSONValue(Double.toString(res.processingTimeToTraversingTrafficInMs)));
+                        resourceJSON.put("capacity", new JSONValue(Double.toString(res.capacity)));
+                        if (res.urlIcon != null)
+                            resourceJSON.put("urlIcon", new JSONValue(res.urlIcon.toString()));
+
+                        JSONArray baseResourcesJSON = new JSONArray();
+                        for (Entry<Resource, Double> br : res.capacityIOccupyInBaseResource.entrySet())
+                        {
+                            JSONObject this_baseResourceJSON = new JSONObject();
+                            this_baseResourceJSON.put("id", new JSONValue((double) br.getKey().id));
+                            this_baseResourceJSON.put("capacity", new JSONValue(br.getValue()));
+                            baseResourcesJSON.add(new JSONValue(this_baseResourceJSON));
+                        }
+                        resourceJSON.put("baseResourceAndOccupiedCapacitiesMap", new JSONValue(baseResourcesJSON));
+
+                        JSONArray tagsJSON = new JSONArray();
+                        for (String tag : res.tags) {
+                            tagsJSON.add(new JSONValue(tag));
+                        }
+                        resourceJSON.put("tags", new JSONValue(tagsJSON));
+
+                        JSONArray attributesJSON = new JSONArray();
+                        for (Entry<String, String> entry : res.attributes.entrySet())
+                        {
+                            JSONObject this_attributeJSON = new JSONObject();
+                            this_attributeJSON.put("key", new JSONValue(entry.getKey()));
+                            this_attributeJSON.put("value", new JSONValue(entry.getValue()));
+                            attributesJSON.add(new JSONValue(this_attributeJSON));
+                        }
+
+                        resourceJSON.put("attributes", new JSONValue(attributesJSON));
+                        resourcesJSON.add(new JSONValue(resourceJSON));
+                    }
+
+                    networkJSON.put("resources", new JSONValue(resourcesJSON));
+
+                    JSONArray layersJSON = new JSONArray();
+                    for (NetworkLayer layer : layers)
+                    {
+                        JSONObject layerJSON = new JSONObject();
+
+                        layerJSON.put("id", new JSONValue(Long.toString(layer.id)));
+                        layerJSON.put("description", new JSONValue(layer.getDescription()));
+                        layerJSON.put("name", new JSONValue(layer.getName()));
+                        layerJSON.put("isDefaultLayer", new JSONValue(Boolean.toString(defaultLayer == layer)));
+                        layerJSON.put("linkCapacityUnitsName", new JSONValue(layer.linkCapacityUnitsName));
+                        layerJSON.put("demandTrafficUnitsName", new JSONValue(layer.demandTrafficUnitsName));
+                        if (layer.defaultNodeIconURL != null)
+                            layerJSON.put("defaultNodeIconURL", new JSONValue(layer.defaultNodeIconURL.toString()));
+
+                        JSONArray linksJSON = new JSONArray();
+                        for (Link link : layer.links)
+                        {
+                            JSONObject linkJSON = new JSONObject();
+
+                            linkJSON.put("id", new JSONValue(Long.toString(link.id)));
+                            linkJSON.put("description", new JSONValue(link.getDescription()));
+                            linkJSON.put("name", new JSONValue(link.getName()));
+                            linkJSON.put("originNodeId", new JSONValue(Long.toString(link.originNode.id)));
+                            linkJSON.put("destinationNodeId", new JSONValue(Long.toString(link.destinationNode.id)));
+                            linkJSON.put("capacity", new JSONValue(Double.toString(link.capacity)));
+                            linkJSON.put("lengthInKm", new JSONValue(Double.toString(link.lengthInKm)));
+                            linkJSON.put("bidirectionalPairId", new JSONValue(Long.toString(link.bidirectionalPair == null ? -1 : link.bidirectionalPair.id)));
+                            linkJSON.put("propagationSpeedInKmPerSecond", new JSONValue(Double.toString(link.propagationSpeedInKmPerSecond)));
+                            linkJSON.put("isUp", new JSONValue(Boolean.toString(link.isUp)));
+                            linkJSON.put("monitoredOrForecastedTraffics", new JSONValue(StringUtils.createEscapedString_asStringList(link.getMonitoredOrForecastedCarriedTraffic().toStringList())));
+
+                            JSONArray tagsJSON = new JSONArray();
+                            for (String tag : link.tags)
+                            {
+                                tagsJSON.add(new JSONValue(tag));
+                            }
+                            linkJSON.put("tags", new JSONValue(tagsJSON));
+
+                            JSONArray attributesJSON = new JSONArray();
+                            for (Entry<String, String> entry : link.attributes.entrySet())
+                            {
+                                JSONObject this_attributeJSON =  new JSONObject();
+                                this_attributeJSON.put("key", new JSONValue(entry.getKey()));
+                                this_attributeJSON.put("value", new JSONValue(entry.getValue()));
+                                attributesJSON.add(new JSONValue(this_attributeJSON));
+                            }
+
+                            linkJSON.put("attributes", new JSONValue(attributesJSON));
+                            linksJSON.add(new JSONValue(linkJSON));
+                        }
+
+                        layerJSON.put("links", new JSONValue(linksJSON));
+
+                        JSONArray demandsJSON = new JSONArray();
+                        for (Demand demand : layer.demands)
+                        {
+                            JSONObject demandJSON = new JSONObject();
+
+                            demandJSON.put("id", new JSONValue(Long.toString(demand.id)));
+                            demandJSON.put("description", new JSONValue(demand.getDescription()));
+                            demandJSON.put("name", new JSONValue(demand.getName()));
+                            demandJSON.put("ingressNodeId", new JSONValue(Long.toString(demand.ingressNode.id)));
+                            demandJSON.put("egressNodeId", new JSONValue(Long.toString(demand.egressNode.id)));
+                            demandJSON.put("offeredTraffic", new JSONValue(Double.toString(demand.offeredTraffic)));
+                            demandJSON.put("intendedRecoveryType", new JSONValue(demand.recoveryType.toString()));
+                            demandJSON.put("routingType", new JSONValue(demand.routingType.name()));
+                            demandJSON.put("bidirectionalPairId", new JSONValue(Long.toString(demand.bidirectionalPair == null ? -1 : demand.bidirectionalPair.id)));
+                            demandJSON.put("maximumAcceptableE2EWorstCaseLatencyInMs", new JSONValue(Double.toString(demand.maximumAcceptableE2EWorstCaseLatencyInMs)));
+                            demandJSON.put("offeredTrafficGrowthFactorPerPeriodZeroIsNoGrowth", new JSONValue(Double.toString(demand.offeredTrafficGrowthFactorPerPeriodZeroIsNoGrowth)));
+                            demandJSON.put("monitoredOrForecastedTraffics", new JSONValue(StringUtils.createEscapedString_asStringList(demand.getMonitoredOrForecastedOfferedTraffic().toStringList())));
+                            demandJSON.put("qosType", new JSONValue(demand.qosType));
+
+                            JSONArray serviceChainResourceType_sequence = new JSONArray();
+                            for (String type : demand.mandatorySequenceOfTraversedResourceTypes)
+                            {
+                                serviceChainResourceType_sequence.add(new JSONValue(type));
+                            }
+
+                            demandJSON.put("serviceChainResourceTypeOfSequence", new JSONValue(serviceChainResourceType_sequence));
+
+                            JSONArray tagsJSON = new JSONArray();
+                            for (String tag : demand.tags)
+                            {
+                                tagsJSON.add(new JSONValue(tag));
+                            }
+
+                            demandJSON.put("tags", new JSONValue(tagsJSON));
+
+                            JSONArray attributesJSON = new JSONArray();
+                            for (Entry<String, String> entry : demand.attributes.entrySet())
+                            {
+                                JSONObject this_attributeJSON = new JSONObject();
+                                this_attributeJSON.put("key", new JSONValue(entry.getKey()));
+                                this_attributeJSON.put("value", new JSONValue(entry.getValue()));
+                                attributesJSON.add(new JSONValue(this_attributeJSON));
+                            }
+
+                            demandJSON.put("attributes", new JSONValue(attributesJSON));
+                            demandsJSON.add(new JSONValue(demandJSON));
+                        }
+
+                        layerJSON.put("demands", new JSONValue(demandsJSON));
+
+                        JSONArray multicastDemandsJSON = new JSONArray();
+                        for (MulticastDemand demand : layer.multicastDemands)
+                        {
+                            JSONObject multicastDemandJSON = new JSONObject();
+                            multicastDemandJSON.put("id", new JSONValue(Long.toString(demand.id)));
+                            multicastDemandJSON.put("description", new JSONValue(demand.getDescription()));
+                            multicastDemandJSON.put("name", new JSONValue(demand.getName()));
+                            multicastDemandJSON.put("ingressNodeId", new JSONValue(Long.toString(demand.ingressNode.id)));
+                            List<Long> egressNodeIds = new LinkedList<>();
+                            for (Node n : demand.egressNodes)
+                                egressNodeIds.add(n.id);
+                            multicastDemandJSON.put("egressNodeIds", new JSONValue(CollectionUtils.join(egressNodeIds, " ")));
+                            multicastDemandJSON.put("offeredTraffic", new JSONValue(Double.toString(demand.offeredTraffic)));
+                            multicastDemandJSON.put("maximumAcceptableE2EWorstCaseLatencyInMs", new JSONValue(Double.toString(demand.maximumAcceptableE2EWorstCaseLatencyInMs)));
+                            multicastDemandJSON.put("offeredTrafficGrowthFactorPerPeriodZeroIsNoGrowth", new JSONValue(Double.toString(demand.offeredTrafficGrowthFactorPerPeriodZeroIsNoGrowth)));
+                            multicastDemandJSON.put("qosType", new JSONValue(demand.qosType));
+                            multicastDemandJSON.put("monitoredOrForecastedTraffics", new JSONValue(StringUtils.createEscapedString_asStringList(demand.getMonitoredOrForecastedOfferedTraffic().toStringList())));
+
+                            JSONArray tagsJSON = new JSONArray();
+                            for (String tag : demand.tags)
+                            {
+                                tagsJSON.add(new JSONValue(tag));
+                            }
+                            multicastDemandJSON.put("tags", new JSONValue(tagsJSON));
+
+                            JSONArray attributesJSON = new JSONArray();
+                            for (Entry<String, String> entry : demand.attributes.entrySet())
+                            {
+                                JSONObject this_attributeJSON = new JSONObject();
+                                this_attributeJSON.put("key", new JSONValue(entry.getKey()));
+                                this_attributeJSON.put("value", new JSONValue(entry.getValue()));
+                                attributesJSON.add(new JSONValue(this_attributeJSON));
+                            }
+                            multicastDemandJSON.put("attributes",new JSONValue(attributesJSON));
+                            multicastDemandsJSON.add(new JSONValue(multicastDemandJSON));
+                        }
+
+                        layerJSON.put("multicastDemands", new JSONValue(multicastDemandsJSON));
+
+                        JSONArray multicastTreesJSON = new JSONArray();
+                        for (MulticastTree tree : layer.multicastTrees)
+                        {
+                            JSONObject multicastTreeJSON = new JSONObject();
+
+                            multicastTreeJSON.put("id", new JSONValue(Long.toString(tree.id)));
+                            multicastTreeJSON.put("description", new JSONValue(tree.getDescription()));
+                            multicastTreeJSON.put("name", new JSONValue(tree.getName()));
+                            multicastTreeJSON.put("demandId", new JSONValue(Long.toString(tree.demand.id)));
+                            multicastTreeJSON.put("carriedTrafficIfNotFailing", new JSONValue(Double.toString(tree.carriedTrafficIfNotFailing)));
+                            multicastTreeJSON.put("occupiedLinkCapacityIfNotFailing", new JSONValue(Double.toString(tree.occupiedLinkCapacityIfNotFailing)));
+
+                            List<Long> linkIds = new LinkedList<Long>();
+                            for (Link e : tree.linkSet)
+                                linkIds.add(e.id);
+                            multicastTreeJSON.put("currentSetLinks", new JSONValue(CollectionUtils.join(linkIds, " ")));
+                            /* If the original link set was removed, it is replaced by the current link set */
+                            boolean initialLinkSetNotRemoved = true;
+                            for (Link e : tree.initialSetLinksWhenWasCreated)
+                                if (e.netPlan == null)
+                                {
+                                    initialLinkSetNotRemoved = false;
+                                    break;
+                                }
+                            linkIds = new LinkedList<Long>();
+                            for (Link e : initialLinkSetNotRemoved ? tree.initialSetLinksWhenWasCreated : tree.linkSet)
+                                linkIds.add(e.id);
+                            multicastTreeJSON.put("initialSetLinks", new JSONValue(CollectionUtils.join(linkIds, " ")));
+
+                            JSONArray tagsJSON = new JSONArray();
+                            for (String tag : tree.tags)
+                            {
+                                tagsJSON.add(new JSONValue(tag));
+                            }
+                            multicastTreeJSON.put("tags", new JSONValue(tagsJSON));
+
+                            JSONArray attributesJSON = new JSONArray();
+                            for (Entry<String, String> entry : tree.attributes.entrySet())
+                            {
+                                JSONObject this_attributeJSON = new JSONObject();
+                                this_attributeJSON.put("key", new JSONValue(entry.getKey()));
+                                this_attributeJSON.put("value", new JSONValue(entry.getValue()));
+                                attributesJSON.add(new JSONValue(this_attributeJSON));
+                            }
+
+                            multicastTreeJSON.put("attributes", new JSONValue(attributesJSON));
+                            multicastTreesJSON.add(new JSONValue(multicastTreeJSON));
+                        }
+                        layerJSON.put("multicastTrees", new JSONValue(multicastTreesJSON));
+
+
+                        /* source routing information */
+                        {
+                            JSONObject sourceRoutingJSON = new JSONObject();
+                            JSONArray routesJSON = new JSONArray();
+
+                            for (Route route : layer.routes)
+                            {
+                                JSONObject routeJSON = new JSONObject();
+
+                                routeJSON.put("id", new JSONValue(Long.toString(route.id)));
+                                routeJSON.put("description", new JSONValue(route.getDescription()));
+                                routeJSON.put("name", new JSONValue(route.getName()));
+                                routeJSON.put("demandId", new JSONValue(Long.toString(route.demand.id)));
+
+                                routeJSON.put("currentCarriedTrafficIfNotFailing", new JSONValue(Double.toString(route.currentCarriedTrafficIfNotFailing)));
+                                routeJSON.put("currentLinksAndResourcesOccupationIfNotFailing", new JSONValue(CollectionUtils.join(route.currentLinksAndResourcesOccupationIfNotFailing, " ")));
+                                routeJSON.put("currentPath", new JSONValue(CollectionUtils.join(NetPlan.getIds(route.currentPath), " ")));
+                                routeJSON.put("bidirectionalPairId", new JSONValue(Long.toString(route.bidirectionalPair == null ? -1 : route.bidirectionalPair.id)));
+
+                                routeJSON.put("initialStateCarriedTrafficIfNotFailing", new JSONValue(Double.toString(route.initialStateCarriedTrafficIfNotFailing)));
+                                routeJSON.put("initialStateOccupationIfNotFailing", new JSONValue(CollectionUtils.join(route.initialStateOccupationIfNotFailing, " ")));
+                                routeJSON.put("initialStatePath", new JSONValue(CollectionUtils.join(NetPlan.getIds(route.initialStatePath), " ")));
+
+                                routeJSON.put("backupRoutes", new JSONValue(CollectionUtils.join(NetPlan.getIds(route.backupRoutes), " ")));
+
+                                JSONArray tagsJSON = new JSONArray();
+                                for (String tag : route.tags)
+                                {
+                                    tagsJSON.add(new JSONValue(tag));
+                                }
+                                routeJSON.put("tags",new JSONValue(tagsJSON));
+
+                                JSONArray attributesJSON = new JSONArray();
+                                for (Entry<String, String> entry : route.attributes.entrySet())
+                                {
+                                    JSONObject this_attributeJSON = new JSONObject();
+                                    this_attributeJSON.put("key", new JSONValue(entry.getKey()));
+                                    this_attributeJSON.put("value",new JSONValue(entry.getValue()));
+                                    attributesJSON.add(new JSONValue(this_attributeJSON));
+                                }
+                                routeJSON.put("attributes", new JSONValue(attributesJSON));
+                                routesJSON.add(new JSONValue(routeJSON));
+                            }
+
+                            sourceRoutingJSON.put("routes",new JSONValue(routesJSON));
+                            layerJSON.put("sourceRouting", new JSONValue(sourceRoutingJSON));
+                        }
+                        /* hop-by-hop information */
+                        {
+                            JSONObject hopByHopJSON = new JSONObject();
+                            JSONArray forwardingRulesJSON = new JSONArray();
+                            for (Demand d : layer.demands)
+                            {
+                                for (Entry<Link, Double> fr : d.cacheHbH_frs.entrySet())
+                                {
+                                    final int indexDemand = d.index;
+                                    final int indexLink = fr.getKey().index;
+                                    final double splittingRatio = fr.getValue();
+                                    JSONObject forwardingRuleJSON = new JSONObject();
+                                    forwardingRuleJSON.put("demandId", new JSONValue(Long.toString(layer.demands.get(indexDemand).id)));
+                                    forwardingRuleJSON.put("linkId", new JSONValue(Long.toString(layer.links.get(indexLink).id)));
+                                    forwardingRuleJSON.put("splittingRatio", new JSONValue(Double.toString(splittingRatio)));
+                                    forwardingRulesJSON.add(new JSONValue(forwardingRuleJSON));
+                                }
+                            }
+
+                            hopByHopJSON.put("forwardingRules", new JSONValue(forwardingRulesJSON));
+                            layerJSON.put("hopbyhopRouting", new JSONValue(hopByHopJSON));
+
+                        }
+
+                        JSONArray tagsJSON = new JSONArray();
+                        for (String tag : layer.tags)
+                        {
+                            tagsJSON.add(new JSONValue(tag));
+                        }
+                        layerJSON.put("tags",new JSONValue(tagsJSON));
+
+                        JSONArray attributesJSON = new JSONArray();
+                        for (Entry<String, String> entry : layer.attributes.entrySet())
+                        {
+                            JSONObject this_attributeJSON = new JSONObject();
+                            this_attributeJSON.put("key", new JSONValue(entry.getKey()));
+                            this_attributeJSON.put("value", new JSONValue(entry.getValue()));
+                            attributesJSON.add(new JSONValue(this_attributeJSON));
+                        }
+                        layerJSON.put("attributes", new JSONValue(attributesJSON));
+                        layersJSON.add(new JSONValue(layerJSON));
+                    }
+
+                    networkJSON.put("layers", new JSONValue(layersJSON));
+
+                    JSONArray srgsJSON = new JSONArray();
+                    for (SharedRiskGroup srg : srgs)
+                    {
+                        JSONObject srgJSON = new JSONObject();
+
+                        srgJSON.put("id", new JSONValue(Long.toString(srg.id)));
+                        srgJSON.put("description", new JSONValue(srg.getDescription()));
+                        srgJSON.put("name", new JSONValue(srg.getName()));
+                        srgJSON.put("meanTimeToFailInHours", new JSONValue(Double.toString(srg.meanTimeToFailInHours)));
+                        srgJSON.put("meanTimeToRepairInHours", new JSONValue(Double.toString(srg.meanTimeToRepairInHours)));
+                        srgJSON.put("isDynamic", new JSONValue(Boolean.toString(srg.isDynamicSrg())));
+                        if (srg.isDynamicSrg())
+                        {
+                            srgJSON.put("dynamicSrgClassName", new JSONValue(srg.getDynamicSrgImplementation().getClass().getName()));
+                            srgJSON.put("dynamicSrgConfigString", new JSONValue(srg.getDynamicSrgImplementation().getInitializationString()));
+                        } else {
+                            srgJSON.put("nodes", new JSONValue(CollectionUtils.join(NetPlan.getIds(srg.getNodes()), " ")));
+                            srgJSON.put("links", new JSONValue(CollectionUtils.join(NetPlan.getIds(srg.getLinksAllLayers()), " ")));
+                        }
+
+                        JSONArray tagsJSON = new JSONArray();
+                        for (String tag : srg.tags)
+                        {
+                            tagsJSON.add(new JSONValue(tag));
+                        }
+                        srgJSON.put("tags", new JSONValue(tagsJSON));
+
+                        JSONArray attributesJSON = new JSONArray();
+                        for (Entry<String, String> entry : srg.attributes.entrySet())
+                        {
+                            JSONObject this_attributeJSON = new JSONObject();
+                            this_attributeJSON.put("key", new JSONValue(entry.getKey()));
+                            this_attributeJSON.put("value", new JSONValue(entry.getValue()));
+                            attributesJSON.add(new JSONValue(this_attributeJSON));
+                        }
+                        srgJSON.put("attributes", new JSONValue(attributesJSON));
+                        srgsJSON.add(new JSONValue(srgJSON));
+                    }
+                    networkJSON.put("srgs", new JSONValue(srgsJSON));
+
+                    JSONArray demandLinkMappingsJSON = new JSONArray();
+                    JSONObject demandLinkMappingJSON = new JSONObject();
+
+                    for (DemandLinkMapping d_e : interLayerCoupling.edgeSet())
+                    {
+                        JSONArray layerCouplingDemandsJSON = new JSONArray();
+                        for (Entry<Demand, Link> coupling : d_e.demandLinkMapping.entrySet())
+                        {
+                            JSONObject layerCouplingDemandJSON = new JSONObject();
+                            layerCouplingDemandJSON.put("lowerLayerDemandId", new JSONValue("" + coupling.getKey().id));
+                            layerCouplingDemandJSON.put("upperLayerLinkId", new JSONValue("" + coupling.getValue().id));
+                            layerCouplingDemandsJSON.add(new JSONValue(layerCouplingDemandJSON));
+                        }
+                        demandLinkMappingJSON.put("layerCouplingDemand", new JSONValue(layerCouplingDemandsJSON));
+
+                        JSONArray layerCouplingMulticastDemandsJSON = new JSONArray();
+                        for (Entry<MulticastDemand, SortedSet<Link>> coupling : d_e.multicastDemandLinkMapping.entrySet())
+                        {
+                            JSONObject layerCouplingMulticastDemandJSON = new JSONObject();
+                            List<Long> linkIds = new LinkedList<Long>();
+                            for (Link e : coupling.getValue())
+                                linkIds.add(e.id);
+                            layerCouplingMulticastDemandJSON.put("lowerLayerDemandId", new JSONValue("" + coupling.getKey().id));
+                            layerCouplingMulticastDemandJSON.put("upperLayerLinkIds", new JSONValue(CollectionUtils.join(linkIds, " ")));
+                        }
+                        demandLinkMappingJSON.put("layerCouplingMulticastDemand", new JSONValue(layerCouplingMulticastDemandsJSON));
+                        demandLinkMappingsJSON.add(new JSONValue(demandLinkMappingJSON));
+                    }
+
+                    JSONArray layerDemandsCoupledJSON = new JSONArray();
+                    for (NetworkLayer layer : this.layers)
+                    {
+                        JSONArray layerDemandCoupledJSON = new JSONArray();
+                        for (Demand coupling : getDemandsCoupled(layer))
+                        {
+                            if (coupling.isCoupledInSameLayer())
+                            {
+                                JSONObject layerDemandJSON = new JSONObject();
+                                layerDemandJSON.put("layerDemandId", new JSONValue("" + coupling.id));
+                                layerDemandJSON.put("layerLinkId", new JSONValue("" + coupling.coupledUpperOrSameLayerLink.id));
+                                layerDemandCoupledJSON.add(new JSONValue(layerDemandJSON));
+                            }
+                        }
+                        layerDemandsCoupledJSON.add(new JSONValue(layerDemandCoupledJSON));
+
+                    }
+                    networkJSON.put("layersDemandsCoupled", new JSONValue(layerDemandsCoupledJSON));
+
+
+                    JSONArray tagsJSON = new JSONArray();
+                    for (String tag : this.tags)
+                    {
+                        tagsJSON.add(new JSONValue(tag));
+                    }
+                    networkJSON.put("tags", new JSONValue(tagsJSON));
+
+                    JSONArray attributesJSON = new JSONArray();
+                    for (Entry<String, String> entry : this.attributes.entrySet())
+                    {
+                        JSONObject this_attributeJSON = new JSONObject();
+                        this_attributeJSON.put("key", new JSONValue(entry.getKey()));
+                        this_attributeJSON.put("value", new JSONValue(entry.getValue()));
+                    }
+                    networkJSON.put("attributes", new JSONValue(attributesJSON));
+                try {
+                    outputStream.write(JSON.write(networkJSON).getBytes());
+                    outputStream.flush();
+                } catch (IOException e)
+                {
+                    e.printStackTrace();
+                }
+                break;
+
+                    default:
+                        throw new RuntimeException();
+
+                }
+
     }
 
     /**

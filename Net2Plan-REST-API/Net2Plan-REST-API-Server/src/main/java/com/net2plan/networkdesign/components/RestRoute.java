@@ -1,13 +1,11 @@
-package com.net2plan.components;
+package com.net2plan.networkdesign.components;
 
-import com.net2plan.interfaces.networkDesign.Demand;
 import com.net2plan.interfaces.networkDesign.Link;
 import com.net2plan.interfaces.networkDesign.Route;
 
 import javax.xml.bind.annotation.XmlRootElement;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 @XmlRootElement
 public class RestRoute

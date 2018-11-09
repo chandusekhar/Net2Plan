@@ -1,12 +1,8 @@
-package com.net2plan.components;
+package com.net2plan.networkdesign.components;
 
 import com.net2plan.interfaces.networkDesign.Demand;
-import com.net2plan.interfaces.networkDesign.NetworkLayer;
-import com.net2plan.interfaces.networkDesign.Node;
-import com.net2plan.utils.Constants;
 
 import javax.xml.bind.annotation.XmlRootElement;
-import java.util.Map;
 
 @XmlRootElement
 public class RestDemand

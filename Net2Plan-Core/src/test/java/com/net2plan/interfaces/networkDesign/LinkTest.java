@@ -137,7 +137,7 @@ public class LinkTest
 		
 		File f = new File (TEST_FILE_DIRECTORY, TEST_FILE_NAME);
 		try{
-			this.np.saveToFile(f);
+			this.np.saveToFile(f, NetPlan.Net2PlanFormat.XML);
 			NetPlan readNp = new NetPlan (f);
 			assertTrue(readNp.isDeepCopy(np));
 			assertTrue(np.isDeepCopy(readNp));

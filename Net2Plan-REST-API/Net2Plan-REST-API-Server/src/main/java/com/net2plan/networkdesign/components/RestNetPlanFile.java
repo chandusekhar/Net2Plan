@@ -1,4 +1,4 @@
-package com.net2plan.components;
+package com.net2plan.networkdesign.components;
 
 import javax.xml.bind.annotation.XmlRootElement;
 import java.io.File;

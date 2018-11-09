@@ -1,6 +1,6 @@
-package com.net2plan;
+package com.net2plan.networkdesign;
 
-import com.net2plan.components.*;
+import com.net2plan.networkdesign.components.*;
 import com.net2plan.examples.ExamplesController;
 import com.net2plan.interfaces.networkDesign.*;
 import com.net2plan.utils.Constants;
@@ -14,10 +14,10 @@ import javax.ws.rs.core.Response;
 import java.util.*;
 
 /**
- * Root resource (exposed at "design" path)
+ * Root resource (exposed at "networkdesign" path)
  */
-@Path("/design")
-public class Net2PlanAPI
+@Path("/networkdesign")
+public class NetworkDesignAPI
 {
     private NetPlan netPlan = RestUtils.netPlan;
 

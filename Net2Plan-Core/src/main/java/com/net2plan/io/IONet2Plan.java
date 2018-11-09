@@ -81,7 +81,7 @@ public class IONet2Plan extends IOFilter
 	}
 
 	@Override
-	public void saveDemandSetToFile(NetPlan netPlan, File file)
+	public void saveDemandSetToFile(NetPlan netPlan, File file, NetPlan.Net2PlanFormat format)
 	{
 		for (NetworkLayer layer : netPlan.getNetworkLayers ())
 			if (!layer.equals(netPlan.getNetworkLayerDefault()))
@@ -89,12 +89,12 @@ public class IONet2Plan extends IOFilter
 		netPlan.removeAllLinks();
 		netPlan.removeAllUnicastRoutingInformation();
 		netPlan.removeAllSRGs();
-		netPlan.saveToFile(file);
+		netPlan.saveToFile(file, format);
 	}
 
 	@Override
-	public void saveToFile(NetPlan netPlan, File file)
+	public void saveToFile(NetPlan netPlan, File file, NetPlan.Net2PlanFormat format)
 	{
-		netPlan.saveToFile(file);
+		netPlan.saveToFile(file, format);
 	}
 }
