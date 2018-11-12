@@ -6028,7 +6028,18 @@ public class NetPlan extends NetworkElement
     public void saveToFile(File file, Net2PlanFormat outputFormat)
     {
         String filePath = file.getPath();
-        if (!filePath.toLowerCase(Locale.getDefault()).endsWith(".n2p")) file = new File(filePath + ".n2p");
+        if (!filePath.toLowerCase(Locale.getDefault()).endsWith(".n2p"))
+        {
+            filePath = filePath + ".n2p";
+            file = new File(filePath);
+        }
+
+        if (outputFormat.equals(Net2PlanFormat.JSON))
+        {
+            filePath = filePath.replace(".n2p",",.json");
+            file = new File(filePath);
+        }
+
 
         FileOutputStream fos = null;
         try
