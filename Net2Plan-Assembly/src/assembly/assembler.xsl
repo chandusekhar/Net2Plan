@@ -110,7 +110,7 @@
             <outputFileNameMapping>Net2Plan.jar</outputFileNameMapping>
         </dependencySet>
         <!--REST API-->
-        <!--<dependencySet>
+        <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
             <useTransitiveDependencies>false</useTransitiveDependencies>
             <unpack>false</unpack>
