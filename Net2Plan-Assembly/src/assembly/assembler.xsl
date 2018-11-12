@@ -129,7 +129,7 @@
             </includes>
             <outputDirectory>rest</outputDirectory>
             <outputFileNameMapping>Net2Plan-REST-Client.jar</outputFileNameMapping>
-        </dependencySet> -->
+        </dependencySet>
         <!--External resources-->
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
