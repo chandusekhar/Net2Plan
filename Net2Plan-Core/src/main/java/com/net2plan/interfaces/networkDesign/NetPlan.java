@@ -289,7 +289,6 @@ public class NetPlan extends NetworkElement
                         } else
                         {
                             int version = xmlStreamReader.getAttributeAsInt(index);
-                            System.out.println("VERSION "+version);
                             switch (version)
                             {
                                 case 2:
