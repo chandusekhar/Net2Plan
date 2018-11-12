@@ -159,7 +159,7 @@ public class Offline_fa_xpMultihourObliviousRouting implements IAlgorithm
 			final DoubleMatrix1D x_p = xx_p.copy().assign (h_p , DoubleFunctions.mult);
 			thisNp.setVectorRouteCarriedTrafficAndOccupiedLinkCapacities(x_p , x_p);
 			thisNp.removeAllRoutesUnused(PRECISION_FACTOR); // routes with zero traffic (or close to zero, with PRECISION_FACTOR tolerance)
-			thisNp.saveToFile(new File (rootOfNameOfOutputFiles.getString() + "_res_tm" + netPlanFiles.size () + ".n2p"));
+			thisNp.saveToFile(new File (rootOfNameOfOutputFiles.getString() + "_res_tm" + netPlanFiles.size () + ".n2p"), NetPlan.Net2PlanFormat.XML);
 			if (t == 0) netPlan.assignFrom (thisNp);
 			if (!thisNp.getLinksOversubscribed().isEmpty()) throw new RuntimeException ("Bad");
 			if (thisNp.getVectorDemandBlockedTraffic().zSum() > PRECISION_FACTOR) throw new RuntimeException ("Bad: " + thisNp.getVectorDemandBlockedTraffic().zSum());

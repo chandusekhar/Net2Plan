@@ -157,7 +157,7 @@ public class CLINetworkDesign extends ICLIModule
 
         long init = System.nanoTime();
         String out = algorithm.executeAlgorithm(netPlan, algorithmParameters, net2planParameters);
-        netPlan.saveToFile(outputFile);
+        netPlan.saveToFile(outputFile, NetPlan.Net2PlanFormat.XML);
         long end = System.nanoTime();
 
         System.out.println(String.format("%n%nAlgorithm finished successfully in %f seconds%nOutput message: %s", (end - init) / 1e9, out));

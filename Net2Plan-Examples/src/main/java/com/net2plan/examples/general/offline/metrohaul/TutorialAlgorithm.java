@@ -29,7 +29,7 @@ public class TutorialAlgorithm implements IAlgorithm
 		TutorialAlgorithm tutorialAlgorithm = new TutorialAlgorithm();
 		tutorialAlgorithm.getParameters();
 		System.out.println(tutorialAlgorithm.executeAlgorithm(netPlan, parameters, null));
-		netPlan.saveToFile(new File("RESULT.n2p"));
+		netPlan.saveToFile(new File("RESULT.n2p"), NetPlan.Net2PlanFormat.XML);
 	}
 
 	@Override

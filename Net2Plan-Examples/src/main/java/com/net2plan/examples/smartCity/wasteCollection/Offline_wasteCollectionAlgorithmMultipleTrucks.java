@@ -104,7 +104,7 @@ public class Offline_wasteCollectionAlgorithmMultipleTrucks implements IAlgorith
 			summaryString.add(thisRun.getRoutes ().stream().map(r->r.getAttributeAsDouble(ATTNAME_TRUCKNUMCONTAINERSCOLLECTED, null) + "").collect(Collectors.joining(" ")));
 			summaryString.add(thisRun.getRoutes ().stream().map(r->r.getAttributeAsDouble(ATTNAME_TRUCKSUMCOLLECTEDWASTE_KG, null) + "").collect(Collectors.joining(" ")));
 			writeFile (new File (folder , "summaryResults_" + run  + ".txt") , summaryString);
-			thisRun.saveToFile(new File (folder , "n2pFile_" + run + ".n2p"));
+			thisRun.saveToFile(new File (folder , "n2pFile_" + run + ".n2p"), NetPlan.Net2PlanFormat.XML);
 			final double totalKm = netPlan.getRoutes().stream().mapToDouble(r->r.getLengthInKm()).sum();
 			final double totalWasteCollected = thisRun.getRoutes ().stream().mapToDouble(r->r.getAttributeAsDouble(ATTNAME_TRUCKSUMCOLLECTEDWASTE_KG, 0.0)).sum();
 			infoString = "Used trucks = " + thisRun.getNumberOfRoutes() + ", total km: " + totalKm + ", total waste collected: " + totalWasteCollected;

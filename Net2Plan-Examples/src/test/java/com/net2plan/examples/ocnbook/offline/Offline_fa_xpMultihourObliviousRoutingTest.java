@@ -51,8 +51,8 @@ public class Offline_fa_xpMultihourObliviousRoutingTest
 		npTm1.removeAllDemands(); 
 		for (Node n1 : npTm0.getNodes()) for (Node n2 : npTm0.getNodes()) if (n1 != n2) npTm0.addDemand(n1, n2, 5*rng.nextDouble() ,RoutingType.SOURCE_ROUTING ,  null);
 		for (Node n1 : npTm1.getNodes()) for (Node n2 : npTm1.getNodes()) if (n1 != n2) npTm1.addDemand(n1, n2, 5*rng.nextDouble() , RoutingType.SOURCE_ROUTING , null);
-		npTm0.saveToFile(new File (temporalDirectoryTests.getRoot().getAbsolutePath() + "/rootInput_tm0.n2p"));
-		npTm1.saveToFile(new File (temporalDirectoryTests.getRoot().getAbsolutePath() + "/rootInput_tm1.n2p"));
+		npTm0.saveToFile(new File (temporalDirectoryTests.getRoot().getAbsolutePath() + "/rootInput_tm0.n2p"), NetPlan.Net2PlanFormat.XML);
+		npTm1.saveToFile(new File (temporalDirectoryTests.getRoot().getAbsolutePath() + "/rootInput_tm1.n2p"), NetPlan.Net2PlanFormat.XML);
 	}
 
 	@After

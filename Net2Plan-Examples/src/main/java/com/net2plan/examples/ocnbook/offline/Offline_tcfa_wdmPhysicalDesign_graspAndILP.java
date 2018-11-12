@@ -297,7 +297,7 @@ public class Offline_tcfa_wdmPhysicalDesign_graspAndILP implements IAlgorithm
 		netPlan.setAttribute("stat_totalTimeCreateProgramsSecs", ""+stat_totalTimeCreateProgramsSecs);
 		netPlan.setAttribute("stat_totalTimeSolverSecs", ""+stat_totalTimeSolverSecs);
 
-		netPlan.saveToFile(new File (fileNameStem + ".n2p"));
+		netPlan.saveToFile(new File (fileNameStem + ".n2p"), NetPlan.Net2PlanFormat.XML);
 
 //		if (netPlan.getDemandTotalBlockedTraffic() > 1E-3) throw new RuntimeException ("Bad");
 //		if (netPlan.getLinksOversubscribed().size() > 0) throw new RuntimeException ("Bad");

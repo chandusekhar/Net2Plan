@@ -173,7 +173,7 @@ public class FileChooserNetworkDesign extends FileChooserConfirmOverwrite
     public void saveDemands(NetPlan netPlan) {
         IOFilter exporter = getCurrentIOFilter();
         File file = getSelectedFile();
-        exporter.saveDemandSetToFile(netPlan, file);
+        exporter.saveDemandSetToFile(netPlan, file, NetPlan.Net2PlanFormat.XML);
     }
 
     /**
@@ -202,9 +202,9 @@ public class FileChooserNetworkDesign extends FileChooserConfirmOverwrite
             NetPlan netPlan = it.next();
 
             if (extension.isEmpty())
-                exporter.saveDemandSetToFile(netPlan, new File(path + pathSeparator + fileName + "_tm" + i));
+                exporter.saveDemandSetToFile(netPlan, new File(path + pathSeparator + fileName + "_tm" + i), NetPlan.Net2PlanFormat.XML);
             else
-                exporter.saveDemandSetToFile(netPlan, new File(path + pathSeparator + fileName + "_tm" + i + "." + extension));
+                exporter.saveDemandSetToFile(netPlan, new File(path + pathSeparator + fileName + "_tm" + i + "." + extension), NetPlan.Net2PlanFormat.XML);
 
             i++;
         }
@@ -216,10 +216,11 @@ public class FileChooserNetworkDesign extends FileChooserConfirmOverwrite
      * @param netPlan Network design
      * @since 0.2.2
      */
-    public void saveNetPlan(NetPlan netPlan) {
+    public void saveNetPlan(NetPlan netPlan, NetPlan.Net2PlanFormat format)
+    {
         IOFilter exporter = getCurrentIOFilter();
         File file = getSelectedFile();
-        exporter.saveToFile(netPlan, file);
+        exporter.saveToFile(netPlan, file, format);
     }
 
     private int showDialog(Component parent, boolean isOpenDialog) throws HeadlessException {

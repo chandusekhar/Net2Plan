@@ -96,7 +96,7 @@ public class Report_perSRGFailureAnalysis implements IReport
 			netPlan.setAllLinksFailureState(true , layer);
 		if (!netPlan.getLinksDownAllLayers().isEmpty() || !netPlan.getNodesDown().isEmpty()) throw new RuntimeException ("Bad");
 		NetPlan npNoFailure = netPlan.copy ();
-		npNoFailure.saveToFile(new File (rootNameOfOutFiles.getString () + "_noFailure"));
+		npNoFailure.saveToFile(new File (rootNameOfOutFiles.getString () + "_noFailure"), NetPlan.Net2PlanFormat.XML);
 
 		/* Initialize the provisioning algorithm */
 		NetPlan npForProducingAllFailures = netPlan.copy ();
@@ -123,7 +123,7 @@ public class Report_perSRGFailureAnalysis implements IReport
 			algorithm.processEvent(npForProducingAllFailures, new SimEvent(0, SimEvent.DestinationModule.EVENT_PROCESSOR , -1 , failureInfo)); 
 		
 			/* Save a coy of the new state */
-			npForProducingAllFailures.saveToFile(new File (rootNameOfOutFiles.getString () + "_srgIndex_" + srgIndex));
+			npForProducingAllFailures.saveToFile(new File (rootNameOfOutFiles.getString () + "_srgIndex_" + srgIndex), NetPlan.Net2PlanFormat.XML);
 			npsFailureStates.add (npForProducingAllFailures.copy ());
 			
 			/* Go back to the no failure state */

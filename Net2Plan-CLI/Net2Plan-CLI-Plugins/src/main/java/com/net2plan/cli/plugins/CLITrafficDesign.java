@@ -416,7 +416,7 @@ public class CLITrafficDesign extends ICLIModule {
         File outputFile = (File) cli.getParsedOptionValue("output-file");
 
         if (outputDemandSets.size() == 1) {
-            outputDemandSets.get(0).saveToFile(outputFile);
+            outputDemandSets.get(0).saveToFile(outputFile, NetPlan.Net2PlanFormat.XML);
         } else {
             String templateFileName = outputFile.getAbsoluteFile().toString();
             if (templateFileName.endsWith(".n2p"))
@@ -424,7 +424,7 @@ public class CLITrafficDesign extends ICLIModule {
 
             ListIterator<NetPlan> netPlanIt = outputDemandSets.listIterator();
             while (netPlanIt.hasNext())
-                netPlanIt.next().saveToFile(new File(templateFileName + "_tm" + netPlanIt.nextIndex() + ".n2p"));
+                netPlanIt.next().saveToFile(new File(templateFileName + "_tm" + netPlanIt.nextIndex() + ".n2p"), NetPlan.Net2PlanFormat.XML);
         }
 
         long end = System.nanoTime();
