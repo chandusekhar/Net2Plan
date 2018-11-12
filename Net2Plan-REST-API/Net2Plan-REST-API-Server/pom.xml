@@ -43,7 +43,7 @@
             <artifactId>jersey-container-servlet-core</artifactId>
             <!-- use the following artifactId if you don't need servlet 2.x compatibility -->
             <!-- artifactId>jersey-container-servlet</artifactId -->
-            <version>2.9</version>
+            <version>2.11</version>
         </dependency>
         <dependency>
             <groupId>com.sun.jersey</groupId>
@@ -66,9 +66,9 @@
             <version>1.8</version>
         </dependency>
         <dependency>
-            <groupId>org.glassfish.jersey.core</groupId>
+            <groupId>com.sun.jersey</groupId>
             <artifactId>jersey-server</artifactId>
-            <version>2.9</version>
+            <version>1.8</version>
         </dependency>
     </dependencies>
     <properties>
