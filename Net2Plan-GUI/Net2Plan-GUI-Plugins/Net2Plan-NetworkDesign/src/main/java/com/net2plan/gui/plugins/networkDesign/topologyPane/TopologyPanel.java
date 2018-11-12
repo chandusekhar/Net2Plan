@@ -469,7 +469,7 @@ public class TopologyPanel extends JPanel
             NetPlan netPlan = callback.getDesign();
             if (netPlan.getNodes().isEmpty()) throw new Net2PlanException("Design is empty");
 
-            fc_netPlan.saveNetPlan(netPlan);
+            fc_netPlan.saveNetPlan(netPlan, NetPlan.Net2PlanFormat.XML);
             ErrorHandling.showInformationDialog("Design saved successfully", "Save design");
         } catch (Net2PlanException ex)
         {
