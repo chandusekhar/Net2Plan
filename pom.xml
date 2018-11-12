@@ -45,7 +45,7 @@
         <dependency>
             <groupId>com.goharsha</groupId>
             <artifactId>easyjson</artifactId>
-            <version>LATEST</version>
+            <version>0.3</version>
             <scope>compile</scope>
         </dependency>
         <dependency>

@@ -317,6 +317,11 @@ public class NetPlan extends NetworkElement
                                     netPlanReader = new ReaderNetPlanN2PVersion_6();
                                     break;
 
+                                case 7:
+                                    netPlanReader = new ReaderNetPlanVersion_7();
+                                    break;
+
+
                                 default:
                                     throw new Net2PlanException("Wrong version number");
                             }
