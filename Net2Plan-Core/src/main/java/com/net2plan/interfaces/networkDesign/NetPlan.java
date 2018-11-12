@@ -280,40 +280,41 @@ public class NetPlan extends NetworkElement
                         if (!elementName.equals("network"))
                             throw new RuntimeException("Root element must be 'network'");
 
-                        IReaderNetPlan netPlanFormat;
+                        IReaderNetPlan netPlanReader;
                         int index = xmlStreamReader.getAttributeIndex(null, "version");
                         if (index == -1)
                         {
 //                            System.out.println("Version 1");
-                            netPlanFormat = new ReaderNetPlanN2PVersion_1();
+                            netPlanReader = new ReaderNetPlanN2PVersion_1();
                         } else
                         {
                             int version = xmlStreamReader.getAttributeAsInt(index);
+                            System.out.println("VERSION "+version);
                             switch (version)
                             {
                                 case 2:
 //                                    System.out.println("Version 2");
-                                    netPlanFormat = new ReaderNetPlanN2PVersion_2();
+                                    netPlanReader = new ReaderNetPlanN2PVersion_2();
                                     break;
 
                                 case 3:
 //                                    System.out.println("Version 3");
-                                    netPlanFormat = new ReaderNetPlanN2PVersion_3();
+                                    netPlanReader = new ReaderNetPlanN2PVersion_3();
                                     break;
 
                                 case 4:
 //                                    System.out.println("Version 4");
-                                    netPlanFormat = new ReaderNetPlanN2PVersion_4();
+                                    netPlanReader = new ReaderNetPlanN2PVersion_4();
                                     break;
 
                                 case 5:
 //                                  System.out.println("Version 5");
-                                  netPlanFormat = new ReaderNetPlanN2PVersion_5();
+                                  netPlanReader = new ReaderNetPlanN2PVersion_5();
                                   break;
 
                                 case 6:
 //                                    System.out.println("Version 5");
-                                    netPlanFormat = new ReaderNetPlanN2PVersion_6();
+                                    netPlanReader = new ReaderNetPlanN2PVersion_6();
                                     break;
 
                                 default:
@@ -321,7 +322,7 @@ public class NetPlan extends NetworkElement
                             }
                         }
 
-                        netPlanFormat.create(this, xmlStreamReader);
+                        netPlanReader.create(this, xmlStreamReader);
                         if (ErrorHandling.isDebugEnabled()) this.checkCachesConsistency();
                         return;
 
