@@ -17,7 +17,7 @@ import java.awt.geom.Point2D;
 import java.net.URL;
 import java.util.*;
 
-public class ReaderNetPlanVersion_7 implements IReaderNetPlan_7andUpwards
+public class ReaderNetPlanN2PJSONVersion_7 implements IReaderNetPlan_JSON
 {
 
     private boolean hasAlreadyReadOneLayer;
@@ -27,7 +27,8 @@ public class ReaderNetPlanVersion_7 implements IReaderNetPlan_7andUpwards
     private SortedSet<Demand> newNpDemandsWithRoutingTypeNotDefined = new TreeSet<>();
 
     @Override
-    public void createFromJSON(NetPlan netPlan, JSONObject json) {
+    public void createFromJSON(NetPlan netPlan, JSONObject json)
+    {
 
     }
 
@@ -41,8 +42,6 @@ public class ReaderNetPlanVersion_7 implements IReaderNetPlan_7andUpwards
         this.nodeAndLayerToIconURLMap = new TreeMap<> ();
 
         parseNetwork(netPlan);
-
-//		System.out.println ("End ReaderNetPlan_v5: " + netPlan + " ----------- ");
 
         if (ErrorHandling.isDebugEnabled()) netPlan.checkCachesConsistency();
         ProfileUtils.printTime("Reading n2p file");

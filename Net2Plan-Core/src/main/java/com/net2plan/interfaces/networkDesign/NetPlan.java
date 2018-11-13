@@ -284,7 +284,6 @@ public class NetPlan extends NetworkElement
                         int index = xmlStreamReader.getAttributeIndex(null, "version");
                         if (index == -1)
                         {
-//                            System.out.println("Version 1");
                             netPlanReader = new ReaderNetPlanN2PVersion_1();
                         } else
                         {
@@ -292,35 +291,29 @@ public class NetPlan extends NetworkElement
                             switch (version)
                             {
                                 case 2:
-//                                    System.out.println("Version 2");
                                     netPlanReader = new ReaderNetPlanN2PVersion_2();
                                     break;
 
                                 case 3:
-//                                    System.out.println("Version 3");
                                     netPlanReader = new ReaderNetPlanN2PVersion_3();
                                     break;
 
                                 case 4:
-//                                    System.out.println("Version 4");
                                     netPlanReader = new ReaderNetPlanN2PVersion_4();
                                     break;
 
                                 case 5:
-//                                  System.out.println("Version 5");
                                   netPlanReader = new ReaderNetPlanN2PVersion_5();
                                   break;
 
                                 case 6:
-//                                    System.out.println("Version 5");
                                     netPlanReader = new ReaderNetPlanN2PVersion_6();
                                     break;
 
                                 case 7:
-                                    netPlanReader = new ReaderNetPlanVersion_7();
+                                    netPlanReader = new ReaderNetPlanN2PJSONVersion_7();
                                     break;
-
-
+                                    
                                 default:
                                     throw new Net2PlanException("Wrong version number");
                             }
