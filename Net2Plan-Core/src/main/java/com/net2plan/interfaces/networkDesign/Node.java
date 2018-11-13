@@ -631,7 +631,7 @@ public class Node extends NetworkElement
 	}
 
 	/**
-	 * <p>SortedSet the failure state of the node: up or down. Returns the previous failure state. The routing is automatically updated, making the traffic
+	 * <p>Set the failure state of the node: up or down. Returns the previous failure state. The routing is automatically updated, making the traffic
 	 * of the traversing routes as zero, and the hop-by-hop routing is updated as if the forwarding rules of input and output links were zero</p>
 	 * @param setAsUp The new failure state ({@code true} up, {@code false} down)
 	 * @return The previous failure state

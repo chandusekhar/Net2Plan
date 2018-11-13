@@ -252,7 +252,36 @@ public class NetPlan extends NetworkElement
         if (ErrorHandling.isDebugEnabled()) np.checkCachesConsistency();
         assignFrom(np);
         if (ErrorHandling.isDebugEnabled()) this.checkCachesConsistency();
-//		System.out.println ("End NetPlan(File file): " + netPlan + " ----------- ");
+    }
+
+    /**
+     * <p>Generates a new network design from a JSON representation.</p>
+     *
+     * @param json JSON Object
+     * @since 0.7.0
+     */
+    public NetPlan(JSONObject json)
+    {
+        this();
+        JSONValue versionValue = json.get("version");
+        if(versionValue == null)
+            throw new Net2PlanException("Unsupported json format");
+        else{
+            int version = versionValue.getValue();
+            IReaderNetPlan reader = null;
+
+            if(version < 7)
+                throw new Net2PlanException("Unsupported version");
+            else{
+                if(version == 7)
+                    reader = new ReaderNetPlanN2PJSONVersion_7();
+            }
+
+            if(reader != null && reader instanceof IReaderNetPlan_JSON)
+                ((IReaderNetPlan_JSON)reader).createFromJSON(this, json);
+        }
+
+
     }
 
     /**
@@ -313,7 +342,7 @@ public class NetPlan extends NetworkElement
                                 case 7:
                                     netPlanReader = new ReaderNetPlanN2PJSONVersion_7();
                                     break;
-                                    
+
                                 default:
                                     throw new Net2PlanException("Wrong version number");
                             }

@@ -7,7 +7,9 @@ import com.net2plan.internal.UnmodifiablePoint2D;
 import com.net2plan.libraries.ProfileUtils;
 import com.net2plan.libraries.TrafficSeries;
 import com.net2plan.utils.*;
+import com.shc.easyjson.JSONArray;
 import com.shc.easyjson.JSONObject;
+import com.shc.easyjson.JSONValue;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.codehaus.stax2.XMLStreamReader2;
 
@@ -29,6 +31,49 @@ public class ReaderNetPlanN2PJSONVersion_7 implements IReaderNetPlan_JSON
     @Override
     public void createFromJSON(NetPlan netPlan, JSONObject json)
     {
+        final long nextElementId = Long.parseLong(json.get("nextElementId").getValue());
+        final String description = json.get("description").getValue();
+        final String name = json.get("name").getValue();
+        final JSONArray tags = json.get("tags").getValue();
+        final JSONArray attributes = json.get("attributes").getValue();
+
+        netPlan.nextElementId = new MutableLong(nextElementId);
+        netPlan.setDescription(description);
+        netPlan.setName(name);
+        tags.stream().forEach(tag -> netPlan.addTag(tag.getValue()));
+        attributes.stream().forEach(
+                att ->
+                {
+                    JSONObject attribute = att.getValue();
+                    netPlan.setAttribute(attribute.get("key").getValue(), (String)attribute.get("value").getValue());
+                }
+        );
+
+        JSONArray nodes = json.get("nodes").getValue();
+        nodes.stream().forEach(
+                node ->
+                {
+                    JSONObject nodeJSON = node.getValue();
+                    Long nodeId = Long.parseLong(nodeJSON.get("id").getValue());
+                    String nodeName = nodeJSON.get("name").getValue();
+                    double xCoord = nodeJSON.get("xCoord").getValue();
+                    double yCoord = nodeJSON.get("yCoord").getValue();
+
+                    Node newNode = netPlan.addNode(nodeId , xCoord, yCoord, nodeName, null);
+
+                    double nodePopulation = Double.parseDouble(nodeJSON.get("population").getValue());
+                    String nodeDescription = nodeJSON.get("description").getValue();
+                    boolean nodeIsUp = Boolean.parseBoolean(nodeJSON.get("isUp").getValue());
+                    JSONArray planningDomains = json.get("planningDomains").getValue();
+                    final SortedSet<String> pds = new TreeSet<> ();
+                    planningDomains.stream().forEach(pd -> pds.add(pd.getValue()));
+                    newNode.setPopulation(nodePopulation);
+                    newNode.setDescription(nodeDescription);
+                    newNode.setFailureState(nodeIsUp);
+
+
+                }
+        );
 
     }
 
