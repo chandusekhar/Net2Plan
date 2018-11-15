@@ -6702,8 +6702,9 @@ public class NetPlan extends NetworkElement
                             if (node.getUrlNodeIcon(layer) != null)
                             {
                                 JSONObject this_layerJSON = new JSONObject();
-                                this_layerJSON.put("nodeIconURLLayer_" + layer.getId(), new JSONValue(node.getUrlNodeIcon(layer).toString()));
-                                this_layerJSON.put("nodeIconRelativeSizeLayer_" + layer.getId(), new JSONValue("" + node.getNodeIconRelativeSize(layer)));
+                                this_layerJSON.put("layerId", new JSONValue(layer.getId()));
+                                this_layerJSON.put("nodeIconURLLayer", new JSONValue(node.getUrlNodeIcon(layer).toString()));
+                                this_layerJSON.put("nodeIconRelativeSizeLayer", new JSONValue("" + node.getNodeIconRelativeSize(layer)));
                                 layersIconsJSON.add(new JSONValue(this_layerJSON));
                             }
                         }

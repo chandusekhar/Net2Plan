@@ -29,7 +29,6 @@
         <module>Net2Plan-Core</module>
         <module>Net2Plan-CLI</module>
         <module>Net2Plan-GUI</module>
-        <module>Net2Plan-REST-API</module>
         <module>Net2Plan-Examples</module>
         <module>Net2Plan-Javadoc</module>
         <module>Net2Plan-Launcher</module>
@@ -42,33 +41,6 @@
     </properties>
 
     <dependencies>
-        <dependency>
-            <groupId>com.sun.jersey</groupId>
-            <artifactId>jersey-server</artifactId>
-            <version>1.18</version>
-        </dependency>
-        <dependency>
-            <groupId>com.sun.jersey</groupId>
-            <artifactId>jersey-servlet</artifactId>
-            <version>1.18</version>
-        </dependency>
-        <dependency>
-            <groupId>com.sun.jersey</groupId>
-            <artifactId>jersey-client</artifactId>
-            <version>1.18</version>
-        </dependency>
-        <dependency>
-            <groupId>com.sun.jersey</groupId>
-            <artifactId>jersey-json</artifactId>
-            <version>1.18</version>
-            <scope>compile</scope>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/com.sun.jersey/jersey-bundle -->
-        <dependency>
-            <groupId>com.sun.jersey</groupId>
-            <artifactId>jersey-bundle</artifactId>
-            <version>1.18</version>
-        </dependency>
         <dependency>
             <groupId>com.goharsha</groupId>
             <artifactId>easyjson</artifactId>

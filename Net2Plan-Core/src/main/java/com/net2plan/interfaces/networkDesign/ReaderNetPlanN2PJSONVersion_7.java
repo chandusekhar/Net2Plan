@@ -16,6 +16,7 @@ import org.codehaus.stax2.XMLStreamReader2;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.XMLEvent;
 import java.awt.geom.Point2D;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
 
@@ -49,6 +50,42 @@ public class ReaderNetPlanN2PJSONVersion_7 implements IReaderNetPlan_JSON
                 }
         );
 
+        JSONArray layers = json.get("layers").getValue();
+        layers.stream().forEach(layer ->
+        {
+            JSONObject layerJSON = layer.getValue();
+            long layerId = Long.parseLong(layerJSON.get("id").getValue());
+            String layerName = layerJSON.get("name").getValue();
+            String layerDescription = layerJSON.get("description").getValue();
+            String layerDemandTrafficUnits = layerJSON.get("demandTrafficUnitsName").getValue();
+            String layerLinkCapacityUnits = layerJSON.get("linkCapacityUnitsName").getValue();
+            boolean isDefaultLayer = Boolean.parseBoolean(layerJSON.get("isDefaultLayer").getValue());
+            URL layerIconURL = null;
+            try {
+                layerIconURL = (layerJSON.get("defaultNodeIconURL") == null) ? null : new URL(layerJSON.get("defaultNodeIconURL").getValue());
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            }
+            JSONArray layerTags = layerJSON.get("tags").getValue();
+            JSONArray layerAttributes = layerJSON.get("attributes").getValue();
+
+            NetworkLayer newLayer = netPlan.addLayer(layerId, layerName, layerDescription, layerLinkCapacityUnits, layerDemandTrafficUnits, layerIconURL, null);
+
+            layerTags.stream().forEach(tag -> newLayer.addTag(tag.getValue()));
+            layerAttributes.stream().forEach(
+                    att ->
+                    {
+                        JSONObject attribute = att.getValue();
+                        newLayer.setAttribute(attribute.get("key").getValue(), (String)attribute.get("value").getValue());
+                    }
+            );
+
+            if(isDefaultLayer)
+                netPlan.setNetworkLayerDefault(newLayer);
+
+
+        });
+
         JSONArray nodes = json.get("nodes").getValue();
         nodes.stream().forEach(
                 node ->
@@ -65,11 +102,31 @@ public class ReaderNetPlanN2PJSONVersion_7 implements IReaderNetPlan_JSON
                     String nodeDescription = nodeJSON.get("description").getValue();
                     boolean nodeIsUp = Boolean.parseBoolean(nodeJSON.get("isUp").getValue());
                     JSONArray planningDomains = json.get("planningDomains").getValue();
-                    final SortedSet<String> pds = new TreeSet<> ();
-                    planningDomains.stream().forEach(pd -> pds.add(pd.getValue()));
+                    planningDomains.stream().forEach(pd -> newNode.addToPlanningDomain(pd.getValue()));
                     newNode.setPopulation(nodePopulation);
                     newNode.setDescription(nodeDescription);
                     newNode.setFailureState(nodeIsUp);
+
+                    JSONArray nodeIconsJSON = nodeJSON.get("nodeIcons").getValue();
+                    nodeIconsJSON.stream().forEach(
+                            nodeIcon ->
+                    {
+                        JSONObject nodeIconJSON = nodeIcon.getValue();
+                        long layerId = Long.parseLong(nodeIconJSON.get("layerId").getValue());
+                        URL iconURL = null;
+                        try {
+                            iconURL = new URL(nodeIconJSON.get("nodeIconURLLayer").getValue());
+                        } catch (MalformedURLException e) {
+                            e.printStackTrace();
+                        }
+                        double iconRelativeSize = Double.parseDouble(nodeIconJSON.get("nodeIconRelativeSizeLayer").getValue());
+                        NetworkLayer nl = netPlan.getNetworkLayerFromId(layerId);
+                        newNode.setUrlNodeIcon(nl,iconURL, iconRelativeSize);
+
+                    });
+
+                    JSONArray nodeTags = nodeJSON.get("tags").getValue();
+
 
 
                 }
