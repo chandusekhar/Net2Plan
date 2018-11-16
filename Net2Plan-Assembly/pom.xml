@@ -83,13 +83,6 @@
             <type>jar</type>
         </dependency>
         <dependency>
-            <groupId>com.net2plan.net2plan-rest-api</groupId>
-            <artifactId>net2plan-rest-api-server</artifactId>
-            <version>0.7.0-SNAPSHOT</version>
-            <scope>runtime</scope>
-            <type>war</type>
-        </dependency>
-        <dependency>
             <groupId>com.net2plan</groupId>
             <artifactId>net2plan-javadoc</artifactId>
             <version>0.7.0-SNAPSHOT</version>
