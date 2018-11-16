@@ -6663,10 +6663,11 @@ public class NetPlan extends NetworkElement
                     networkJSON.put("version", new JSONValue(Version.getFileFormatVersion()));
                     networkJSON.put("nextElementId", new JSONValue(nextElementId.toString()));
 
-                    int counter = 0;
+                    JSONArray pds = new JSONArray();
                     for (String planningDomain : this.cache_planningDomain2nodes.keySet())
-                        networkJSON.put("planningDomain_" + (counter++), new JSONValue(planningDomain));
+                        pds.add(new JSONValue(planningDomain));
 
+                    networkJSON.put("planningDomains", new JSONValue(pds));
                     JSONArray nodesJSON = new JSONArray();
                     for (Node node : nodes)
                     {

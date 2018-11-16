@@ -126,11 +126,103 @@ public class ReaderNetPlanN2PJSONVersion_7 implements IReaderNetPlan_JSON
                     });
 
                     JSONArray nodeTags = nodeJSON.get("tags").getValue();
-
+                    JSONArray nodeAttributes = nodeJSON.get("attributes").getValue();
+                    nodeTags.stream().forEach(tag -> newNode.addTag(tag.getValue()));
+                    nodeAttributes.stream().forEach(att ->
+                            {
+                                JSONObject attribute = att.getValue();
+                                newNode.setAttribute(attribute.get("key").getValue(), (String)attribute.get("value").getValue());
+                            });
 
 
                 }
         );
+
+        JSONArray resources = json.get("resources").getValue();
+        resources.stream().forEach(res ->
+        {
+            JSONObject resource = res.getValue();
+            long resourceId = resource.get("id").getValue();
+            String resourceName = resource.get("name").getValue();
+            String resourceType = resource.get("type").getValue();
+            long hostNodeId = resource.get("hostNodeId").getValue();
+            double resourceProcessingTime = resource.get("processingTimeToTraversingTrafficInMs").getValue();
+            String resourceUnits = resource.get("capacityMeasurementUnits").getValue();
+            double resourceCapacity = resource.get("capacity").getValue();
+
+            JSONArray resourceBaseRes = resource.get("baseResourceAndOccupiedCapacitiesMap").getValue();
+            Map<Resource, Double> baseResourceAndOccupiedCapacitiesMap = new LinkedHashMap<>();
+            resourceBaseRes.stream().forEach(baseRes ->
+            {
+                JSONObject baseJSON = baseRes.getValue();
+                baseResourceAndOccupiedCapacitiesMap.put(netPlan.getResourceFromId(baseJSON.get("id").getValue()), baseJSON.get("capacity").getValue());
+            });
+            Node hostNode = netPlan.getNodeFromId(hostNodeId);
+            Optional<Node> hostNodeOpt = (hostNode == null) ? Optional.empty() : Optional.of(hostNode);
+
+            Resource newRes = netPlan.addResource(resourceId, resourceType, resourceName, hostNodeOpt, resourceCapacity, resourceUnits, baseResourceAndOccupiedCapacitiesMap, resourceProcessingTime, null );
+
+            JSONArray resTags = resource.get("tags").getValue();
+            JSONArray resAttributes = resource.get("attributes").getValue();
+            resTags.stream().forEach(tag -> newRes.addTag(tag.getValue()));
+            resAttributes.stream().forEach(att ->
+            {
+                JSONObject attribute = att.getValue();
+                newRes.setAttribute(attribute.get("key").getValue(), (String)attribute.get("value").getValue());
+            });
+
+
+        });
+
+        layers.stream().forEach(layer ->
+        {
+            JSONObject layerJSON = layer.getValue();
+            long layerId = Long.parseLong(layerJSON.get("id").getValue());
+            NetworkLayer nl = netPlan.getNetworkLayerFromId(layerId);
+
+            JSONArray links = layerJSON.get("links").getValue();
+            links.stream().forEach(link ->
+            {
+                JSONObject linkJSON = link.getValue();
+                long linkId = linkJSON.get("id").getValue();
+                String linkDescription = linkJSON.get("description").getValue();
+                long originNodeId = linkJSON.get("originNodeId").getValue();
+                long destinationNodeId = linkJSON.get("destinationNodeId").getValue();
+                double linkLength = linkJSON.get("lengthInKm").getValue();
+                double linkCapacity = linkJSON.get("capacity").getValue();
+                double linkPropagationSpeed = linkJSON.get("propagationSpeedInKmPerSecond").getValue();
+                boolean linkIsUp = linkJSON.get("isUp").getValue();
+                long linkBidirectionalPairId = linkJSON.get("bidirectionalPairId").getValue();
+
+                Node originNode = netPlan.getNodeFromId(originNodeId);
+                Node destinationNode = netPlan.getNodeFromId(destinationNodeId);
+                Link bidirectionalPair = netPlan.getLinkFromId(linkBidirectionalPairId);
+
+                Link newLink = netPlan.addLink(linkId, originNode, destinationNode, linkCapacity, linkLength, linkPropagationSpeed, null, nl);
+
+                newLink.setDescription(linkDescription);
+                newLink.setFailureState(linkIsUp);
+                if(bidirectionalPair != null)
+                    newLink.setBidirectionalPair(bidirectionalPair);
+
+                JSONArray linkTags = linkJSON.get("tags").getValue();
+                JSONArray linkAttributes = linkJSON.get("attributes").getValue();
+                linkTags.stream().forEach(tag -> newLink.addTag(tag.getValue()));
+                linkAttributes.stream().forEach(att ->
+                {
+                    JSONObject attribute = att.getValue();
+                    newLink.setAttribute(attribute.get("key").getValue(), (String)attribute.get("value").getValue());
+                });
+
+
+            });
+
+            JSONArray demands = layerJSON.get("demands").getValue();
+            demands.stream().forEach(demand ->
+            {
+                JSONObject demandJSON = demand.getValue();
+            });
+        });
 
     }
 
