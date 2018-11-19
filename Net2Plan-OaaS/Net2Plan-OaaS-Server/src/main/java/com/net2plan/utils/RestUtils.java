@@ -6,7 +6,7 @@ import com.net2plan.interfaces.networkDesign.NetPlan;
 import javax.ws.rs.core.Response;
 
 
-public class RestServerUtils
+public class RestUtils
 {
 
     /**

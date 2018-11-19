@@ -4,15 +4,17 @@ import com.net2plan.interfaces.networkDesign.IAlgorithm;
 import com.net2plan.interfaces.networkDesign.IReport;
 import com.net2plan.interfaces.networkDesign.NetPlan;
 import com.net2plan.utils.RestDatabase;
-import com.net2plan.utils.RestJAR;
-import com.net2plan.utils.RestServerUtils;
+import com.net2plan.utils.RestUtils;
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
+import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.io.File;
+import java.io.*;
 import java.util.List;
 import java.util.Map;
+
 
 /**
  * Root resource (exposed at "myresource" path)
@@ -29,23 +31,35 @@ public class Net2PlanOaaS
     @Produces(MediaType.APPLICATION_JSON)
     public Response getDesign()
     {
-        return RestServerUtils.OK(netPlan.saveToJSON());
+        return RestUtils.OK(netPlan.saveToJSON());
     }
 
     @POST
     @Path("/JAR")
-    @Consumes(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response uploadJAR(RestJAR jar)
+    public Response uploadJAR(@FormDataParam("file") FormDataContentDisposition fileMetaData)
     {
-        File jarFile = jar.getFile();
-        //jar2AlgorithmsMap.put(jarFile.getName(), jar.getInternalAlgorithms());
-        //jar2ReportsMap.put(jarFile.getName(), jar.getInternalReports());
+        String UPLOAD_PATH = "C:/temp/";
+        /*  try
+        {
+            int read = 0;
+            byte[] bytes = new byte[1024];
 
-        System.out.println(jar2AlgorithmsMap);
-        System.out.println(jar2ReportsMap);
+           OutputStream out = new FileOutputStream(new File(UPLOAD_PATH + fileMetaData.getFileName()));
 
-        return RestServerUtils.OK(jar);
+            while ((read = fileInputStream.read(bytes)) != -1)
+            {
+                out.write(bytes, 0, read);
+            }
+            out.flush();
+            out.close();
+        } catch (IOException e)
+        {
+            throw new WebApplicationException("Error while uploading file. Please try again !!");
+        }*/
+
+        return RestUtils.OK(fileMetaData.getFileName());
     }
 
 }
