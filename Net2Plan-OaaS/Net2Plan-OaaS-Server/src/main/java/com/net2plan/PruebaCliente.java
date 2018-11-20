@@ -1,6 +1,6 @@
 package com.net2plan;
 
-import com.sun.scenario.effect.impl.sw.sse.SSEBlend_SRC_OUTPeer;
+
 import org.glassfish.jersey.media.multipart.MultiPart;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.media.multipart.file.FileDataBodyPart;
@@ -17,7 +17,7 @@ public class PruebaCliente
         Client client = ClientBuilder.newClient().register(MultiPartFeature.class);
         WebTarget target = client.target("http://localhost:8080/net2plan-oaas-server-0.7.0-SNAPSHOT/OaaS/").path("JAR");
 
-        File f = new File("C:/Users/César/Desktop/BuiltInExamples.jar");
+        File f = new File("C:\\Users\\César\\Desktop\\Net2Plan-0.6.1\\workspace\\BuiltInExamples.jar");
         FileDataBodyPart body = new FileDataBodyPart("file",f);
         MultiPart multi = new MultiPart();
         multi.bodyPart(body);

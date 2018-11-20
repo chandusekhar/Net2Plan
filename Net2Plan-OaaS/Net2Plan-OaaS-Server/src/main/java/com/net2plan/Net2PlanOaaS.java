@@ -2,7 +2,11 @@ package com.net2plan;
 
 import com.net2plan.interfaces.networkDesign.IAlgorithm;
 import com.net2plan.interfaces.networkDesign.IReport;
+import com.net2plan.interfaces.networkDesign.Net2PlanException;
 import com.net2plan.interfaces.networkDesign.NetPlan;
+import com.net2plan.internal.IExternal;
+import com.net2plan.internal.SystemUtils;
+import com.net2plan.utils.ClassLoaderUtils;
 import com.net2plan.utils.RestDatabase;
 import com.net2plan.utils.RestUtils;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
@@ -12,8 +16,11 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.*;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 
 /**
@@ -23,8 +30,8 @@ import java.util.Map;
 public class Net2PlanOaaS
 {
     public NetPlan netPlan = RestDatabase.netPlan;
-    public Map<String, List<IAlgorithm>> jar2AlgorithmsMap = RestDatabase.jar2AlgorithmsMap;
-    public Map<String, List<IReport>> jar2ReportsMap = RestDatabase.jar2ReportsMap;
+    public List<IAlgorithm> algorithms = RestDatabase.algorithmsList;
+    public List<IReport> reports = RestDatabase.reportsList;
 
     @GET
     @Path("/design")
@@ -38,28 +45,68 @@ public class Net2PlanOaaS
     @Path("/JAR")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response uploadJAR(@FormDataParam("file") FormDataContentDisposition fileMetaData)
+    public Response uploadJAR(@FormDataParam("file") byte [] input, @FormDataParam("file") FormDataContentDisposition fileMetaData)
     {
-        String UPLOAD_PATH = "C:/temp/";
-        /*  try
+        String UPLOAD_PATH = "C:\\Users\\César\\Desktop\\archivosCopia";
+        File uploadDir = new File(UPLOAD_PATH);
+        File uploadedFile = new File(UPLOAD_PATH + File.separator + fileMetaData.getFileName());
+        System.out.println(uploadedFile.getAbsolutePath());
+        try
         {
-            int read = 0;
-            byte[] bytes = new byte[1024];
+           OutputStream out = new FileOutputStream(uploadedFile);
+           out.write(input);
+           out.flush();
+           out.close();
 
-           OutputStream out = new FileOutputStream(new File(UPLOAD_PATH + fileMetaData.getFileName()));
+           decompressJarFile(uploadedFile);
 
-            while ((read = fileInputStream.read(bytes)) != -1)
-            {
-                out.write(bytes, 0, read);
-            }
-            out.flush();
-            out.close();
+
         } catch (IOException e)
         {
-            throw new WebApplicationException("Error while uploading file. Please try again !!");
-        }*/
+            throw new Net2PlanException(e.getMessage());
+        }
 
-        return RestUtils.OK(fileMetaData.getFileName());
+        return RestUtils.OK(null);
+    }
+
+    private void decompressJarFile(File jarFile)
+    {
+        String destDir = jarFile.getParentFile().getAbsolutePath();
+        try {
+            JarFile jar = new JarFile(jarFile);
+            Enumeration<JarEntry> enumJar = jar.entries();
+            while(enumJar.hasMoreElements())
+            {
+                JarEntry file = enumJar.nextElement();
+                File f = new File(destDir + java.io.File.separator + file.getName());
+                if (file.isDirectory())
+                {
+                    f.mkdir();
+                }
+            }
+            enumJar = jar.entries();
+            while(enumJar.hasMoreElements())
+            {
+                JarEntry file = enumJar.nextElement();
+                File f = new File(destDir + java.io.File.separator + file.getName());
+                if (file.isDirectory())
+                {
+                   continue;
+                }
+                InputStream is = jar.getInputStream(file);
+                java.io.FileOutputStream fos = new java.io.FileOutputStream(f);
+                while (is.available() > 0)
+                {
+                    fos.write(is.read());
+                }
+                fos.close();
+                is.close();
+            }
+            jar.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 }

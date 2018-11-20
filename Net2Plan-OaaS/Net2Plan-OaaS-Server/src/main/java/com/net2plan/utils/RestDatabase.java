@@ -4,7 +4,6 @@ import com.net2plan.interfaces.networkDesign.IAlgorithm;
 import com.net2plan.interfaces.networkDesign.IReport;
 import com.net2plan.interfaces.networkDesign.NetPlan;
 
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 
