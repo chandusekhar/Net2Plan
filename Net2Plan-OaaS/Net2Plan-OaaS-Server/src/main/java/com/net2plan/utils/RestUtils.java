@@ -1,17 +1,30 @@
 package com.net2plan.utils;
 
-import com.net2plan.interfaces.networkDesign.NetPlan;
 
+
+import com.net2plan.internal.SystemUtils;
 
 import javax.ws.rs.core.Response;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Enumeration;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 
 public class RestUtils
 {
 
     /**
+     * Directory where uploaded files will be stored while they are being analyzed
+     */
+    public final static File UPLOAD_DIR;
+    static { UPLOAD_DIR = new File(SystemUtils.getCurrentDir().getAbsolutePath() + File.separator + "upload"); }
+
+    /**
      * Creates a HTTP response 200, OK with a specific message
-     * @param message message to return
+     * @param message message to return (null if no message is desired)
      * @return HTTP response 200, OK
      */
     public static Response OK(Object message)
@@ -22,14 +35,24 @@ public class RestUtils
             return Response.ok(message).build();
     }
 
-    public static Response NOT_FOUND(NotFoundResponseType type)
+    /**
+     * Creates a HTTP response 404, NOT FOUND with a specific message
+     * @param message message to return (null if no message is desired)
+     * @return HTTP response 404, NOT FOUND
+     */
+    public static Response NOT_FOUND(Object message)
     {
-        if(type != null)
-            return Response.status(Response.Status.NOT_FOUND).entity(type.toString()+" not found.").build();
+        if(message != null)
+            return Response.status(Response.Status.NOT_FOUND).entity(message).build();
 
         return Response.status(Response.Status.NOT_FOUND).build();
     }
 
+    /**
+     * Creates a HTTP response 500, SERVER ERROR with a specific message
+     * @param message message to return (null if no message is desired)
+     * @return HTTP response 500, SERVER ERROR
+     */
     public static Response SERVER_ERROR(Object message)
     {
         if(message == null)
@@ -38,30 +61,75 @@ public class RestUtils
             return Response.serverError().entity(message).build();
     }
 
-    public enum NotFoundResponseType
+    /**
+     * Decompresses a JAR file
+     * @param jarFile JAR file to decompress
+     */
+    public static void decompressJarFile(File jarFile)
     {
-        /**
-         * Algorithm type
-         */
-        ALGORITHM("algorithm"),
+        String destDir = jarFile.getParentFile().getAbsolutePath();
+        try {
+            JarFile jar = new JarFile(jarFile);
+            Enumeration<JarEntry> enumJar = jar.entries();
+            while(enumJar.hasMoreElements())
+            {
+                JarEntry file = enumJar.nextElement();
+                File f = new File(destDir + java.io.File.separator + file.getName());
+                if (file.isDirectory())
+                {
+                    f.mkdir();
+                }
+            }
+            enumJar = jar.entries();
+            while(enumJar.hasMoreElements())
+            {
+                JarEntry file = enumJar.nextElement();
+                File f = new File(destDir + java.io.File.separator + file.getName());
+                if (file.isDirectory())
+                {
+                    continue;
+                }
+                InputStream is = jar.getInputStream(file);
+                java.io.FileOutputStream fos = new java.io.FileOutputStream(f);
+                while (is.available() > 0)
+                {
+                    fos.write(is.read());
+                }
+                fos.close();
+                is.close();
+            }
+            jar.close();
 
-        /**
-         * Report type
-         */
-        REPORT("report");
-
-        private final String label;
-
-        NotFoundResponseType(String label)
-        {
-            this.label = label;
-        }
-
-        @Override
-        public String toString()
-        {
-            return label;
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
+
+    /**
+     * Deletes all files and directories inside a directory
+     * @param folder directory to leave empty
+     * @param deleteFolder true if folder will be deleted, false if not
+     */
+    public static void cleanFolder(File folder, boolean deleteFolder)
+    {
+        if(folder.isDirectory())
+            return;
+        File [] files = folder.listFiles();
+        if(files != null)
+        {
+            for(File f: files)
+            {
+                if(f.isDirectory())
+                {
+                    cleanFolder(f, true);
+                } else {
+                    f.delete();
+                }
+            }
+        }
+        if(deleteFolder)
+            folder.delete();
+    }
+
 
 }

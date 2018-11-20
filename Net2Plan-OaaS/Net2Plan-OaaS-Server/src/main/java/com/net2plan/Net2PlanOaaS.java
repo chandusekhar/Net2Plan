@@ -24,11 +24,12 @@ import java.util.jar.JarFile;
 
 
 /**
- * Root resource (exposed at "myresource" path)
+ * Root resource (exposed at "OaaS" path)
  */
 @Path("/OaaS")
 public class Net2PlanOaaS
 {
+    public File UPLOAD_DIR = RestUtils.UPLOAD_DIR;
     public NetPlan netPlan = RestDatabase.netPlan;
     public List<IAlgorithm> algorithms = RestDatabase.algorithmsList;
     public List<IReport> reports = RestDatabase.reportsList;
@@ -47,10 +48,10 @@ public class Net2PlanOaaS
     @Produces(MediaType.APPLICATION_JSON)
     public Response uploadJAR(@FormDataParam("file") byte [] input, @FormDataParam("file") FormDataContentDisposition fileMetaData)
     {
-        String UPLOAD_PATH = "C:\\Users\\César\\Desktop\\archivosCopia";
-        File uploadDir = new File(UPLOAD_PATH);
-        File uploadedFile = new File(UPLOAD_PATH + File.separator + fileMetaData.getFileName());
-        System.out.println(uploadedFile.getAbsolutePath());
+
+        File uploadedFile = new File(UPLOAD_DIR + File.separator + fileMetaData.getFileName());
+        if(!UPLOAD_DIR.exists())
+            UPLOAD_DIR.mkdirs();
         try
         {
            OutputStream out = new FileOutputStream(uploadedFile);
@@ -58,54 +59,16 @@ public class Net2PlanOaaS
            out.flush();
            out.close();
 
-           decompressJarFile(uploadedFile);
+           RestUtils.decompressJarFile(uploadedFile);
 
+           // Here, we have to analyze each decompressed folder from JAR and check if there are any available algorithm or report
+
+           RestUtils.cleanFolder(UPLOAD_DIR, false);
+           return RestUtils.OK(null);
 
         } catch (IOException e)
         {
-            throw new Net2PlanException(e.getMessage());
-        }
-
-        return RestUtils.OK(null);
-    }
-
-    private void decompressJarFile(File jarFile)
-    {
-        String destDir = jarFile.getParentFile().getAbsolutePath();
-        try {
-            JarFile jar = new JarFile(jarFile);
-            Enumeration<JarEntry> enumJar = jar.entries();
-            while(enumJar.hasMoreElements())
-            {
-                JarEntry file = enumJar.nextElement();
-                File f = new File(destDir + java.io.File.separator + file.getName());
-                if (file.isDirectory())
-                {
-                    f.mkdir();
-                }
-            }
-            enumJar = jar.entries();
-            while(enumJar.hasMoreElements())
-            {
-                JarEntry file = enumJar.nextElement();
-                File f = new File(destDir + java.io.File.separator + file.getName());
-                if (file.isDirectory())
-                {
-                   continue;
-                }
-                InputStream is = jar.getInputStream(file);
-                java.io.FileOutputStream fos = new java.io.FileOutputStream(f);
-                while (is.available() > 0)
-                {
-                    fos.write(is.read());
-                }
-                fos.close();
-                is.close();
-            }
-            jar.close();
-
-        } catch (IOException e) {
-            e.printStackTrace();
+            return RestUtils.SERVER_ERROR(e.getMessage());
         }
     }
 
