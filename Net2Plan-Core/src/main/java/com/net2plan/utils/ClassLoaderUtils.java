@@ -87,7 +87,6 @@ public class ClassLoaderUtils
 		List<Class> classes = new LinkedList<Class>();
 
 		String extension = SystemUtils.getExtension(file).toLowerCase(Locale.getDefault());
-		System.out.println(file + ", extension: "+extension);
 		switch (extension)
 		{
 			case "jar":

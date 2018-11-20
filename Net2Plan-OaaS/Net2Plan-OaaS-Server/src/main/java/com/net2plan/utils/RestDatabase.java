@@ -5,21 +5,21 @@ import com.net2plan.interfaces.networkDesign.IReport;
 import com.net2plan.interfaces.networkDesign.NetPlan;
 
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 public class RestDatabase
 {
     private RestDatabase(){}
 
     public static NetPlan netPlan;
-    public static Map<String, List<IAlgorithm>> jar2AlgorithmsMap;
-    public static Map<String, List<IReport>> jar2ReportsMap;
+    public static List<IAlgorithm> algorithmsList;
+    public static List<IReport> reportsList;
 
     static
     {
         netPlan = new NetPlan();
-        jar2AlgorithmsMap = new LinkedHashMap<>();
-        jar2ReportsMap = new LinkedHashMap<>();
+        algorithmsList = new LinkedList<>();
+        reportsList = new LinkedList<>();
     }
 }
