@@ -19,6 +19,7 @@ import java.awt.geom.Point2D;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class ReaderNetPlanN2PJSONVersion_7 implements IReaderNetPlan_JSON
 {
@@ -221,7 +222,59 @@ public class ReaderNetPlanN2PJSONVersion_7 implements IReaderNetPlan_JSON
             demands.stream().forEach(demand ->
             {
                 JSONObject demandJSON = demand.getValue();
+                long demandId = demandJSON.get("id").getValue();
+                String demandDescription = demandJSON.get("description").getValue();
+                long ingressNodeId = demandJSON.get("ingressNodeId").getValue();
+                long egressNodeId = demandJSON.get("egressNodeId").getValue();
+                String demandRoutingType = demandJSON.get("routingType").getValue();
+                double demandOfferedTraffic = demandJSON.get("offeredTraffic").getValue();
+                double demandOfferedTrafficGrowth = demandJSON.get("offeredTrafficGrowthFactorPerPeriodZeroIsNoGrowth").getValue();
+                String demandQoSType = demandJSON.get("qosType").getValue();
+                long demandBidirectionalPairId = demandJSON.get("bidirectionalPairId").getValue();
+                double demandMaximumLatencyMs = demandJSON.get("maximumAcceptableE2EWorstCaseLatencyInMs").getValue();
+                String demandIntendedRecovery = demandJSON.get("intendedRecoveryType").getValue();
+                String monitoredOrForecastedTrafficsValues = demandJSON.get("monitoredOrForecastedTraffics").getValue();
+                JSONArray demandServiceChainSequence = demandJSON.get("serviceChainResourceTypeOfSequence").getValue();
+
+                Node ingressNode = netPlan.getNodeFromId(ingressNodeId);
+                Node egressNode = netPlan.getNodeFromId(egressNodeId);
+                Demand bidirectionalDemand = netPlan.getDemandFromId(demandBidirectionalPairId);
+                TrafficSeries demandTrafficSeries = TrafficSeries.createFromStringList(StringUtils.readEscapedString_asStringList(monitoredOrForecastedTrafficsValues, new ArrayList<>()));
+
+                List<String> demandServiceChainSequenceList = demandServiceChainSequence.stream().map(val -> (String)val.getValue()).collect(Collectors.toList());
+
+                Demand newDemand = netPlan.addDemand(demandId, ingressNode, egressNode, demandOfferedTraffic, Constants.RoutingType.valueOf(demandRoutingType), null, nl);
+
+                newDemand.setDescription(demandDescription);
+                newDemand.setOfferedTrafficPerPeriodGrowthFactor(demandOfferedTrafficGrowth);
+                newDemand.setQoSType(demandQoSType);
+                if(bidirectionalDemand != null)
+                    newDemand.setBidirectionalPair(bidirectionalDemand);
+
+                newDemand.setMaximumAcceptableE2EWorstCaseLatencyInMs(demandMaximumLatencyMs);
+                newDemand.setServiceChainSequenceOfTraversedResourceTypes(demandServiceChainSequenceList);
+                newDemand.setMonitoredOrForecastedOfferedTraffic(demandTrafficSeries);
+                newDemand.setIntendedRecoveryType(Demand.IntendedRecoveryType.valueOf(demandIntendedRecovery));
+
+                JSONArray demandAttributes = demandJSON.get("attributes").getValue();
+                JSONArray demandTags = demandJSON.get("tags").getValue();
+                demandTags.stream().forEach(tag -> newDemand.addTag(tag.getValue()));
+                demandAttributes.stream().forEach(att ->
+                {
+                    JSONObject attribute = att.getValue();
+                    newDemand.setAttribute(attribute.get("key").getValue(), (String)attribute.get("value").getValue());
+                });
+
+
+                JSONObject sourceRoutingJSON = layerJSON.get("sourceRouting").getValue();
+                JSONArray routes = sourceRoutingJSON.get("routes").getValue();
+                routes.stream().forEach(route ->
+                {
+                    JSONObject routeJSON = route.getValue();
+                });
             });
+
+
         });
 
     }

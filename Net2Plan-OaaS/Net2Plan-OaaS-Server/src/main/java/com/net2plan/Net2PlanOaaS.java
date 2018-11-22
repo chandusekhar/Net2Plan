@@ -17,7 +17,6 @@ import org.glassfish.jersey.media.multipart.FormDataParam;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.beans.IntrospectionException;
 import java.io.*;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -33,18 +32,10 @@ import java.util.Map;
 public class Net2PlanOaaS
 {
     public File UPLOAD_DIR = InternalUtils.UPLOAD_DIR;
-    public NetPlan netPlan = RestDatabase.netPlan;
     public Map<String, List<IExternal>> catalog2ExternalMap = RestDatabase.catalog2ExternalMap;
     public List<IAlgorithm> algorithms = RestDatabase.algorithms;
     public List<IReport> reports = RestDatabase.reports;
 
-    @GET
-    @Path("/design")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response getDesign()
-    {
-        return InternalUtils.OK(netPlan.saveToJSON());
-    }
 
     @GET
     @Path("/catalogs")

@@ -3,7 +3,6 @@ package com.net2plan.utils;
 
 import com.net2plan.interfaces.networkDesign.IAlgorithm;
 import com.net2plan.interfaces.networkDesign.IReport;
-import com.net2plan.interfaces.networkDesign.NetPlan;
 import com.net2plan.internal.IExternal;
 
 import java.util.LinkedHashMap;
@@ -15,14 +14,12 @@ public class RestDatabase
 {
     private RestDatabase(){}
 
-    public static NetPlan netPlan;
     public static List<IAlgorithm> algorithms;
     public static List<IReport> reports;
     public static Map<String, List<IExternal>> catalog2ExternalMap;
 
     static
     {
-        netPlan = new NetPlan();
         algorithms = new LinkedList<>();
         reports = new LinkedList<>();
         catalog2ExternalMap = new LinkedHashMap<>();

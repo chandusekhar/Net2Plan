@@ -265,7 +265,7 @@ public class NetPlan extends NetworkElement
         this();
         JSONValue versionValue = json.get("version");
         if(versionValue == null)
-            throw new Net2PlanException("Unsupported json format");
+            throw new Net2PlanException("Unsupported JSON format");
         else{
             int version = versionValue.getValue();
             IReaderNetPlan reader = null;
@@ -6846,7 +6846,7 @@ public class NetPlan extends NetworkElement
                             demandJSON.put("egressNodeId", new JSONValue(Long.toString(demand.egressNode.id)));
                             demandJSON.put("offeredTraffic", new JSONValue(Double.toString(demand.offeredTraffic)));
                             demandJSON.put("intendedRecoveryType", new JSONValue(demand.recoveryType.toString()));
-                            demandJSON.put("routingType", new JSONValue(demand.routingType.name()));
+                            demandJSON.put("routingType", new JSONValue(demand.routingType.toString()));
                             demandJSON.put("bidirectionalPairId", new JSONValue(Long.toString(demand.bidirectionalPair == null ? -1 : demand.bidirectionalPair.id)));
                             demandJSON.put("maximumAcceptableE2EWorstCaseLatencyInMs", new JSONValue(Double.toString(demand.maximumAcceptableE2EWorstCaseLatencyInMs)));
                             demandJSON.put("offeredTrafficGrowthFactorPerPeriodZeroIsNoGrowth", new JSONValue(Double.toString(demand.offeredTrafficGrowthFactorPerPeriodZeroIsNoGrowth)));
