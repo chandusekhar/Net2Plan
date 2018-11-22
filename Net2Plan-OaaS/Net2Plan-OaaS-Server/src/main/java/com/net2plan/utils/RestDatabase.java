@@ -1,24 +1,30 @@
 package com.net2plan.utils;
 
+
 import com.net2plan.interfaces.networkDesign.IAlgorithm;
 import com.net2plan.interfaces.networkDesign.IReport;
 import com.net2plan.interfaces.networkDesign.NetPlan;
+import com.net2plan.internal.IExternal;
 
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 public class RestDatabase
 {
     private RestDatabase(){}
 
     public static NetPlan netPlan;
-    public static List<IAlgorithm> algorithmsList;
-    public static List<IReport> reportsList;
+    public static List<IAlgorithm> algorithms;
+    public static List<IReport> reports;
+    public static Map<String, List<IExternal>> catalog2ExternalMap;
 
     static
     {
         netPlan = new NetPlan();
-        algorithmsList = new LinkedList<>();
-        reportsList = new LinkedList<>();
+        algorithms = new LinkedList<>();
+        reports = new LinkedList<>();
+        catalog2ExternalMap = new LinkedHashMap<>();
     }
 }

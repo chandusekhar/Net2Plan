@@ -2,7 +2,12 @@ package com.net2plan.utils;
 
 
 
+import com.net2plan.interfaces.networkDesign.IAlgorithm;
+import com.net2plan.interfaces.networkDesign.IReport;
 import com.net2plan.internal.SystemUtils;
+import com.shc.easyjson.JSONArray;
+import com.shc.easyjson.JSONObject;
+import com.shc.easyjson.JSONValue;
 
 import javax.ws.rs.core.Response;
 import java.io.File;
@@ -13,7 +18,7 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 
-public class RestUtils
+public class InternalUtils
 {
 
     /**
@@ -129,6 +134,62 @@ public class RestUtils
         }
         if(deleteFolder)
             folder.delete();
+    }
+
+    public static JSONObject parseAlgorithm(IAlgorithm alg)
+    {
+        JSONObject algorithmJSON = new JSONObject();
+        String algName = (alg.getClass().getName() == null) ? "" : alg.getClass().getName();
+        String algDescription = (alg.getDescription() == null) ? "" : alg.getDescription().replaceAll("\"","");
+        algorithmJSON.put("name", new JSONValue(algName));
+        algorithmJSON.put("type", new JSONValue("algorithm"));
+        algorithmJSON.put("description", new JSONValue(algDescription));
+        JSONArray parametersArray = new JSONArray();
+        if(alg.getParameters() != null)
+        {
+            for(Triple<String, String, String> param : alg.getParameters())
+            {
+                JSONObject parameter = new JSONObject();
+                String paramName = (param.getFirst() == null) ? "" : param.getFirst();
+                String paramDefaultValue = (param.getSecond() == null) ? "" : param.getSecond();
+                String paramDescription = (param.getThird() == null) ? "" : param.getThird().replaceAll("\"","");
+                parameter.put("name", new JSONValue(paramName));
+                parameter.put("defaultValue", new JSONValue(paramDefaultValue));
+                parameter.put("description", new JSONValue(paramDescription));
+                parametersArray.add(new JSONValue(parameter));
+            }
+        }
+        algorithmJSON.put("parameters", new JSONValue(parametersArray));
+        return algorithmJSON;
+    }
+
+    public static JSONObject parseReport(IReport rep)
+    {
+        JSONObject reportJSON = new JSONObject();
+        String repName = (rep.getClass().getName() == null) ? "" : rep.getClass().getName();
+        String repTitle = (rep.getTitle() == null) ? "" : rep.getTitle();
+        String repDescription = (rep.getDescription() == null) ? "" : rep.getDescription().replaceAll("\"","");
+        reportJSON.put("name", new JSONValue(repName));
+        reportJSON.put("type", new JSONValue("report"));
+        reportJSON.put("title", new JSONValue(repTitle));
+        reportJSON.put("description", new JSONValue(repDescription));
+        JSONArray parametersArray = new JSONArray();
+        if(rep.getParameters() != null)
+        {
+            for(Triple<String, String, String> param : rep.getParameters())
+            {
+                JSONObject parameter = new JSONObject();
+                String paramName = (param.getFirst() == null) ? "" : param.getFirst();
+                String paramDefaultValue = (param.getSecond() == null) ? "" : param.getSecond();
+                String paramDescription = (param.getThird() == null) ? "" : param.getThird().replaceAll("\"","");
+                parameter.put("name", new JSONValue(paramName));
+                parameter.put("defaultValue", new JSONValue(paramDefaultValue));
+                parameter.put("description", new JSONValue(paramDescription));
+                parametersArray.add(new JSONValue(parameter));
+            }
+        }
+        reportJSON.put("parameters", new JSONValue(parametersArray));
+        return reportJSON;
     }
 
 
