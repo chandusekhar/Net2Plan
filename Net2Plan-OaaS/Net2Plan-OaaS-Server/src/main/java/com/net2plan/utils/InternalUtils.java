@@ -4,7 +4,9 @@ package com.net2plan.utils;
 
 import com.net2plan.interfaces.networkDesign.IAlgorithm;
 import com.net2plan.interfaces.networkDesign.IReport;
+import com.net2plan.internal.IExternal;
 import com.net2plan.internal.SystemUtils;
+import com.shc.easyjson.JSON;
 import com.shc.easyjson.JSONArray;
 import com.shc.easyjson.JSONObject;
 import com.shc.easyjson.JSONValue;
@@ -14,6 +16,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Enumeration;
+import java.util.List;
+import java.util.Map;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -190,6 +194,39 @@ public class InternalUtils
         }
         reportJSON.put("parameters", new JSONValue(parametersArray));
         return reportJSON;
+    }
+
+    public static JSONObject parseCatalog(Map.Entry<String, List<IExternal>> catalogEntry)
+    {
+        String catalogName = catalogEntry.getKey();
+        List<IExternal> catalogExternals = catalogEntry.getValue();
+        JSONObject catalogJSON = new JSONObject();
+        JSONArray externalsArray = new JSONArray();
+        for(IExternal ext : catalogExternals)
+        {
+            if(ext instanceof IAlgorithm)
+            {
+                JSONObject algJSON = parseAlgorithm((IAlgorithm)ext);
+                externalsArray.add(new JSONValue(algJSON));
+            }
+            else if(ext instanceof IReport)
+            {
+                JSONObject repJSON = parseReport((IReport)ext);
+                externalsArray.add(new JSONValue(repJSON));
+            }
+        }
+        catalogJSON.put("name", new JSONValue(catalogName));
+        catalogJSON.put("files", new JSONValue(externalsArray));
+        return catalogJSON;
+    }
+
+    public static JSONObject NOT_FOUND_JSON(String message)
+    {
+        if(message == null)
+            message = "";
+        JSONObject notfound = new JSONObject();
+        notfound.put("message", new JSONValue(message));
+        return notfound;
     }
 
 

@@ -55,25 +55,7 @@ public class Net2PlanOaaS
         JSONArray catalogsArray = new JSONArray();
         for(Map.Entry<String, List<IExternal>> catalogEntry : catalog2ExternalMap.entrySet())
         {
-            String catalogName = catalogEntry.getKey();
-            List<IExternal> catalogExternals = catalogEntry.getValue();
-            JSONObject catalogJSON = new JSONObject();
-            JSONArray externalsArray = new JSONArray();
-            for(IExternal ext : catalogExternals)
-            {
-                if(ext instanceof IAlgorithm)
-                {
-                    JSONObject algJSON = InternalUtils.parseAlgorithm((IAlgorithm)ext);
-                    externalsArray.add(new JSONValue(algJSON));
-                }
-                else if(ext instanceof IReport)
-                {
-                    JSONObject repJSON = InternalUtils.parseReport((IReport)ext);
-                    externalsArray.add(new JSONValue(repJSON));
-                }
-            }
-            catalogJSON.put("name", new JSONValue(catalogName));
-            catalogJSON.put("files", new JSONValue(externalsArray));
+            JSONObject catalogJSON = InternalUtils.parseCatalog(catalogEntry);
             catalogsArray.add(new JSONValue(catalogJSON));
         }
         catalogsJSON.put("catalogs", new JSONValue(catalogsArray));
@@ -134,6 +116,29 @@ public class Net2PlanOaaS
     }
 
     @GET
+    @Path("/catalogs/{name}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getCatalogByName(@PathParam("name") String catalogName)
+    {
+        JSONObject catalogJSON = null;
+        for(Map.Entry<String, List<IExternal>> catalogEntry : catalog2ExternalMap.entrySet())
+        {
+            String catalog = catalogEntry.getKey();
+            if(catalog.equals(catalogName))
+            {
+                catalogJSON = InternalUtils.parseCatalog(catalogEntry);
+                break;
+            }
+        }
+        if(catalogJSON == null)
+        {
+            return InternalUtils.NOT_FOUND(JSON.write(InternalUtils.NOT_FOUND_JSON("Catalog "+catalogName+" not found")));
+        }
+
+        return InternalUtils.OK(JSON.write(catalogJSON));
+    }
+
+    @GET
     @Path("/algorithms")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAlgorithms()
@@ -151,6 +156,30 @@ public class Net2PlanOaaS
     }
 
     @GET
+    @Path("/algorithms/{name}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getAlgorithmByName(@PathParam("name") String algorithmName)
+    {
+        JSONObject algorithmJSON = null;
+        for(IAlgorithm alg : algorithms)
+        {
+            String algName = alg.getClass().getName();
+            if(algName.equals(algorithmName))
+            {
+                algorithmJSON = InternalUtils.parseAlgorithm(alg);
+                break;
+            }
+        }
+
+        if(algorithmJSON == null)
+        {
+            return InternalUtils.NOT_FOUND(JSON.write(InternalUtils.NOT_FOUND_JSON("Algorithm "+algorithmName+" not found")));
+        }
+
+        return InternalUtils.OK(JSON.write(algorithmJSON));
+    }
+
+    @GET
     @Path("/reports")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getReports()
@@ -165,6 +194,30 @@ public class Net2PlanOaaS
         reportsJSON.put("reports",new JSONValue(reportsArray));
 
         return InternalUtils.OK(JSON.write(reportsJSON));
+    }
+
+    @GET
+    @Path("/reports/{name}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getReportByName(@PathParam("name") String reportName)
+    {
+        JSONObject reportJSON = null;
+        for(IReport rep : reports)
+        {
+            String repName = rep.getClass().getName();
+            if(repName.equals(reportName))
+            {
+                reportJSON = InternalUtils.parseReport(rep);
+                break;
+            }
+        }
+
+        if(reportJSON == null)
+        {
+            return InternalUtils.NOT_FOUND(JSON.write(InternalUtils.NOT_FOUND_JSON("Report "+reportName+" not found")));
+        }
+
+        return InternalUtils.OK(JSON.write(reportJSON));
     }
 
 
