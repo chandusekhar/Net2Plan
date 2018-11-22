@@ -8,10 +8,7 @@ import javax.ws.rs.core.Response;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collections;
 import java.util.Enumeration;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -115,7 +112,7 @@ public class RestUtils
      */
     public static void cleanFolder(File folder, boolean deleteFolder)
     {
-        if(!folder.isDirectory())
+        if(folder.isDirectory())
             return;
         File [] files = folder.listFiles();
         if(files != null)
@@ -132,29 +129,6 @@ public class RestUtils
         }
         if(deleteFolder)
             folder.delete();
-    }
-
-    public static List<File> findClassFilesInFolder(File folder)
-    {
-        List<File> classFiles = new LinkedList<>();
-        if(!folder.isDirectory())
-            return Collections.EMPTY_LIST;
-        File [] files = folder.listFiles();
-        if(files != null)
-        {
-            for(File f: files)
-            {
-                if(f.isDirectory())
-                {
-                    classFiles.addAll(findClassFilesInFolder(f));
-                } else {
-                    if(f.getName().endsWith(".class") && !f.getName().contains("$"))
-                        classFiles.add(f);
-                }
-            }
-        }
-
-        return classFiles;
     }
 
 
