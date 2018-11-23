@@ -9,7 +9,6 @@ import com.net2plan.libraries.TrafficSeries;
 import com.net2plan.utils.*;
 import com.shc.easyjson.JSONArray;
 import com.shc.easyjson.JSONObject;
-import com.shc.easyjson.JSONValue;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.codehaus.stax2.XMLStreamReader2;
 
@@ -315,23 +314,222 @@ public class ReaderNetPlanN2PJSONVersion_7 implements IReaderNetPlan_JSON
                     long mtId = mtJSON.get("id").getValue();
                     long mtDemandId = mtJSON.get("demandId").getValue();
                     String mtDescription = mtJSON.get("description").getValue();
-                    List<String> mtInitialSetLinks = StringUtils.toList(StringUtils.split(mtJSON.get("initialSetLinks").getValue()));
                     List<String> mtCurrentSetLinks = StringUtils.toList(StringUtils.split(mtJSON.get("currentSetLinks").getValue()));
+                    Set<Link> mtLinks = mtCurrentSetLinks.stream().map(id -> netPlan.getLinkFromId(Long.parseLong(id))).collect(Collectors.toSet());
                     double mtCarriedTraffic = mtJSON.get("carriedTrafficIfNotFailing").getValue();
                     double mtOccupiedLinkCapacity = mtJSON.get("occupiedLinkCapacityIfNotFailing").getValue();
+
+                    MulticastDemand dem = netPlan.getMulticastDemandFromId(mtDemandId);
+
+                    MulticastTree newTree = netPlan.addMulticastTree(mtId, dem, mtCarriedTraffic, mtOccupiedLinkCapacity, mtLinks, null);
+
+                    newTree.setDescription(mtDescription);
+                    JSONArray mtAttributes = mtJSON.get("attributes").getValue();
+                    JSONArray mtTags = mtJSON.get("tags").getValue();
+                    mtTags.stream().forEach(tag -> newTree.addTag(tag.getValue()));
+                    mtAttributes.stream().forEach(att ->
+                    {
+                        JSONObject attribute = att.getValue();
+                        newTree.setAttribute(attribute.get("key").getValue(), (String)attribute.get("value").getValue());
+                    });
 
                 });
 
                 JSONObject sourceRoutingJSON = layerJSON.get("sourceRouting").getValue();
+                backupRouteIdsMap = new TreeMap<>();
                 JSONArray routes = sourceRoutingJSON.get("routes").getValue();
                 routes.stream().forEach(route ->
                 {
                     JSONObject routeJSON = route.getValue();
+                    long routeId = routeJSON.get("id").getValue();
+                    long routeDemandId = routeJSON.get("demandId").getValue();
+                    String routeDescription = routeJSON.get("description").getValue();
+                    double routeCarriedTraffic = routeJSON.get("currentCarriedTrafficIfNotFailing").getValue();
 
+                    List<String> routeCurrentPathIds = StringUtils.toList(StringUtils.split(routeJSON.get("currentPath").getValue()));
+                    List<? extends NetworkElement> routeCurrentPath = routeCurrentPathIds.stream().map(id -> netPlan.getNetworkElement(Long.parseLong(id))).collect(Collectors.toList());
+
+                    List<String> routeCurrentOccupations = StringUtils.toList(StringUtils.split(routeJSON.get("currentLinksAndResourcesOccupationIfNotFailing").getValue()));
+                    List<Double> routeCurrentOccupations_double = routeCurrentOccupations.stream().mapToDouble(s -> Double.parseDouble(s)).boxed().collect(Collectors.toList());
+
+                    List<String> routeBackupIds = StringUtils.toList(StringUtils.split(routeJSON.get("backupRoutes").getValue()));
+
+                    long routeBidirectionalPairId = routeJSON.get("bidirectionalPairId").getValue();
+
+                    Demand d = netPlan.getDemandFromId(routeDemandId);
+                    Route newRoute = netPlan.addServiceChain(routeId, d, routeCarriedTraffic, routeCurrentOccupations_double, routeCurrentPath, null);
+                    backupRouteIdsMap.put(newRoute, routeBackupIds.stream().map(id ->
+                    {
+                        try{
+                            return Long.parseLong(id);
+                        }
+                        catch(Exception e)
+                        {
+                            return Integer.toUnsignedLong(-1);
+                        }
+
+                    }).collect(Collectors.toList()));
+
+                    newRoute.setDescription(routeDescription);
+
+                    Route bidirectionalPair = netPlan.getRouteFromId(routeBidirectionalPairId);
+                    if(bidirectionalPair != null)
+                        newRoute.setBidirectionalPair(bidirectionalPair);
+
+                    JSONArray routeAttributes = routeJSON.get("attributes").getValue();
+                    JSONArray routeTags = routeJSON.get("tags").getValue();
+                    routeTags.stream().forEach(tag -> newRoute.addTag(tag.getValue()));
+                    routeAttributes.stream().forEach(att ->
+                    {
+                        JSONObject attribute = att.getValue();
+                        newRoute.setAttribute(attribute.get("key").getValue(), (String)attribute.get("value").getValue());
+                    });
+
+                });
+
+                for(NetworkLayer lay : netPlan.getNetworkLayers())
+                {
+                    for(Route r : netPlan.getRoutes(lay))
+                    {
+                        List<Long> backupRoutesIds = backupRouteIdsMap.get(r);
+                        backupRoutesIds.stream().forEach(id ->
+                        {
+                            Route backup = netPlan.getRouteFromId(id);
+                            if(backup != null)
+                                r.addBackupRoute(backup);
+                        });
+                    }
+                }
+
+                JSONObject hopByHopJSON = layerJSON.get("hopbyhopRouting").getValue();
+                JSONArray fRules = hopByHopJSON.get("forwardingRules").getValue();
+                fRules.stream().forEach(fRule ->
+                {
+                    JSONObject fRuleJSON = fRule.getValue();
+                    long fRuleDemandId = fRuleJSON.get("demandId").getValue();
+                    long fRuleLinkId = fRuleJSON.get("linkId").getValue();
+                    double fRuleSplittingRatio = fRuleJSON.get("splittingRatio").getValue();
+
+                    Demand d = netPlan.getDemandFromId(fRuleDemandId);
+                    Link l = netPlan.getLinkFromId(fRuleLinkId);
+
+                    netPlan.setForwardingRule(d,l,fRuleSplittingRatio);
                 });
             });
 
 
+        });
+
+        JSONArray srgs = json.get("srgs").getValue();
+        srgs.stream().forEach(srg ->
+        {
+            JSONObject srgJSON = srg.getValue();
+            long srgId = srgJSON.get("id").getValue();
+            String srgDescription = srgJSON.get("description").getValue();
+            boolean srgIsDynamic = srgJSON.get("isDynamic").getValue();
+            double meanTimeToFailInHours = srgJSON.get("meanTimeToFailInHours").getValue();
+            double meanTimeToRepairInHours = srgJSON.get("meanTimeToRepairInHours").getValue();
+            SharedRiskGroup newSRG;
+            if (srgIsDynamic)
+            {
+                final String className = srgJSON.get("dynamicSrgClassName").getValue();
+                final String configString = srgJSON.get("dynamicSrgConfigString").getValue();
+                newSRG = netPlan.addSRGDynamic(srgId , meanTimeToFailInHours, meanTimeToRepairInHours, className , configString , null);
+            }
+            else
+            {
+                newSRG = netPlan.addSRG(srgId , meanTimeToFailInHours, meanTimeToRepairInHours, null);
+                List<String> srgLinksIds = StringUtils.toList(StringUtils.split(srgJSON.get("links").getValue()));
+                srgLinksIds.stream().forEach(id ->
+                {
+                    try{
+                        long idd = Long.parseLong(id);
+                        newSRG.addLink(netPlan.getLinkFromId(idd));
+                    }catch (Exception e)
+                    {
+
+                    }
+                });
+                List<String> srgNodesIds = StringUtils.toList(StringUtils.split(srgJSON.get("nodes").getValue()));
+                srgNodesIds.stream().forEach(id ->
+                {
+                    try{
+                        long idd = Long.parseLong(id);
+                        newSRG.addNode(netPlan.getNodeFromId(idd));
+                    }catch(Exception e)
+                    {
+
+                    }
+                });
+
+            }
+
+            newSRG.setDescription(srgDescription);
+
+            JSONArray srgAttributes = srgJSON.get("attributes").getValue();
+            JSONArray srgTags = srgJSON.get("tags").getValue();
+            srgTags.stream().forEach(tag -> newSRG.addTag(tag.getValue()));
+            srgAttributes.stream().forEach(att ->
+            {
+                JSONObject attribute = att.getValue();
+                newSRG.setAttribute(attribute.get("key").getValue(), (String)attribute.get("value").getValue());
+            });
+        });
+
+        JSONArray demandLinkMappings = json.get("demandLinkMappings").getValue();
+        demandLinkMappings.stream().forEach(demandLinkMap ->
+        {
+            JSONObject demandLinkMapJSON = demandLinkMap.getValue();
+            JSONArray layerCouplingDemands = demandLinkMapJSON.get("layerCouplingDemand").getValue();
+            layerCouplingDemands.stream().forEach(layerCoupling ->
+            {
+                JSONObject layerCouplingJSON = layerCoupling.getValue();
+                long lowerLayerDemandId = layerCouplingJSON.get("lowerLayerDemandId").getValue();
+                long upperLayerLinkId = layerCouplingJSON.get("upperLayerLinkId").getValue();
+                Demand d = netPlan.getDemandFromId(lowerLayerDemandId);
+                Link l = netPlan.getLinkFromId(upperLayerLinkId);
+                d.coupleToUpperOrSameLayerLink(l);
+            });
+
+            JSONArray layerCouplingMulticastDemands = demandLinkMapJSON.get("layerCouplingMulticastDemand").getValue();
+            layerCouplingMulticastDemands.stream().forEach(layerCouplingM ->
+            {
+                JSONObject layerCouplingMJSON = layerCouplingM.getValue();
+                long lowerLayerDemandId = layerCouplingMJSON.get("lowerLayerDemandId").getValue();
+                List<String> upperLayerLinksIds = StringUtils.toList(StringUtils.split(layerCouplingMJSON.get("upperLayerLinkIds").getValue()));
+                MulticastDemand md = netPlan.getMulticastDemandFromId(lowerLayerDemandId);
+                Set<Link> l = new LinkedHashSet<>();
+                upperLayerLinksIds.stream().forEach(id ->
+                {
+                    try{
+                        Long idd = Long.parseLong(id);
+                        l.add(netPlan.getLinkFromId(idd));
+                    }catch(Exception e)
+                    {
+
+                    }
+                });
+
+                md.couple(l);
+            });
+        });
+
+        JSONArray layersDemandsCoupled = json.get("layersDemandsCoupled").getValue();
+        layersDemandsCoupled.stream().forEach(layerDemandsCoupled ->
+        {
+            JSONObject layerCoupledJSON = layerDemandsCoupled.getValue();
+            long coupledDemandId = layerCoupledJSON.get("layerDemandId").getValue();
+            long bundleId = layerCoupledJSON.get("layerLinkId").getValue();
+            netPlan.getDemandFromId(coupledDemandId).coupleToUpperOrSameLayerLink(netPlan.getLinkFromId(bundleId));
+        });
+
+        JSONArray netAttributes = json.get("attributes").getValue();
+        JSONArray netTags = json.get("tags").getValue();
+        netTags.stream().forEach(tag -> netPlan.addTag(tag.getValue()));
+        netAttributes.stream().forEach(att ->
+        {
+            JSONObject attribute = att.getValue();
+            netPlan.setAttribute(attribute.get("key").getValue(), (String)attribute.get("value").getValue());
         });
 
     }
@@ -597,12 +795,12 @@ public class ReaderNetPlanN2PJSONVersion_7 implements IReaderNetPlan_JSON
 
         final double currentCarriedTrafficIfNotFailing = getDouble ("currentCarriedTrafficIfNotFailing");
         final List<Double> currentLinksAndResourcesOccupationIfNotFailing = getListDouble("currentLinksAndResourcesOccupationIfNotFailing");
-        final List<NetworkElement> currentPath = getLinkAndResorceListFromIds(netPlan, getListLong("currentPath"));
+        final List<NetworkElement> currentPath = getLinkAndResourceListFromIds(netPlan, getListLong("currentPath"));
 
         /* Initial route may not exist, if so current equals the initial */
         List<NetworkElement> initialStatePath = new ArrayList<NetworkElement> (currentPath);
         boolean initialPathExists = true;
-        try { initialStatePath = getLinkAndResorceListFromIds(netPlan, getListLong("initialStatePath")); } catch (Exception e) { initialPathExists = false; }
+        try { initialStatePath = getLinkAndResourceListFromIds(netPlan, getListLong("initialStatePath")); } catch (Exception e) { initialPathExists = false; }
         final double initialStateCarriedTrafficIfNotFailing = initialPathExists? getDouble ("initialStateCarriedTrafficIfNotFailing") : currentCarriedTrafficIfNotFailing;
         final List<Double> initialStateOccupationIfNotFailing = initialPathExists? getListDouble("initialStateOccupationIfNotFailing") : new ArrayList<Double> (currentLinksAndResourcesOccupationIfNotFailing);
         long bidirectionalPairId = -1; try { bidirectionalPairId = getLong ("bidirectionalPairId"); } catch (Exception e) {}
@@ -991,7 +1189,7 @@ public class ReaderNetPlanN2PJSONVersion_7 implements IReaderNetPlan_JSON
     {
         List<Link> res = new LinkedList<Link> (); for (long id : ids) res.add(np.getLinkFromId(id)); return res;
     }
-    private static List<NetworkElement> getLinkAndResorceListFromIds (NetPlan np , Collection<Long> ids)
+    private static List<NetworkElement> getLinkAndResourceListFromIds(NetPlan np , Collection<Long> ids)
     {
         List<NetworkElement> res = new LinkedList<NetworkElement> ();
         for (long id : ids)
