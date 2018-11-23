@@ -1,12 +1,11 @@
 package com.net2plan;
 
+import com.net2plan.interfaces.networkDesign.Configuration;
 import com.net2plan.interfaces.networkDesign.IAlgorithm;
 import com.net2plan.interfaces.networkDesign.IReport;
 import com.net2plan.interfaces.networkDesign.NetPlan;
 import com.net2plan.internal.IExternal;
-import com.net2plan.utils.ClassLoaderUtils;
-import com.net2plan.utils.RestDatabase;
-import com.net2plan.utils.InternalUtils;
+import com.net2plan.utils.*;
 import com.shc.easyjson.JSON;
 import com.shc.easyjson.JSONArray;
 import com.shc.easyjson.JSONObject;
@@ -20,6 +19,7 @@ import javax.ws.rs.core.Response;
 import java.io.*;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -211,6 +211,211 @@ public class Net2PlanOaaS
         return InternalUtils.OK(JSON.write(reportJSON));
     }
 
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/execute")
+    public Response execute(JSONObject inputJSON)
+    {
+        String response = "";
+        String type = inputJSON.get("type").getValue();
+        String executeName = inputJSON.get("name").getValue();
+        JSONObject userParams = inputJSON.get("userparams").getValue();
+        JSONObject inputNetPlan = inputJSON.get("netPlan").getValue();
+
+        NetPlan netPlan = new NetPlan(inputNetPlan);
+
+        if(type.equalsIgnoreCase("ALGORITHM"))
+        {
+            IAlgorithm algorithm = null;
+            for(IAlgorithm alg : algorithms)
+            {
+                if(executeName.equals(alg.getClass().getName()))
+                {
+                    algorithm = alg;
+                    break;
+                }
+            }
+            if(algorithm == null)
+                return InternalUtils.NOT_FOUND("Algorithm "+executeName+" not found");
+
+            List<Triple<String, String, String>> algorithmParameters_raw = algorithm.getParameters();
+            Map<String, String> algorithmParameters = new LinkedHashMap<>();
+            for(Triple<String, String, String> t : algorithmParameters_raw)
+            {
+                String paramName = t.getFirst();
+                String paramDefaultValue = t.getSecond();
+                algorithmParameters.put(paramName, paramDefaultValue);
+            }
+
+
+            Map<String, String> userParametersMap = InternalUtils.parseParametersMap(userParams);
+            if(userParametersMap != null)
+            {
+                for(Map.Entry<String, String> entry : userParametersMap.entrySet())
+                {
+                    String paramName = entry.getKey();
+                    String userParamValue = entry.getValue();
+                    if(algorithmParameters.containsKey(paramName))
+                    {
+                        String paramDefaultValue = algorithmParameters.get(paramName);
+                        if(paramDefaultValue.startsWith("#select#"))
+                        {
+                            List<String> possibleValues = StringUtils.toList(StringUtils.split(paramDefaultValue.replace("#select# ","")));
+                            if(possibleValues.contains(userParamValue))
+                            {
+                                algorithmParameters.put(paramName, userParamValue);
+                            }
+                            else{
+                                return InternalUtils.SERVER_ERROR("Parameter "+paramName+ " can't be set as "+userParamValue+". Its possible values are: "+possibleValues);
+                            }
+                        }
+                        else if(paramDefaultValue.startsWith("#boolean#"))
+                        {
+                            if(userParamValue.equals("true") || userParamValue.equals("false"))
+                            {
+                                algorithmParameters.put(paramName, userParamValue);
+                            }
+                            else{
+                                return InternalUtils.SERVER_ERROR("Parameter "+paramName+ " can't be set as "+userParamValue+". Its possible values are true or false");
+                            }
+                        }
+                        else{
+                            algorithmParameters.put(paramName, userParamValue);
+                        }
+                    }
+                    else{
+                        return InternalUtils.SERVER_ERROR("Undefined parameter "+paramName+" for this algorithm: "+algorithm.getClass().getName());
+                    }
+                }
+            }
+            else{
+                for(Map.Entry<String, String> entry : algorithmParameters.entrySet())
+                {
+                    String paramName = entry.getKey();
+                    String paramDefaultValue = entry.getValue();
+                    String paramValue = "";
+                    if(paramDefaultValue.startsWith("#select#"))
+                    {
+                        paramValue = StringUtils.split(paramDefaultValue.replace("#select# ",""))[0];
+                    }
+                    else if(paramDefaultValue.startsWith("#boolean#"))
+                    {
+                        paramValue = paramDefaultValue.replace("#boolean# ","");
+                    }
+                    else{
+                        paramValue = paramDefaultValue;
+                    }
+
+                    algorithmParameters.put(paramName, paramValue);
+                }
+            }
+
+            List<Triple<String, String, String>> net2planParameters_raw = Configuration.getNet2PlanParameters();
+            Map<String, String> net2planParameters = new LinkedHashMap<>();
+            net2planParameters_raw.stream().forEach(t -> net2planParameters.put(t.getFirst(), t.getSecond()));
+
+            response = algorithm.executeAlgorithm(netPlan, algorithmParameters, net2planParameters);
+
+        }
+        else if(type.equalsIgnoreCase("REPORT"))
+        {
+            IReport report = null;
+            for(IReport rep : reports)
+            {
+                if(executeName.equals(rep.getClass().getName()))
+                {
+                    report = rep;
+                    break;
+                }
+            }
+            if(report == null)
+                return InternalUtils.NOT_FOUND("Report "+executeName+" not found");
+
+            List<Triple<String, String, String>> reportParameters_raw = report.getParameters();
+            Map<String, String> reportParameters = new LinkedHashMap<>();
+            for(Triple<String, String, String> t : reportParameters_raw)
+            {
+                String paramName = t.getFirst();
+                String paramDefaultValue = t.getSecond();
+                reportParameters.put(paramName, paramDefaultValue);
+            }
+
+            Map<String, String> userParametersMap = InternalUtils.parseParametersMap(userParams);
+            if(userParametersMap != null)
+            {
+                for(Map.Entry<String, String> entry : userParametersMap.entrySet())
+                {
+                    String paramName = entry.getKey();
+                    String userParamValue = entry.getValue();
+                    if(reportParameters.containsKey(paramName))
+                    {
+                        String paramDefaultValue = reportParameters.get(paramName);
+                        if(paramDefaultValue.startsWith("#select#"))
+                        {
+                            List<String> possibleValues = StringUtils.toList(StringUtils.split(paramDefaultValue.replace("#select# ","")));
+                            if(possibleValues.contains(userParamValue))
+                            {
+                                reportParameters.put(paramName, userParamValue);
+                            }
+                            else{
+                                return InternalUtils.SERVER_ERROR("Parameter "+paramName+ " can't be set as "+userParamValue+". Its possible values are: "+possibleValues);
+                            }
+                        }
+                        else if(paramDefaultValue.startsWith("#boolean#"))
+                        {
+                            if(userParamValue.equals("true") || userParamValue.equals("false"))
+                            {
+                                reportParameters.put(paramName, userParamValue);
+                            }
+                            else{
+                                return InternalUtils.SERVER_ERROR("Parameter "+paramName+ " can't be set as "+userParamValue+". Its possible values are true or false");
+                            }
+                        }
+                        else{
+                            reportParameters.put(paramName, userParamValue);
+                        }
+                    }
+                    else{
+                        return InternalUtils.SERVER_ERROR("Undefined parameter "+paramName+" for this report: "+report.getClass().getName());
+                    }
+                }
+            }
+            else{
+                for(Map.Entry<String, String> entry : reportParameters.entrySet())
+                {
+                    String paramName = entry.getKey();
+                    String paramDefaultValue = entry.getValue();
+                    String paramValue = "";
+                    if(paramDefaultValue.startsWith("#select#"))
+                    {
+                        paramValue = StringUtils.split(paramDefaultValue.replace("#select# ",""))[0];
+                    }
+                    else if(paramDefaultValue.startsWith("#boolean#"))
+                    {
+                        paramValue = paramDefaultValue.replace("#boolean# ","");
+                    }
+                    else{
+                        paramValue = paramDefaultValue;
+                    }
+
+                    reportParameters.put(paramName, paramValue);
+                }
+            }
+
+            List<Triple<String, String, String>> net2planParameters_raw = Configuration.getNet2PlanParameters();
+            Map<String, String> net2planParameters = new LinkedHashMap<>();
+            net2planParameters_raw.stream().forEach(t -> net2planParameters.put(t.getFirst(), t.getSecond()));
+
+            response = report.executeReport(netPlan, reportParameters, net2planParameters);
+        }
+
+        JSONObject responseJSON = new JSONObject();
+        responseJSON.put("outputNetPlan", new JSONValue(netPlan.saveToJSON()));
+        responseJSON.put("executeResponse", new JSONValue(response));
+
+        return InternalUtils.OK(response);
+    }
 
 
 }

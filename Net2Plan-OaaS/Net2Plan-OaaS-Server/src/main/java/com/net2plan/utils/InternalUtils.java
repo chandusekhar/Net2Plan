@@ -16,6 +16,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Enumeration;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.jar.JarEntry;
@@ -227,6 +228,19 @@ public class InternalUtils
         JSONObject notfound = new JSONObject();
         notfound.put("message", new JSONValue(message));
         return notfound;
+    }
+
+    public static Map<String, String> parseParametersMap(JSONObject paramJSON)
+    {
+        Map<String, String> params = new LinkedHashMap<>();
+        if(paramJSON.size() == 0)
+            return null;
+        for(Map.Entry<String, JSONValue> entry : paramJSON.entrySet())
+        {
+            params.put(entry.getKey(), entry.getValue().getValue());
+        }
+
+        return params;
     }
 
 
