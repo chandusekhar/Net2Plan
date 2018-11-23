@@ -6063,7 +6063,7 @@ public class NetPlan extends NetworkElement
 
         if (outputFormat.equals(Net2PlanFormat.JSON))
         {
-            filePath = filePath.replace(".n2p",",.json");
+            filePath = filePath.replace(".n2p",".json");
             file = new File(filePath);
         }
 
@@ -7134,6 +7134,7 @@ public class NetPlan extends NetworkElement
                         demandLinkMappingJSON.put("layerCouplingMulticastDemand", new JSONValue(layerCouplingMulticastDemandsJSON));
                         demandLinkMappingsJSON.add(new JSONValue(demandLinkMappingJSON));
                     }
+                    networkJSON.put("demandLinkMappings", new JSONValue(demandLinkMappingsJSON));
 
                     JSONArray layerDemandsCoupledJSON = new JSONArray();
                     for (NetworkLayer layer : this.layers)

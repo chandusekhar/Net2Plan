@@ -38,10 +38,17 @@ public class ReaderNetPlanN2PJSONVersion_7 implements IReaderNetPlan_JSON
         final String name = json.get("name").getValue();
         final JSONArray tags = json.get("tags").getValue();
         final JSONArray attributes = json.get("attributes").getValue();
+        final JSONArray planningDomains = json.get("planningDomains").getValue();
+        List<String> cache_definedPlotNodeLayouts = StringUtils.toList(StringUtils.split(json.get("cache_definedPlotNodeLayouts").getValue()));
+        String currentPlot = json.get("currentPlotNodeLayout").getValue();
+        cache_definedPlotNodeLayouts.stream().forEach(plot -> netPlan.addPlotNodeLayout(plot));
+        netPlan.setPlotNodeLayoutCurrentlyActive(currentPlot);
+
 
         netPlan.nextElementId = new MutableLong(nextElementId);
         netPlan.setDescription(description);
         netPlan.setName(name);
+        planningDomains.stream().forEach(pd -> netPlan.addGlobalPlanningDomain(pd.getValue()));
         tags.stream().forEach(tag -> netPlan.addTag(tag.getValue()));
         attributes.stream().forEach(
                 att ->
@@ -102,8 +109,8 @@ public class ReaderNetPlanN2PJSONVersion_7 implements IReaderNetPlan_JSON
                     double nodePopulation = Double.parseDouble(nodeJSON.get("population").getValue());
                     String nodeDescription = nodeJSON.get("description").getValue();
                     boolean nodeIsUp = Boolean.parseBoolean(nodeJSON.get("isUp").getValue());
-                    JSONArray planningDomains = json.get("planningDomains").getValue();
-                    planningDomains.stream().forEach(pd -> newNode.addToPlanningDomain(pd.getValue()));
+                    JSONArray nodePlanningDomains = json.get("planningDomains").getValue();
+                    nodePlanningDomains.stream().forEach(pd -> newNode.addToPlanningDomain(pd.getValue()));
                     newNode.setPopulation(nodePopulation);
                     newNode.setDescription(nodeDescription);
                     newNode.setFailureState(nodeIsUp);
@@ -265,12 +272,62 @@ public class ReaderNetPlanN2PJSONVersion_7 implements IReaderNetPlan_JSON
                     newDemand.setAttribute(attribute.get("key").getValue(), (String)attribute.get("value").getValue());
                 });
 
+                JSONArray multicastDemands = layerJSON.get("multicastDemands").getValue();
+                multicastDemands.stream().forEach(md ->
+                {
+                    JSONObject mdJSON = md.getValue();
+                    long mdId = mdJSON.get("id").getValue();
+                    long mdIngressNodeId = mdJSON.get("ingressNodeId").getValue();
+                    List<String> mdEgressNodesIds = StringUtils.toList(StringUtils.split(mdJSON.get("egressNodeIds").getValue()));
+                    String mdDescription = mdJSON.get("description").getValue();
+                    String mdQoSType = mdJSON.get("qosType").getValue();
+                    double mdOfferedTraffic = mdJSON.get("offeredTraffic").getValue();
+                    double mdOfferedTrafficGrowthFactor = mdJSON.get("offeredTrafficGrowthFactorPerPeriodZeroIsNoGrowth").getValue();
+                    double mdMaxAcceptableLatency = mdJSON.get("maximumAcceptableE2EWorstCaseLatencyInMs").getValue();
+                    List<String> mdMonitoredTraffics = StringUtils.toList(StringUtils.split(mdJSON.get("monitoredOrForecastedTraffics").getValue()));
+
+                    Node mdIngressNode = netPlan.getNodeFromId(mdIngressNodeId);
+                    Set<Node> mdEgressNodes = mdEgressNodesIds.stream().map(id -> netPlan.getNodeFromId(Long.parseLong(id))).collect(Collectors.toSet());
+
+                    MulticastDemand newMDemand = netPlan.addMulticastDemand(mdId, mdIngressNode, mdEgressNodes, mdOfferedTraffic, null, nl);
+
+                    newMDemand.setDescription(mdDescription);
+                    newMDemand.setQoSType(mdQoSType);
+                    newMDemand.setOfferedTrafficPerPeriodGrowthFactor(mdOfferedTrafficGrowthFactor);
+                    newMDemand.setMaximumAcceptableE2EWorstCaseLatencyInMs(mdMaxAcceptableLatency);
+                    newMDemand.setMonitoredOrForecastedOfferedTraffic(TrafficSeries.createFromStringList(mdMonitoredTraffics));
+
+                    JSONArray mdemandAttributes = mdJSON.get("attributes").getValue();
+                    JSONArray mdemandTags = mdJSON.get("tags").getValue();
+                    mdemandTags.stream().forEach(tag -> newMDemand.addTag(tag.getValue()));
+                    mdemandAttributes.stream().forEach(att ->
+                    {
+                        JSONObject attribute = att.getValue();
+                        newMDemand.setAttribute(attribute.get("key").getValue(), (String)attribute.get("value").getValue());
+                    });
+
+                });
+
+                JSONArray multicastTrees = layerJSON.get("multicastTrees").getValue();
+                multicastTrees.stream().forEach(mt ->
+                {
+                    JSONObject mtJSON = mt.getValue();
+                    long mtId = mtJSON.get("id").getValue();
+                    long mtDemandId = mtJSON.get("demandId").getValue();
+                    String mtDescription = mtJSON.get("description").getValue();
+                    List<String> mtInitialSetLinks = StringUtils.toList(StringUtils.split(mtJSON.get("initialSetLinks").getValue()));
+                    List<String> mtCurrentSetLinks = StringUtils.toList(StringUtils.split(mtJSON.get("currentSetLinks").getValue()));
+                    double mtCarriedTraffic = mtJSON.get("carriedTrafficIfNotFailing").getValue();
+                    double mtOccupiedLinkCapacity = mtJSON.get("occupiedLinkCapacityIfNotFailing").getValue();
+
+                });
 
                 JSONObject sourceRoutingJSON = layerJSON.get("sourceRouting").getValue();
                 JSONArray routes = sourceRoutingJSON.get("routes").getValue();
                 routes.stream().forEach(route ->
                 {
                     JSONObject routeJSON = route.getValue();
+
                 });
             });
 
