@@ -414,7 +414,7 @@ public class Net2PlanOaaS
         responseJSON.put("outputNetPlan", new JSONValue(netPlan.saveToJSON()));
         responseJSON.put("executeResponse", new JSONValue(response));
 
-        return InternalUtils.OK(response);
+        return InternalUtils.OK(JSON.write(responseJSON));
     }
 
 

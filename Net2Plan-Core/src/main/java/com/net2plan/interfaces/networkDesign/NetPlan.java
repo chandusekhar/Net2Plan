@@ -37,10 +37,7 @@ import javax.xml.stream.FactoryConfigurationError;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.XMLEvent;
 
-import com.shc.easyjson.JSON;
-import com.shc.easyjson.JSONArray;
-import com.shc.easyjson.JSONObject;
-import com.shc.easyjson.JSONValue;
+import com.shc.easyjson.*;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.codehaus.stax2.XMLInputFactory2;
 import org.codehaus.stax2.XMLOutputFactory2;
@@ -6126,11 +6123,11 @@ public class NetPlan extends NetworkElement
     }
 
     /**
-     * <p>Saves the current network plan to a JSON formatted string.</p>
+     * <p>Saves the current network plan to a JSON .</p>
      *
-     * @return JSON formatted String
+     * @return JSON
      */
-    public String saveToJSON()
+    public JSONObject saveToJSON()
     {
         ByteArrayOutputStream baos = null;
         String jsonResponse = "";
@@ -6155,7 +6152,15 @@ public class NetPlan extends NetworkElement
                 e.printStackTrace();
             }
         }
-        return jsonResponse;
+        JSONObject json = null;
+        try {
+            json = JSON.parse(jsonResponse);
+        } catch (ParseException e)
+        {
+            throw new Net2PlanException(e.getMessage());
+        }
+
+        return json;
     }
 
     /**
