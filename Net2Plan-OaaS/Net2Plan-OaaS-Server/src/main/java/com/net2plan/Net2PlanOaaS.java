@@ -26,7 +26,7 @@ import java.util.Map;
 
 
 /**
- * Root resource (exposed at "OaaS" path)
+ * Net2Plan OaaS (Optimization as a Service) root resource (exposed at "OaaS" path)
  */
 @Path("/OaaS")
 public class Net2PlanOaaS
@@ -54,6 +54,12 @@ public class Net2PlanOaaS
         return InternalUtils.OK(JSON.write(catalogsJSON));
     }
 
+    /**
+     *
+     * @param input
+     * @param fileMetaData
+     * @return
+     */
     @POST
     @Path("/catalogs")
     @Consumes(MediaType.MULTIPART_FORM_DATA)

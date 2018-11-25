@@ -32,6 +32,24 @@ public class InternalUtils
     public final static File UPLOAD_DIR;
     static { UPLOAD_DIR = new File(SystemUtils.getCurrentDir().getAbsolutePath() + File.separator + "upload"); }
 
+    public enum ExecutionType
+    {
+        ALGORITHM("ALGORITHM"),
+
+        REPORT("REPORT");
+
+        private String type;
+        ExecutionType(String type)
+        {
+            this.type = type;
+        }
+
+        @Override
+        public String toString()
+        {
+            return this.type;
+        }
+    }
     /**
      * Creates a HTTP response 200, OK with a specific message
      * @param message message to return (null if no message is desired)
@@ -69,50 +87,6 @@ public class InternalUtils
             return Response.serverError().build();
         else
             return Response.serverError().entity(message).build();
-    }
-
-    /**
-     * Decompresses a JAR file
-     * @param jarFile JAR file to decompress
-     */
-    public static void decompressJarFile(File jarFile)
-    {
-        String destDir = jarFile.getParentFile().getAbsolutePath();
-        try {
-            JarFile jar = new JarFile(jarFile);
-            Enumeration<JarEntry> enumJar = jar.entries();
-            while(enumJar.hasMoreElements())
-            {
-                JarEntry file = enumJar.nextElement();
-                File f = new File(destDir + java.io.File.separator + file.getName());
-                if (file.isDirectory())
-                {
-                    f.mkdir();
-                }
-            }
-            enumJar = jar.entries();
-            while(enumJar.hasMoreElements())
-            {
-                JarEntry file = enumJar.nextElement();
-                File f = new File(destDir + java.io.File.separator + file.getName());
-                if (file.isDirectory())
-                {
-                    continue;
-                }
-                InputStream is = jar.getInputStream(file);
-                java.io.FileOutputStream fos = new java.io.FileOutputStream(f);
-                while (is.available() > 0)
-                {
-                    fos.write(is.read());
-                }
-                fos.close();
-                is.close();
-            }
-            jar.close();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     /**
