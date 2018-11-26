@@ -52,6 +52,19 @@ public class Net2PlanOaaSClient
     }
 
     /**
+     * Obtains the catalog represented by name {name}
+     * @param name catalog´s name
+     * @return HTTP Response
+     */
+    public Response getCatalogByName(String name)
+    {
+        WebTarget this_target = target.path("catalogs/"+name);
+        Invocation.Builder inv = this_target.request().accept(MediaType.APPLICATION_JSON);
+        Response r = inv.get();
+        return r;
+    }
+
+    /**
      * Uploads a catalog (JAR file) including different algorithms and/or reports
      * @param catalogFile catalog (JAR file)
      * @return HTTP Response
