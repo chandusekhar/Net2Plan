@@ -41,6 +41,27 @@
             <classifier>bundle</classifier>
         </dependency>
         <dependency>
+            <groupId>com.net2plan</groupId>
+            <artifactId>net2plan-oaas-exec</artifactId>
+            <version>0.7.0-SNAPSHOT</version>
+            <scope>runtime</scope>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>com.net2plan</groupId>
+            <artifactId>net2plan-oaas-plugins-server</artifactId>
+            <version>0.7.0-SNAPSHOT</version>
+            <scope>runtime</scope>
+            <type>war</type>
+        </dependency>
+        <dependency>
+            <groupId>com.net2plan</groupId>
+            <artifactId>net2plan-oaas-plugins-client</artifactId>
+            <version>0.7.0-SNAPSHOT</version>
+            <scope>runtime</scope>
+            <type>jar</type>
+        </dependency>
+        <dependency>
             <groupId>com.net2plan.net2plan-cli</groupId>
             <artifactId>net2plan-cli-exec</artifactId>
             <version>0.7.0-SNAPSHOT</version>

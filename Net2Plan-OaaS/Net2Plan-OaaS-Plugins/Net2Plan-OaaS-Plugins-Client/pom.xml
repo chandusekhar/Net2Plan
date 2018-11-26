@@ -3,15 +3,14 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>net2plan-oaas</artifactId>
+        <artifactId>net2plan-oaas-plugins</artifactId>
         <groupId>com.net2plan</groupId>
         <version>0.7.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>net2plan-oaas-client</artifactId>
+    <artifactId>net2plan-oaas-plugins-client</artifactId>
     <packaging>jar</packaging>
-    <name>net2plan-oaas-client</name>
 
     <dependencyManagement>
         <dependencies>
@@ -28,13 +27,14 @@
     <dependencies>
         <dependency>
             <groupId>com.net2plan</groupId>
-            <artifactId>net2plan-oaas-server</artifactId>
+            <artifactId>net2plan-core</artifactId>
             <version>0.7.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.net2plan</groupId>
-            <artifactId>net2plan-core</artifactId>
+            <artifactId>net2plan-oaas-exec</artifactId>
             <version>0.7.0-SNAPSHOT</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.glassfish.jersey.containers</groupId>
