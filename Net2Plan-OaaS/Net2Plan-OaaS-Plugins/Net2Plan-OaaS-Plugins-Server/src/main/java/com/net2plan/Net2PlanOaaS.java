@@ -321,13 +321,7 @@ public class Net2PlanOaaS
             Map<String, String> net2planParameters = new LinkedHashMap<>();
             net2planParameters_raw.stream().forEach(t -> net2planParameters.put(t.getFirst(), t.getSecond()));
 
-            try{
-                response = algorithm.executeAlgorithm(netPlan, algorithmParameters, net2planParameters);
-            }
-            catch (Exception e)
-            {
-                return OaaSUtils.SERVER_ERROR(e.getMessage());
-            }
+            response = algorithm.executeAlgorithm(netPlan, algorithmParameters, net2planParameters);
 
         }
         else if(type.equalsIgnoreCase("REPORT"))
@@ -419,14 +413,7 @@ public class Net2PlanOaaS
             Map<String, String> net2planParameters = new LinkedHashMap<>();
             net2planParameters_raw.stream().forEach(t -> net2planParameters.put(t.getFirst(), t.getSecond()));
 
-            try{
-                response = report.executeReport(netPlan, reportParameters, net2planParameters);
-            }
-            catch (Exception e)
-            {
-                return OaaSUtils.SERVER_ERROR(e.getMessage());
-            }
-
+            response = report.executeReport(netPlan, reportParameters, net2planParameters);
         }
 
         JSONObject responseJSON = new JSONObject();

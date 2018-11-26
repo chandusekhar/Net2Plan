@@ -71,13 +71,13 @@ public class Net2PlanOaaSClient
 
         JSONObject netPlanJSON = netPlan.saveToJSON();
 
-        json.put("netPlan", new JSONValue(netPlanJSON));
+        //json.put("netPlan", new JSONValue(netPlanJSON));
 
         String json_string = JSON.write(json);
         System.out.println(json_string);
 
         Invocation.Builder inv = this_target.request(MediaType.APPLICATION_JSON_TYPE).accept(MediaType.APPLICATION_JSON_TYPE);
-        Response r = inv.post(Entity.entity(json, MediaType.APPLICATION_JSON_TYPE));
+        Response r = inv.post(Entity.entity(json_string, MediaType.APPLICATION_JSON_TYPE));
 
         return r;
     }
