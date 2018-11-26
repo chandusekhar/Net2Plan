@@ -110,26 +110,16 @@
             <outputFileNameMapping>Net2Plan.jar</outputFileNameMapping>
         </dependencySet>
         <!--REST API-->
-        <dependencySet>
+        <!-- <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
             <useTransitiveDependencies>false</useTransitiveDependencies>
             <unpack>false</unpack>
             <includes>
-                <include>${project.groupId}.net2plan-oaas.net2plan-oaas-plugins:net2plan-oaas-plugins-server:*</include>
+                <include>${project.groupId}.net2plan-rest-api:net2plan-rest-api-server:*</include>
             </includes>
             <outputDirectory>rest</outputDirectory>
             <outputFileNameMapping>Net2Plan-REST-API.war</outputFileNameMapping>
-        </dependencySet>
-        <dependencySet>
-            <useProjectArtifact>false</useProjectArtifact>
-            <useTransitiveDependencies>false</useTransitiveDependencies>
-            <unpack>false</unpack>
-            <includes>
-                <include>${project.groupId}.net2plan-oaas.net2plan-oaas-plugins:net2plan-oaas-plugins-client:*</include>
-            </includes>
-            <outputDirectory>rest</outputDirectory>
-            <outputFileNameMapping>Net2Plan-REST-API-Client.jar</outputFileNameMapping>
-        </dependencySet>
+        </dependencySet> -->
         <!--External resources-->
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>

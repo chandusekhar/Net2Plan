@@ -51,7 +51,7 @@ public class Net2PlanOaaS
         }
         catalogsJSON.put("catalogs", new JSONValue(catalogsArray));
 
-        return OaaSUtils.OK(JSON.write(catalogsJSON));
+        return InternalUtils.OK(JSON.write(catalogsJSON));
     }
 
     /**
@@ -98,17 +98,17 @@ public class Net2PlanOaaS
             catalog2ExternalMap.put(fileMetaData.getName(), externalFiles);
             InternalUtils.cleanFolder(UPLOAD_DIR, false);
 
-            return OaaSUtils.OK(null);
+            return InternalUtils.OK(null);
 
         } catch (IOException e)
         {
-            return OaaSUtils.SERVER_ERROR(e.getMessage());
+            return InternalUtils.SERVER_ERROR(e.getMessage());
         } catch (IllegalAccessException e)
         {
-            return OaaSUtils.SERVER_ERROR(e.getMessage());
+            return InternalUtils.SERVER_ERROR(e.getMessage());
         } catch (InstantiationException e)
         {
-            return OaaSUtils.SERVER_ERROR(e.getMessage());
+            return InternalUtils.SERVER_ERROR(e.getMessage());
         }
     }
 
@@ -129,10 +129,10 @@ public class Net2PlanOaaS
         }
         if(catalogJSON == null)
         {
-            return OaaSUtils.NOT_FOUND(JSON.write(InternalUtils.NOT_FOUND_JSON("Catalog "+catalogName+" not found")));
+            return InternalUtils.NOT_FOUND(JSON.write(InternalUtils.NOT_FOUND_JSON("Catalog "+catalogName+" not found")));
         }
 
-        return OaaSUtils.OK(JSON.write(catalogJSON));
+        return InternalUtils.OK(JSON.write(catalogJSON));
     }
 
     @GET
@@ -149,7 +149,7 @@ public class Net2PlanOaaS
         }
         algorithmsJSON.put("algorithms",new JSONValue(algorithmsArray));
 
-        return OaaSUtils.OK(JSON.write(algorithmsJSON));
+        return InternalUtils.OK(JSON.write(algorithmsJSON));
     }
 
     @GET
@@ -170,10 +170,10 @@ public class Net2PlanOaaS
 
         if(algorithmJSON == null)
         {
-            return OaaSUtils.NOT_FOUND(JSON.write(InternalUtils.NOT_FOUND_JSON("Algorithm "+algorithmName+" not found")));
+            return InternalUtils.NOT_FOUND(JSON.write(InternalUtils.NOT_FOUND_JSON("Algorithm "+algorithmName+" not found")));
         }
 
-        return OaaSUtils.OK(JSON.write(algorithmJSON));
+        return InternalUtils.OK(JSON.write(algorithmJSON));
     }
 
     @GET
@@ -190,7 +190,7 @@ public class Net2PlanOaaS
         }
         reportsJSON.put("reports",new JSONValue(reportsArray));
 
-        return OaaSUtils.OK(JSON.write(reportsJSON));
+        return InternalUtils.OK(JSON.write(reportsJSON));
     }
 
     @GET
@@ -211,10 +211,10 @@ public class Net2PlanOaaS
 
         if(reportJSON == null)
         {
-            return OaaSUtils.NOT_FOUND(JSON.write(InternalUtils.NOT_FOUND_JSON("Report "+reportName+" not found")));
+            return InternalUtils.NOT_FOUND(JSON.write(InternalUtils.NOT_FOUND_JSON("Report "+reportName+" not found")));
         }
 
-        return OaaSUtils.OK(JSON.write(reportJSON));
+        return InternalUtils.OK(JSON.write(reportJSON));
     }
 
     @POST
@@ -243,7 +243,7 @@ public class Net2PlanOaaS
                 }
             }
             if(algorithm == null)
-                return OaaSUtils.NOT_FOUND("Algorithm "+executeName+" not found");
+                return InternalUtils.NOT_FOUND("Algorithm "+executeName+" not found");
 
             List<Triple<String, String, String>> algorithmParameters_raw = algorithm.getParameters();
             Map<String, String> algorithmParameters = new LinkedHashMap<>();
@@ -273,7 +273,7 @@ public class Net2PlanOaaS
                                 algorithmParameters.put(paramName, userParamValue);
                             }
                             else{
-                                return OaaSUtils.SERVER_ERROR("Parameter "+paramName+ " can't be set as "+userParamValue+". Its possible values are: "+possibleValues);
+                                return InternalUtils.SERVER_ERROR("Parameter "+paramName+ " can't be set as "+userParamValue+". Its possible values are: "+possibleValues);
                             }
                         }
                         else if(paramDefaultValue.startsWith("#boolean#"))
@@ -283,7 +283,7 @@ public class Net2PlanOaaS
                                 algorithmParameters.put(paramName, userParamValue);
                             }
                             else{
-                                return OaaSUtils.SERVER_ERROR("Parameter "+paramName+ " can't be set as "+userParamValue+". Its possible values are true or false");
+                                return InternalUtils.SERVER_ERROR("Parameter "+paramName+ " can't be set as "+userParamValue+". Its possible values are true or false");
                             }
                         }
                         else{
@@ -291,7 +291,7 @@ public class Net2PlanOaaS
                         }
                     }
                     else{
-                        return OaaSUtils.SERVER_ERROR("Undefined parameter "+paramName+" for this algorithm: "+algorithm.getClass().getName());
+                        return InternalUtils.SERVER_ERROR("Undefined parameter "+paramName+" for this algorithm: "+algorithm.getClass().getName());
                     }
                 }
             }
@@ -336,7 +336,7 @@ public class Net2PlanOaaS
                 }
             }
             if(report == null)
-                return OaaSUtils.NOT_FOUND("Report "+executeName+" not found");
+                return InternalUtils.NOT_FOUND("Report "+executeName+" not found");
 
             List<Triple<String, String, String>> reportParameters_raw = report.getParameters();
             Map<String, String> reportParameters = new LinkedHashMap<>();
@@ -365,7 +365,7 @@ public class Net2PlanOaaS
                                 reportParameters.put(paramName, userParamValue);
                             }
                             else{
-                                return OaaSUtils.SERVER_ERROR("Parameter "+paramName+ " can't be set as "+userParamValue+". Its possible values are: "+possibleValues);
+                                return InternalUtils.SERVER_ERROR("Parameter "+paramName+ " can't be set as "+userParamValue+". Its possible values are: "+possibleValues);
                             }
                         }
                         else if(paramDefaultValue.startsWith("#boolean#"))
@@ -375,7 +375,7 @@ public class Net2PlanOaaS
                                 reportParameters.put(paramName, userParamValue);
                             }
                             else{
-                                return OaaSUtils.SERVER_ERROR("Parameter "+paramName+ " can't be set as "+userParamValue+". Its possible values are true or false");
+                                return InternalUtils.SERVER_ERROR("Parameter "+paramName+ " can't be set as "+userParamValue+". Its possible values are true or false");
                             }
                         }
                         else{
@@ -383,7 +383,7 @@ public class Net2PlanOaaS
                         }
                     }
                     else{
-                        return OaaSUtils.SERVER_ERROR("Undefined parameter "+paramName+" for this report: "+report.getClass().getName());
+                        return InternalUtils.SERVER_ERROR("Undefined parameter "+paramName+" for this report: "+report.getClass().getName());
                     }
                 }
             }
@@ -420,7 +420,7 @@ public class Net2PlanOaaS
         responseJSON.put("outputNetPlan", new JSONValue(netPlan.saveToJSON()));
         responseJSON.put("executeResponse", new JSONValue(response));
 
-        return OaaSUtils.OK(JSON.write(responseJSON));
+        return InternalUtils.OK(JSON.write(responseJSON));
     }
 
 
