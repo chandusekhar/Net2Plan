@@ -40,6 +40,18 @@ public class Net2PlanOaaSClient
     }
 
     /**
+     * Obtains a list of all the available catalogs
+     * @return HTTP Response
+     */
+    public Response getCatalogs()
+    {
+        WebTarget this_target = target.path("catalogs");
+        Invocation.Builder inv = this_target.request().accept(MediaType.APPLICATION_JSON);
+        Response r = inv.get();
+        return r;
+    }
+
+    /**
      * Uploads a catalog (JAR file) including different algorithms and/or reports
      * @param catalogFile catalog (JAR file)
      * @return HTTP Response
@@ -60,14 +72,14 @@ public class Net2PlanOaaSClient
     /**
      * Send an execution (algorithm or report) request to OaaS API
      * @param type execution type (ALGORITHM, REPORT)
-     * @param name algorithm or report name to execute
+     * @param name algorithm or report name to executeOperation
      * @param userParams Map including names and customized values of the execution parameters
      * @param netPlan input NetPlan
      * @return HTTP Response
      */
-    public Response execute(String type, String name, Map<String, String> userParams, NetPlan netPlan)
+    public Response executeOperation(String type, String name, Map<String, String> userParams, NetPlan netPlan)
     {
-        WebTarget this_target = target.path("execute");
+        WebTarget this_target = target.path("executeOperation");
 
         JSONObject json = new JSONObject();
         json.put("type",new JSONValue(type));
@@ -99,7 +111,7 @@ public class Net2PlanOaaSClient
 
         File topologyFile = new File("C:\\Users\\César\\Desktop\\Net2Plan-0.6.1\\workspace\\data\\networkTopologies\\example7nodes.n2p");
         NetPlan netPlan = new NetPlan(topologyFile);
-        Response r2 = client.execute("ALGORITHM","com.net2plan.examples.ocnbook.offline.Offline_fa_ospfWeightOptimization_EA",null, netPlan);
+        Response r2 = client.executeOperation("ALGORITHM","com.net2plan.examples.ocnbook.offline.Offline_fa_ospfWeightOptimization_EA",null, netPlan);
         System.out.println("EXECUTE -> "+r2.getStatus()+", "+r2.readEntity(String.class));
     }
 

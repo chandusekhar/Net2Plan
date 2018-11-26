@@ -28,7 +28,7 @@ import java.util.Map;
 @Path("/OaaS")
 public class Net2PlanOaaS
 {
-    public File UPLOAD_DIR = InternalUtils.UPLOAD_DIR;
+    public File UPLOAD_DIR = ServerUtils.UPLOAD_DIR;
     public Map<String, List<IExternal>> catalog2ExternalMap = RestDatabase.catalog2ExternalMap;
     public List<IAlgorithm> algorithms = RestDatabase.algorithms;
     public List<IReport> reports = RestDatabase.reports;
@@ -43,12 +43,12 @@ public class Net2PlanOaaS
         JSONArray catalogsArray = new JSONArray();
         for(Map.Entry<String, List<IExternal>> catalogEntry : catalog2ExternalMap.entrySet())
         {
-            JSONObject catalogJSON = InternalUtils.parseCatalog(catalogEntry);
+            JSONObject catalogJSON = ServerUtils.parseCatalog(catalogEntry);
             catalogsArray.add(new JSONValue(catalogJSON));
         }
         catalogsJSON.put("catalogs", new JSONValue(catalogsArray));
 
-        return InternalUtils.OK(JSON.write(catalogsJSON));
+        return ServerUtils.OK(JSON.write(catalogsJSON));
     }
 
     /**
@@ -66,6 +66,7 @@ public class Net2PlanOaaS
         File uploadedFile = new File(UPLOAD_DIR + File.separator + fileMetaData.getFileName());
         if(!UPLOAD_DIR.exists())
             UPLOAD_DIR.mkdirs();
+
         try
         {
             OutputStream out = new FileOutputStream(uploadedFile);
@@ -93,19 +94,19 @@ public class Net2PlanOaaS
             }
 
             catalog2ExternalMap.put(fileMetaData.getName(), externalFiles);
-            InternalUtils.cleanFolder(UPLOAD_DIR, false);
+            ServerUtils.cleanFolder(UPLOAD_DIR, false);
 
-            return InternalUtils.OK(null);
+            return ServerUtils.OK(null);
 
         } catch (IOException e)
         {
-            return InternalUtils.SERVER_ERROR(e.getMessage());
+            return ServerUtils.SERVER_ERROR(e.getMessage());
         } catch (IllegalAccessException e)
         {
-            return InternalUtils.SERVER_ERROR(e.getMessage());
+            return ServerUtils.SERVER_ERROR(e.getMessage());
         } catch (InstantiationException e)
         {
-            return InternalUtils.SERVER_ERROR(e.getMessage());
+            return ServerUtils.SERVER_ERROR(e.getMessage());
         }
     }
 
@@ -120,16 +121,16 @@ public class Net2PlanOaaS
             String catalog = catalogEntry.getKey();
             if(catalog.equals(catalogName))
             {
-                catalogJSON = InternalUtils.parseCatalog(catalogEntry);
+                catalogJSON = ServerUtils.parseCatalog(catalogEntry);
                 break;
             }
         }
         if(catalogJSON == null)
         {
-            return InternalUtils.NOT_FOUND(JSON.write(InternalUtils.NOT_FOUND_JSON("Catalog "+catalogName+" not found")));
+            return ServerUtils.NOT_FOUND(JSON.write(ServerUtils.NOT_FOUND_JSON("Catalog "+catalogName+" not found")));
         }
 
-        return InternalUtils.OK(JSON.write(catalogJSON));
+        return ServerUtils.OK(JSON.write(catalogJSON));
     }
 
     @GET
@@ -141,12 +142,12 @@ public class Net2PlanOaaS
         JSONArray algorithmsArray = new JSONArray();
         for(IAlgorithm alg : algorithms)
         {
-            JSONObject algorithmJSON = InternalUtils.parseAlgorithm(alg);
+            JSONObject algorithmJSON = ServerUtils.parseAlgorithm(alg);
             algorithmsArray.add(new JSONValue(algorithmJSON));
         }
         algorithmsJSON.put("algorithms",new JSONValue(algorithmsArray));
 
-        return InternalUtils.OK(JSON.write(algorithmsJSON));
+        return ServerUtils.OK(JSON.write(algorithmsJSON));
     }
 
     @GET
@@ -160,17 +161,17 @@ public class Net2PlanOaaS
             String algName = alg.getClass().getName();
             if(algName.equals(algorithmName))
             {
-                algorithmJSON = InternalUtils.parseAlgorithm(alg);
+                algorithmJSON = ServerUtils.parseAlgorithm(alg);
                 break;
             }
         }
 
         if(algorithmJSON == null)
         {
-            return InternalUtils.NOT_FOUND(JSON.write(InternalUtils.NOT_FOUND_JSON("Algorithm "+algorithmName+" not found")));
+            return ServerUtils.NOT_FOUND(JSON.write(ServerUtils.NOT_FOUND_JSON("Algorithm "+algorithmName+" not found")));
         }
 
-        return InternalUtils.OK(JSON.write(algorithmJSON));
+        return ServerUtils.OK(JSON.write(algorithmJSON));
     }
 
     @GET
@@ -182,12 +183,12 @@ public class Net2PlanOaaS
         JSONArray reportsArray = new JSONArray();
         for(IReport rep : reports)
         {
-            JSONObject reportJSON = InternalUtils.parseReport(rep);
+            JSONObject reportJSON = ServerUtils.parseReport(rep);
             reportsArray.add(new JSONValue(reportJSON));
         }
         reportsJSON.put("reports",new JSONValue(reportsArray));
 
-        return InternalUtils.OK(JSON.write(reportsJSON));
+        return ServerUtils.OK(JSON.write(reportsJSON));
     }
 
     @GET
@@ -201,17 +202,17 @@ public class Net2PlanOaaS
             String repName = rep.getClass().getName();
             if(repName.equals(reportName))
             {
-                reportJSON = InternalUtils.parseReport(rep);
+                reportJSON = ServerUtils.parseReport(rep);
                 break;
             }
         }
 
         if(reportJSON == null)
         {
-            return InternalUtils.NOT_FOUND(JSON.write(InternalUtils.NOT_FOUND_JSON("Report "+reportName+" not found")));
+            return ServerUtils.NOT_FOUND(JSON.write(ServerUtils.NOT_FOUND_JSON("Report "+reportName+" not found")));
         }
 
-        return InternalUtils.OK(JSON.write(reportJSON));
+        return ServerUtils.OK(JSON.write(reportJSON));
     }
 
     @POST
@@ -226,7 +227,7 @@ public class Net2PlanOaaS
             inputJSON = JSON.parse(input);
         } catch (ParseException e)
         {
-            return InternalUtils.SERVER_ERROR(e.getMessage());
+            return ServerUtils.SERVER_ERROR(e.getMessage());
         }
         String type = inputJSON.get("type").getValue();
         String executeName = inputJSON.get("name").getValue();
@@ -247,7 +248,7 @@ public class Net2PlanOaaS
                 }
             }
             if(algorithm == null)
-                return InternalUtils.NOT_FOUND("Algorithm "+executeName+" not found");
+                return ServerUtils.NOT_FOUND("Algorithm "+executeName+" not found");
 
             List<Triple<String, String, String>> algorithmParameters_raw = algorithm.getParameters();
             Map<String, String> algorithmParameters = new LinkedHashMap<>();
@@ -259,7 +260,7 @@ public class Net2PlanOaaS
             }
 
 
-            Map<String, String> userParametersMap = InternalUtils.parseParametersMap(userParams);
+            Map<String, String> userParametersMap = ServerUtils.parseParametersMap(userParams);
             if(userParametersMap != null)
             {
                 for(Map.Entry<String, String> entry : userParametersMap.entrySet())
@@ -277,7 +278,7 @@ public class Net2PlanOaaS
                                 algorithmParameters.put(paramName, userParamValue);
                             }
                             else{
-                                return InternalUtils.SERVER_ERROR("Parameter "+paramName+ " can't be set as "+userParamValue+". Its possible values are: "+possibleValues);
+                                return ServerUtils.SERVER_ERROR("Parameter "+paramName+ " can't be set as "+userParamValue+". Its possible values are: "+possibleValues);
                             }
                         }
                         else if(paramDefaultValue.startsWith("#boolean#"))
@@ -287,7 +288,7 @@ public class Net2PlanOaaS
                                 algorithmParameters.put(paramName, userParamValue);
                             }
                             else{
-                                return InternalUtils.SERVER_ERROR("Parameter "+paramName+ " can't be set as "+userParamValue+". Its possible values are true or false");
+                                return ServerUtils.SERVER_ERROR("Parameter "+paramName+ " can't be set as "+userParamValue+". Its possible values are true or false");
                             }
                         }
                         else{
@@ -295,7 +296,7 @@ public class Net2PlanOaaS
                         }
                     }
                     else{
-                        return InternalUtils.SERVER_ERROR("Undefined parameter "+paramName+" for this algorithm: "+algorithm.getClass().getName());
+                        return ServerUtils.SERVER_ERROR("Undefined parameter "+paramName+" for this algorithm: "+algorithm.getClass().getName());
                     }
                 }
             }
@@ -329,7 +330,7 @@ public class Net2PlanOaaS
                 response = algorithm.executeAlgorithm(netPlan, algorithmParameters, net2planParameters);
             }catch(Exception e)
             {
-                return InternalUtils.SERVER_ERROR(e.getMessage());
+                return ServerUtils.SERVER_ERROR(e.getMessage());
             }
 
         }
@@ -345,7 +346,7 @@ public class Net2PlanOaaS
                 }
             }
             if(report == null)
-                return InternalUtils.NOT_FOUND("Report "+executeName+" not found");
+                return ServerUtils.NOT_FOUND("Report "+executeName+" not found");
 
             List<Triple<String, String, String>> reportParameters_raw = report.getParameters();
             Map<String, String> reportParameters = new LinkedHashMap<>();
@@ -356,7 +357,7 @@ public class Net2PlanOaaS
                 reportParameters.put(paramName, paramDefaultValue);
             }
 
-            Map<String, String> userParametersMap = InternalUtils.parseParametersMap(userParams);
+            Map<String, String> userParametersMap = ServerUtils.parseParametersMap(userParams);
             if(userParametersMap != null)
             {
                 for(Map.Entry<String, String> entry : userParametersMap.entrySet())
@@ -374,7 +375,7 @@ public class Net2PlanOaaS
                                 reportParameters.put(paramName, userParamValue);
                             }
                             else{
-                                return InternalUtils.SERVER_ERROR("Parameter "+paramName+ " can't be set as "+userParamValue+". Its possible values are: "+possibleValues);
+                                return ServerUtils.SERVER_ERROR("Parameter "+paramName+ " can't be set as "+userParamValue+". Its possible values are: "+possibleValues);
                             }
                         }
                         else if(paramDefaultValue.startsWith("#boolean#"))
@@ -384,7 +385,7 @@ public class Net2PlanOaaS
                                 reportParameters.put(paramName, userParamValue);
                             }
                             else{
-                                return InternalUtils.SERVER_ERROR("Parameter "+paramName+ " can't be set as "+userParamValue+". Its possible values are true or false");
+                                return ServerUtils.SERVER_ERROR("Parameter "+paramName+ " can't be set as "+userParamValue+". Its possible values are true or false");
                             }
                         }
                         else{
@@ -392,7 +393,7 @@ public class Net2PlanOaaS
                         }
                     }
                     else{
-                        return InternalUtils.SERVER_ERROR("Undefined parameter "+paramName+" for this report: "+report.getClass().getName());
+                        return ServerUtils.SERVER_ERROR("Undefined parameter "+paramName+" for this report: "+report.getClass().getName());
                     }
                 }
             }
@@ -426,7 +427,7 @@ public class Net2PlanOaaS
                 response = report.executeReport(netPlan, reportParameters, net2planParameters);
             }catch(Exception e)
             {
-                return InternalUtils.SERVER_ERROR(e.getMessage());
+                return ServerUtils.SERVER_ERROR(e.getMessage());
             }
         }
 
@@ -434,7 +435,7 @@ public class Net2PlanOaaS
         responseJSON.put("outputNetPlan", new JSONValue(netPlan.saveToJSON()));
         responseJSON.put("executeResponse", new JSONValue(response));
 
-        return InternalUtils.OK(JSON.write(responseJSON));
+        return ServerUtils.OK(JSON.write(responseJSON));
     }
 
 

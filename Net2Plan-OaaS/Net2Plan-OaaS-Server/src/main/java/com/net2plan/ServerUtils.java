@@ -24,7 +24,7 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 
-public class InternalUtils
+public class ServerUtils
 {
 
     /**
@@ -98,6 +98,11 @@ public class InternalUtils
             folder.delete();
     }
 
+    /**
+     * Obtains a JSON representation of an algorithm
+     * @param alg algorithm to convert to JSON
+     * @return JSON representation of the algorithm
+     */
     protected static JSONObject parseAlgorithm(IAlgorithm alg)
     {
         JSONObject algorithmJSON = new JSONObject();
@@ -125,6 +130,11 @@ public class InternalUtils
         return algorithmJSON;
     }
 
+    /**
+     * Obtains a JSON representation of a report
+     * @param rep report to convert to JSON
+     * @return JSON representation of the report
+     */
     protected static JSONObject parseReport(IReport rep)
     {
         JSONObject reportJSON = new JSONObject();
@@ -154,6 +164,11 @@ public class InternalUtils
         return reportJSON;
     }
 
+    /**
+     * Obtains the JSON representation of a catalog (JAR file)
+     * @param catalogEntry Map entry represeting a catalog
+     * @return JSON representation of the catalog
+     */
     protected static JSONObject parseCatalog(Map.Entry<String, List<IExternal>> catalogEntry)
     {
         String catalogName = catalogEntry.getKey();
@@ -178,15 +193,11 @@ public class InternalUtils
         return catalogJSON;
     }
 
-    protected static JSONObject NOT_FOUND_JSON(String message)
-    {
-        if(message == null)
-            message = "";
-        JSONObject notfound = new JSONObject();
-        notfound.put("message", new JSONValue(message));
-        return notfound;
-    }
-
+    /**
+     * Converts a JSONArray of parameters in a Map<String, String>
+     * @param paramJSON parameters in JSON format
+     * @return Map<String, String> including the parameters
+     */
     protected static Map<String, String> parseParametersMap(JSONArray paramJSON)
     {
         Map<String, String> params = new LinkedHashMap<>();
@@ -201,5 +212,13 @@ public class InternalUtils
         return params;
     }
 
+    protected static JSONObject NOT_FOUND_JSON(String message)
+    {
+        if(message == null)
+            message = "";
+        JSONObject notfound = new JSONObject();
+        notfound.put("message", new JSONValue(message));
+        return notfound;
+    }
 
 }
