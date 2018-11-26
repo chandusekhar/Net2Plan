@@ -28,6 +28,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import com.shc.easyjson.JSONObject;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -212,6 +213,28 @@ public class NetPlanTest
 		this.np = new NetPlan ();
 	}
 
+	@Test
+	public void testJSONReaderAndWriter()
+	{
+		File fileIn = new File ("src/main/resources/data/networkTopologies/example7nodes_ipOverWDM.n2p");
+		NetPlan netIn = new NetPlan(fileIn);
+		JSONObject jsonNetIn = netIn.saveToJSON();
+		NetPlan netOut = new NetPlan(jsonNetIn);
+
+
+		assertEquals(netIn.getNumberOfLayers(), netOut.getNumberOfLayers());
+		assertEquals(netIn.getNumberOfNodes(), netOut.getNumberOfNodes());
+		assertEquals(netIn.getResources().size(), netOut.getResources().size());
+		for(int i = 0; i < netIn.getNumberOfLayers(); i++)
+		{
+			assertEquals(netIn.getLinks(netIn.getNetworkLayer(i)).size(), netOut.getLinks(netOut.getNetworkLayer(i)).size());
+			assertEquals(netIn.getDemands(netIn.getNetworkLayer(i)).size(), netOut.getDemands(netOut.getNetworkLayer(i)).size());
+			assertEquals(netIn.getRoutes(netIn.getNetworkLayer(i)).size(), netOut.getRoutes(netOut.getNetworkLayer(i)).size());
+			assertEquals(netIn.getForwardingRules(netIn.getNetworkLayer(i)).size(), netOut.getForwardingRules(netOut.getNetworkLayer(i)).size());
+			assertEquals(netIn.getMulticastDemands(netIn.getNetworkLayer(i)).size(), netOut.getMulticastDemands(netOut.getNetworkLayer(i)).size());
+			assertEquals(netIn.getMulticastTrees(netIn.getNetworkLayer(i)).size(), netOut.getMulticastTrees(netOut.getNetworkLayer(i)).size());;
+		}
+	}
 	@Test
 	public void testOfferedTrafficGrowth()
 	{

@@ -1,4 +1,4 @@
-package com.net2plan.utils;
+package com.net2plan;
 
 
 import com.net2plan.interfaces.networkDesign.IAlgorithm;
@@ -14,9 +14,9 @@ public class RestDatabase
 {
     private RestDatabase(){}
 
-    public static List<IAlgorithm> algorithms;
-    public static List<IReport> reports;
-    public static Map<String, List<IExternal>> catalog2ExternalMap;
+    protected static List<IAlgorithm> algorithms;
+    protected static List<IReport> reports;
+    protected static Map<String, List<IExternal>> catalog2ExternalMap;
 
     static
     {

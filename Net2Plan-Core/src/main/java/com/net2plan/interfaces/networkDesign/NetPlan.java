@@ -264,7 +264,7 @@ public class NetPlan extends NetworkElement
         if(versionValue == null)
             throw new Net2PlanException("Unsupported JSON format");
         else{
-            int version = versionValue.getValue();
+            int version = Integer.parseInt(versionValue.getValue());
             IReaderNetPlan reader = null;
 
             if(version < 7)

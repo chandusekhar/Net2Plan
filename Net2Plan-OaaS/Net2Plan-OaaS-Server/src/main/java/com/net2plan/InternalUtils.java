@@ -1,4 +1,4 @@
-package com.net2plan.utils;
+package com.net2plan;
 
 
 
@@ -6,6 +6,7 @@ import com.net2plan.interfaces.networkDesign.IAlgorithm;
 import com.net2plan.interfaces.networkDesign.IReport;
 import com.net2plan.internal.IExternal;
 import com.net2plan.internal.SystemUtils;
+import com.net2plan.utils.Triple;
 import com.shc.easyjson.JSON;
 import com.shc.easyjson.JSONArray;
 import com.shc.easyjson.JSONObject;
@@ -29,27 +30,9 @@ public class InternalUtils
     /**
      * Directory where uploaded files will be stored while they are being analyzed
      */
-    public final static File UPLOAD_DIR;
+    protected final static File UPLOAD_DIR;
     static { UPLOAD_DIR = new File(SystemUtils.getCurrentDir().getAbsolutePath() + File.separator + "upload"); }
 
-    public enum ExecutionType
-    {
-        ALGORITHM("ALGORITHM"),
-
-        REPORT("REPORT");
-
-        private String type;
-        ExecutionType(String type)
-        {
-            this.type = type;
-        }
-
-        @Override
-        public String toString()
-        {
-            return this.type;
-        }
-    }
     /**
      * Creates a HTTP response 200, OK with a specific message
      * @param message message to return (null if no message is desired)
@@ -94,7 +77,7 @@ public class InternalUtils
      * @param folder directory to leave empty
      * @param deleteFolder true if folder will be deleted, false if not
      */
-    public static void cleanFolder(File folder, boolean deleteFolder)
+    protected static void cleanFolder(File folder, boolean deleteFolder)
     {
         if(folder.isDirectory())
             return;
@@ -115,7 +98,7 @@ public class InternalUtils
             folder.delete();
     }
 
-    public static JSONObject parseAlgorithm(IAlgorithm alg)
+    protected static JSONObject parseAlgorithm(IAlgorithm alg)
     {
         JSONObject algorithmJSON = new JSONObject();
         String algName = (alg.getClass().getName() == null) ? "" : alg.getClass().getName();
@@ -142,7 +125,7 @@ public class InternalUtils
         return algorithmJSON;
     }
 
-    public static JSONObject parseReport(IReport rep)
+    protected static JSONObject parseReport(IReport rep)
     {
         JSONObject reportJSON = new JSONObject();
         String repName = (rep.getClass().getName() == null) ? "" : rep.getClass().getName();
@@ -171,7 +154,7 @@ public class InternalUtils
         return reportJSON;
     }
 
-    public static JSONObject parseCatalog(Map.Entry<String, List<IExternal>> catalogEntry)
+    protected static JSONObject parseCatalog(Map.Entry<String, List<IExternal>> catalogEntry)
     {
         String catalogName = catalogEntry.getKey();
         List<IExternal> catalogExternals = catalogEntry.getValue();
@@ -195,7 +178,7 @@ public class InternalUtils
         return catalogJSON;
     }
 
-    public static JSONObject NOT_FOUND_JSON(String message)
+    protected static JSONObject NOT_FOUND_JSON(String message)
     {
         if(message == null)
             message = "";
@@ -204,14 +187,15 @@ public class InternalUtils
         return notfound;
     }
 
-    public static Map<String, String> parseParametersMap(JSONObject paramJSON)
+    protected static Map<String, String> parseParametersMap(JSONArray paramJSON)
     {
         Map<String, String> params = new LinkedHashMap<>();
         if(paramJSON.size() == 0)
             return null;
-        for(Map.Entry<String, JSONValue> entry : paramJSON.entrySet())
+        for(JSONValue json : paramJSON)
         {
-            params.put(entry.getKey(), entry.getValue().getValue());
+            JSONObject this_json = json.getValue();
+            params.put(this_json.get("name").getValue(), this_json.get("value").getValue());
         }
 
         return params;

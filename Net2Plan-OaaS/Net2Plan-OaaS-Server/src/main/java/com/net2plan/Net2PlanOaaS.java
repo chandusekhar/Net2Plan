@@ -6,10 +6,7 @@ import com.net2plan.interfaces.networkDesign.IReport;
 import com.net2plan.interfaces.networkDesign.NetPlan;
 import com.net2plan.internal.IExternal;
 import com.net2plan.utils.*;
-import com.shc.easyjson.JSON;
-import com.shc.easyjson.JSONArray;
-import com.shc.easyjson.JSONObject;
-import com.shc.easyjson.JSONValue;
+import com.shc.easyjson.*;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
@@ -221,12 +218,19 @@ public class Net2PlanOaaS
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/execute")
-    public Response execute(JSONObject inputJSON)
+    public Response execute(String input)
     {
         String response = "";
+        JSONObject inputJSON = null;
+        try {
+            inputJSON = JSON.parse(input);
+        } catch (ParseException e)
+        {
+            return InternalUtils.SERVER_ERROR(e.getMessage());
+        }
         String type = inputJSON.get("type").getValue();
         String executeName = inputJSON.get("name").getValue();
-        JSONObject userParams = inputJSON.get("userparams").getValue();
+        JSONArray userParams = inputJSON.get("userparams").getValue();
         JSONObject inputNetPlan = inputJSON.get("netPlan").getValue();
 
         NetPlan netPlan = new NetPlan(inputNetPlan);
@@ -321,7 +325,12 @@ public class Net2PlanOaaS
             Map<String, String> net2planParameters = new LinkedHashMap<>();
             net2planParameters_raw.stream().forEach(t -> net2planParameters.put(t.getFirst(), t.getSecond()));
 
-            response = algorithm.executeAlgorithm(netPlan, algorithmParameters, net2planParameters);
+            try{
+                response = algorithm.executeAlgorithm(netPlan, algorithmParameters, net2planParameters);
+            }catch(Exception e)
+            {
+                return InternalUtils.SERVER_ERROR(e.getMessage());
+            }
 
         }
         else if(type.equalsIgnoreCase("REPORT"))
@@ -413,7 +422,12 @@ public class Net2PlanOaaS
             Map<String, String> net2planParameters = new LinkedHashMap<>();
             net2planParameters_raw.stream().forEach(t -> net2planParameters.put(t.getFirst(), t.getSecond()));
 
-            response = report.executeReport(netPlan, reportParameters, net2planParameters);
+            try{
+                response = report.executeReport(netPlan, reportParameters, net2planParameters);
+            }catch(Exception e)
+            {
+                return InternalUtils.SERVER_ERROR(e.getMessage());
+            }
         }
 
         JSONObject responseJSON = new JSONObject();

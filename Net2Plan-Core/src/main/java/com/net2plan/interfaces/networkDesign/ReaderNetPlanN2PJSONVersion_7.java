@@ -75,8 +75,31 @@ public class ReaderNetPlanN2PJSONVersion_7 implements IReaderNetPlan_JSON
             }
             JSONArray layerTags = layerJSON.get("tags").getValue();
             JSONArray layerAttributes = layerJSON.get("attributes").getValue();
+            NetworkLayer newLayer;
 
-            NetworkLayer newLayer = netPlan.addLayer(layerId, layerName, layerDescription, layerLinkCapacityUnits, layerDemandTrafficUnits, layerIconURL, null);
+            if (!hasAlreadyReadOneLayer)
+            {
+                if (netPlan.layers.size() != 1) throw new RuntimeException ("Bad");
+                if (netPlan.layers.get (0).id != layerId)
+                {
+                    // the Id of first layer is different => create a new one and remove the existing
+                    newLayer = netPlan.addLayer(layerId , layerName, layerDescription, layerLinkCapacityUnits, layerDemandTrafficUnits,  layerIconURL , null);
+                    netPlan.removeNetworkLayer(netPlan.layers.get (0));
+                }
+                else
+                {
+                    newLayer = netPlan.layers.get (0); // it already has the right Id
+                    newLayer.demandTrafficUnitsName = layerDemandTrafficUnits;
+                    newLayer.description = layerDescription;
+                    newLayer.name = layerName;
+                    newLayer.linkCapacityUnitsName= layerLinkCapacityUnits;
+                }
+                hasAlreadyReadOneLayer = true;
+            }
+            else
+            {
+                newLayer = netPlan.addLayer(layerId , layerName, layerDescription, layerLinkCapacityUnits, layerDemandTrafficUnits,  layerIconURL , null);
+            }
 
             layerTags.stream().forEach(tag -> newLayer.addTag(tag.getValue()));
             layerAttributes.stream().forEach(
@@ -100,8 +123,8 @@ public class ReaderNetPlanN2PJSONVersion_7 implements IReaderNetPlan_JSON
                     JSONObject nodeJSON = node.getValue();
                     Long nodeId = Long.parseLong(nodeJSON.get("id").getValue());
                     String nodeName = nodeJSON.get("name").getValue();
-                    double xCoord = nodeJSON.get("xCoord").getValue();
-                    double yCoord = nodeJSON.get("yCoord").getValue();
+                    double xCoord = Double.parseDouble(nodeJSON.get("xCoord").getValue());
+                    double yCoord = Double.parseDouble(nodeJSON.get("yCoord").getValue());
 
                     Node newNode = netPlan.addNode(nodeId , xCoord, yCoord, nodeName, null);
 
@@ -149,13 +172,13 @@ public class ReaderNetPlanN2PJSONVersion_7 implements IReaderNetPlan_JSON
         resources.stream().forEach(res ->
         {
             JSONObject resource = res.getValue();
-            long resourceId = resource.get("id").getValue();
+            long resourceId = Long.parseLong(resource.get("id").getValue());
             String resourceName = resource.get("name").getValue();
             String resourceType = resource.get("type").getValue();
-            long hostNodeId = resource.get("hostNodeId").getValue();
-            double resourceProcessingTime = resource.get("processingTimeToTraversingTrafficInMs").getValue();
+            long hostNodeId = Long.parseLong(resource.get("hostNodeId").getValue());
+            double resourceProcessingTime = Double.parseDouble(resource.get("processingTimeToTraversingTrafficInMs").getValue());
             String resourceUnits = resource.get("capacityMeasurementUnits").getValue();
-            double resourceCapacity = resource.get("capacity").getValue();
+            double resourceCapacity = Double.parseDouble(resource.get("capacity").getValue());
 
             JSONArray resourceBaseRes = resource.get("baseResourceAndOccupiedCapacitiesMap").getValue();
             Map<Resource, Double> baseResourceAndOccupiedCapacitiesMap = new LinkedHashMap<>();
@@ -191,15 +214,15 @@ public class ReaderNetPlanN2PJSONVersion_7 implements IReaderNetPlan_JSON
             links.stream().forEach(link ->
             {
                 JSONObject linkJSON = link.getValue();
-                long linkId = linkJSON.get("id").getValue();
+                long linkId = Long.parseLong(linkJSON.get("id").getValue());
                 String linkDescription = linkJSON.get("description").getValue();
-                long originNodeId = linkJSON.get("originNodeId").getValue();
-                long destinationNodeId = linkJSON.get("destinationNodeId").getValue();
-                double linkLength = linkJSON.get("lengthInKm").getValue();
-                double linkCapacity = linkJSON.get("capacity").getValue();
-                double linkPropagationSpeed = linkJSON.get("propagationSpeedInKmPerSecond").getValue();
-                boolean linkIsUp = linkJSON.get("isUp").getValue();
-                long linkBidirectionalPairId = linkJSON.get("bidirectionalPairId").getValue();
+                long originNodeId = Long.parseLong(linkJSON.get("originNodeId").getValue());
+                long destinationNodeId = Long.parseLong(linkJSON.get("destinationNodeId").getValue());
+                double linkLength = Double.parseDouble(linkJSON.get("lengthInKm").getValue());
+                double linkCapacity = Double.parseDouble(linkJSON.get("capacity").getValue());
+                double linkPropagationSpeed = Double.parseDouble(linkJSON.get("propagationSpeedInKmPerSecond").getValue());
+                boolean linkIsUp = Boolean.parseBoolean(linkJSON.get("isUp").getValue());
+                long linkBidirectionalPairId = Long.parseLong(linkJSON.get("bidirectionalPairId").getValue());
 
                 Node originNode = netPlan.getNodeFromId(originNodeId);
                 Node destinationNode = netPlan.getNodeFromId(destinationNodeId);
@@ -226,63 +249,71 @@ public class ReaderNetPlanN2PJSONVersion_7 implements IReaderNetPlan_JSON
 
             JSONArray demands = layerJSON.get("demands").getValue();
             demands.stream().forEach(demand ->
-            {
-                JSONObject demandJSON = demand.getValue();
-                long demandId = demandJSON.get("id").getValue();
-                String demandDescription = demandJSON.get("description").getValue();
-                long ingressNodeId = demandJSON.get("ingressNodeId").getValue();
-                long egressNodeId = demandJSON.get("egressNodeId").getValue();
-                String demandRoutingType = demandJSON.get("routingType").getValue();
-                double demandOfferedTraffic = demandJSON.get("offeredTraffic").getValue();
-                double demandOfferedTrafficGrowth = demandJSON.get("offeredTrafficGrowthFactorPerPeriodZeroIsNoGrowth").getValue();
-                String demandQoSType = demandJSON.get("qosType").getValue();
-                long demandBidirectionalPairId = demandJSON.get("bidirectionalPairId").getValue();
-                double demandMaximumLatencyMs = demandJSON.get("maximumAcceptableE2EWorstCaseLatencyInMs").getValue();
-                String demandIntendedRecovery = demandJSON.get("intendedRecoveryType").getValue();
-                String monitoredOrForecastedTrafficsValues = demandJSON.get("monitoredOrForecastedTraffics").getValue();
-                JSONArray demandServiceChainSequence = demandJSON.get("serviceChainResourceTypeOfSequence").getValue();
+                    {
+                        JSONObject demandJSON = demand.getValue();
+                        long demandId = Long.parseLong(demandJSON.get("id").getValue());
+                        String demandDescription = demandJSON.get("description").getValue();
+                        long ingressNodeId = Long.parseLong(demandJSON.get("ingressNodeId").getValue());
+                        long egressNodeId = Long.parseLong(demandJSON.get("egressNodeId").getValue());
+                        String demandRoutingType = demandJSON.get("routingType").getValue();
+                        double demandOfferedTraffic = Double.parseDouble(demandJSON.get("offeredTraffic").getValue());
+                        double demandOfferedTrafficGrowth = Double.parseDouble(demandJSON.get("offeredTrafficGrowthFactorPerPeriodZeroIsNoGrowth").getValue());
+                        String demandQoSType = demandJSON.get("qosType").getValue();
+                        long demandBidirectionalPairId = Long.parseLong(demandJSON.get("bidirectionalPairId").getValue());
+                        double demandMaximumLatencyMs = Double.parseDouble(demandJSON.get("maximumAcceptableE2EWorstCaseLatencyInMs").getValue());
+                        String demandIntendedRecovery = demandJSON.get("intendedRecoveryType").getValue();
+                        String monitoredOrForecastedTrafficsValues = demandJSON.get("monitoredOrForecastedTraffics").getValue();
+                        JSONArray demandServiceChainSequence = demandJSON.get("serviceChainResourceTypeOfSequence").getValue();
 
-                Node ingressNode = netPlan.getNodeFromId(ingressNodeId);
-                Node egressNode = netPlan.getNodeFromId(egressNodeId);
-                Demand bidirectionalDemand = netPlan.getDemandFromId(demandBidirectionalPairId);
-                TrafficSeries demandTrafficSeries = TrafficSeries.createFromStringList(StringUtils.readEscapedString_asStringList(monitoredOrForecastedTrafficsValues, new ArrayList<>()));
+                        Node ingressNode = netPlan.getNodeFromId(ingressNodeId);
+                        Node egressNode = netPlan.getNodeFromId(egressNodeId);
+                        Demand bidirectionalDemand = netPlan.getDemandFromId(demandBidirectionalPairId);
+                        TrafficSeries demandTrafficSeries = TrafficSeries.createFromStringList(StringUtils.readEscapedString_asStringList(monitoredOrForecastedTrafficsValues, new ArrayList<>()));
 
-                List<String> demandServiceChainSequenceList = demandServiceChainSequence.stream().map(val -> (String)val.getValue()).collect(Collectors.toList());
+                        List<String> demandServiceChainSequenceList = demandServiceChainSequence.stream().map(val -> (String) val.getValue()).collect(Collectors.toList());
 
-                Demand newDemand = netPlan.addDemand(demandId, ingressNode, egressNode, demandOfferedTraffic, Constants.RoutingType.valueOf(demandRoutingType), null, nl);
+                        Constants.RoutingType type = Constants.RoutingType.SOURCE_ROUTING;
+                        if (demandRoutingType.equals("Source Routing"))
+                            type = Constants.RoutingType.SOURCE_ROUTING;
+                        else if (demandRoutingType.equals("Hop-by-hop routing"))
+                            type = Constants.RoutingType.HOP_BY_HOP_ROUTING;
 
-                newDemand.setDescription(demandDescription);
-                newDemand.setOfferedTrafficPerPeriodGrowthFactor(demandOfferedTrafficGrowth);
-                newDemand.setQoSType(demandQoSType);
-                if(bidirectionalDemand != null)
-                    newDemand.setBidirectionalPair(bidirectionalDemand);
+                        Demand newDemand = netPlan.addDemand(demandId, ingressNode, egressNode, demandOfferedTraffic, type, null, nl);
 
-                newDemand.setMaximumAcceptableE2EWorstCaseLatencyInMs(demandMaximumLatencyMs);
-                newDemand.setServiceChainSequenceOfTraversedResourceTypes(demandServiceChainSequenceList);
-                newDemand.setMonitoredOrForecastedOfferedTraffic(demandTrafficSeries);
-                newDemand.setIntendedRecoveryType(Demand.IntendedRecoveryType.valueOf(demandIntendedRecovery));
+                        newDemand.setDescription(demandDescription);
+                        newDemand.setOfferedTrafficPerPeriodGrowthFactor(demandOfferedTrafficGrowth);
+                        newDemand.setQoSType(demandQoSType);
+                        if (bidirectionalDemand != null)
+                            newDemand.setBidirectionalPair(bidirectionalDemand);
 
-                JSONArray demandAttributes = demandJSON.get("attributes").getValue();
-                JSONArray demandTags = demandJSON.get("tags").getValue();
-                demandTags.stream().forEach(tag -> newDemand.addTag(tag.getValue()));
-                demandAttributes.stream().forEach(att ->
-                {
-                    JSONObject attribute = att.getValue();
-                    newDemand.setAttribute(attribute.get("key").getValue(), (String)attribute.get("value").getValue());
-                });
+                        newDemand.setMaximumAcceptableE2EWorstCaseLatencyInMs(demandMaximumLatencyMs);
+                        if(demandServiceChainSequence.size() > 0)
+                            newDemand.setServiceChainSequenceOfTraversedResourceTypes(demandServiceChainSequenceList);
+                        newDemand.setMonitoredOrForecastedOfferedTraffic(demandTrafficSeries);
+                        newDemand.setIntendedRecoveryType(Demand.IntendedRecoveryType.valueOf(demandIntendedRecovery));
 
+                        JSONArray demandAttributes = demandJSON.get("attributes").getValue();
+                        JSONArray demandTags = demandJSON.get("tags").getValue();
+                        demandTags.stream().forEach(tag -> newDemand.addTag(tag.getValue()));
+                        demandAttributes.stream().forEach(att ->
+                        {
+                            JSONObject attribute = att.getValue();
+                            newDemand.setAttribute(attribute.get("key").getValue(), (String) attribute.get("value").getValue());
+                        });
+
+                    });
                 JSONArray multicastDemands = layerJSON.get("multicastDemands").getValue();
                 multicastDemands.stream().forEach(md ->
                 {
                     JSONObject mdJSON = md.getValue();
-                    long mdId = mdJSON.get("id").getValue();
-                    long mdIngressNodeId = mdJSON.get("ingressNodeId").getValue();
+                    long mdId = Long.parseLong(mdJSON.get("id").getValue());
+                    long mdIngressNodeId = Long.parseLong(mdJSON.get("ingressNodeId").getValue());
                     List<String> mdEgressNodesIds = StringUtils.toList(StringUtils.split(mdJSON.get("egressNodeIds").getValue()));
                     String mdDescription = mdJSON.get("description").getValue();
                     String mdQoSType = mdJSON.get("qosType").getValue();
-                    double mdOfferedTraffic = mdJSON.get("offeredTraffic").getValue();
-                    double mdOfferedTrafficGrowthFactor = mdJSON.get("offeredTrafficGrowthFactorPerPeriodZeroIsNoGrowth").getValue();
-                    double mdMaxAcceptableLatency = mdJSON.get("maximumAcceptableE2EWorstCaseLatencyInMs").getValue();
+                    double mdOfferedTraffic = Double.parseDouble(mdJSON.get("offeredTraffic").getValue());
+                    double mdOfferedTrafficGrowthFactor = Double.parseDouble(mdJSON.get("offeredTrafficGrowthFactorPerPeriodZeroIsNoGrowth").getValue());
+                    double mdMaxAcceptableLatency = Double.parseDouble(mdJSON.get("maximumAcceptableE2EWorstCaseLatencyInMs").getValue());
                     List<String> mdMonitoredTraffics = StringUtils.toList(StringUtils.split(mdJSON.get("monitoredOrForecastedTraffics").getValue()));
 
                     Node mdIngressNode = netPlan.getNodeFromId(mdIngressNodeId);
@@ -341,10 +372,10 @@ public class ReaderNetPlanN2PJSONVersion_7 implements IReaderNetPlan_JSON
                 routes.stream().forEach(route ->
                 {
                     JSONObject routeJSON = route.getValue();
-                    long routeId = routeJSON.get("id").getValue();
-                    long routeDemandId = routeJSON.get("demandId").getValue();
+                    long routeId = Long.parseLong(routeJSON.get("id").getValue());
+                    long routeDemandId = Long.parseLong(routeJSON.get("demandId").getValue());
                     String routeDescription = routeJSON.get("description").getValue();
-                    double routeCarriedTraffic = routeJSON.get("currentCarriedTrafficIfNotFailing").getValue();
+                    double routeCarriedTraffic = Double.parseDouble(routeJSON.get("currentCarriedTrafficIfNotFailing").getValue());
 
                     List<String> routeCurrentPathIds = StringUtils.toList(StringUtils.split(routeJSON.get("currentPath").getValue()));
                     List<? extends NetworkElement> routeCurrentPath = routeCurrentPathIds.stream().map(id -> netPlan.getNetworkElement(Long.parseLong(id))).collect(Collectors.toList());
@@ -354,9 +385,10 @@ public class ReaderNetPlanN2PJSONVersion_7 implements IReaderNetPlan_JSON
 
                     List<String> routeBackupIds = StringUtils.toList(StringUtils.split(routeJSON.get("backupRoutes").getValue()));
 
-                    long routeBidirectionalPairId = routeJSON.get("bidirectionalPairId").getValue();
+                    long routeBidirectionalPairId = Long.parseLong(routeJSON.get("bidirectionalPairId").getValue());
 
                     Demand d = netPlan.getDemandFromId(routeDemandId);
+
                     Route newRoute = netPlan.addServiceChain(routeId, d, routeCarriedTraffic, routeCurrentOccupations_double, routeCurrentPath, null);
                     backupRouteIdsMap.put(newRoute, routeBackupIds.stream().map(id ->
                     {
@@ -392,12 +424,16 @@ public class ReaderNetPlanN2PJSONVersion_7 implements IReaderNetPlan_JSON
                     for(Route r : netPlan.getRoutes(lay))
                     {
                         List<Long> backupRoutesIds = backupRouteIdsMap.get(r);
-                        backupRoutesIds.stream().forEach(id ->
+                        if(backupRoutesIds != null)
                         {
-                            Route backup = netPlan.getRouteFromId(id);
-                            if(backup != null)
-                                r.addBackupRoute(backup);
-                        });
+                            backupRoutesIds.stream().forEach(id ->
+                            {
+                                Route backup = netPlan.getRouteFromId(id);
+                                if(backup != null)
+                                    r.addBackupRoute(backup);
+                            });
+                        }
+
                     }
                 }
 
@@ -406,9 +442,9 @@ public class ReaderNetPlanN2PJSONVersion_7 implements IReaderNetPlan_JSON
                 fRules.stream().forEach(fRule ->
                 {
                     JSONObject fRuleJSON = fRule.getValue();
-                    long fRuleDemandId = fRuleJSON.get("demandId").getValue();
-                    long fRuleLinkId = fRuleJSON.get("linkId").getValue();
-                    double fRuleSplittingRatio = fRuleJSON.get("splittingRatio").getValue();
+                    long fRuleDemandId = Long.parseLong(fRuleJSON.get("demandId").getValue());
+                    long fRuleLinkId = Long.parseLong(fRuleJSON.get("linkId").getValue());
+                    double fRuleSplittingRatio = Double.parseDouble(fRuleJSON.get("splittingRatio").getValue());
 
                     Demand d = netPlan.getDemandFromId(fRuleDemandId);
                     Link l = netPlan.getLinkFromId(fRuleLinkId);
@@ -418,17 +454,16 @@ public class ReaderNetPlanN2PJSONVersion_7 implements IReaderNetPlan_JSON
             });
 
 
-        });
 
         JSONArray srgs = json.get("srgs").getValue();
         srgs.stream().forEach(srg ->
         {
             JSONObject srgJSON = srg.getValue();
-            long srgId = srgJSON.get("id").getValue();
+            long srgId = Long.parseLong(srgJSON.get("id").getValue());
             String srgDescription = srgJSON.get("description").getValue();
-            boolean srgIsDynamic = srgJSON.get("isDynamic").getValue();
-            double meanTimeToFailInHours = srgJSON.get("meanTimeToFailInHours").getValue();
-            double meanTimeToRepairInHours = srgJSON.get("meanTimeToRepairInHours").getValue();
+            boolean srgIsDynamic = Boolean.parseBoolean(srgJSON.get("isDynamic").getValue());
+            double meanTimeToFailInHours = Double.parseDouble(srgJSON.get("meanTimeToFailInHours").getValue());
+            double meanTimeToRepairInHours = Double.parseDouble(srgJSON.get("meanTimeToRepairInHours").getValue());
             SharedRiskGroup newSRG;
             if (srgIsDynamic)
             {
@@ -484,8 +519,8 @@ public class ReaderNetPlanN2PJSONVersion_7 implements IReaderNetPlan_JSON
             layerCouplingDemands.stream().forEach(layerCoupling ->
             {
                 JSONObject layerCouplingJSON = layerCoupling.getValue();
-                long lowerLayerDemandId = layerCouplingJSON.get("lowerLayerDemandId").getValue();
-                long upperLayerLinkId = layerCouplingJSON.get("upperLayerLinkId").getValue();
+                long lowerLayerDemandId = Long.parseLong(layerCouplingJSON.get("lowerLayerDemandId").getValue());
+                long upperLayerLinkId = Long.parseLong(layerCouplingJSON.get("upperLayerLinkId").getValue());
                 Demand d = netPlan.getDemandFromId(lowerLayerDemandId);
                 Link l = netPlan.getLinkFromId(upperLayerLinkId);
                 d.coupleToUpperOrSameLayerLink(l);
@@ -495,7 +530,7 @@ public class ReaderNetPlanN2PJSONVersion_7 implements IReaderNetPlan_JSON
             layerCouplingMulticastDemands.stream().forEach(layerCouplingM ->
             {
                 JSONObject layerCouplingMJSON = layerCouplingM.getValue();
-                long lowerLayerDemandId = layerCouplingMJSON.get("lowerLayerDemandId").getValue();
+                long lowerLayerDemandId = Long.parseLong(layerCouplingMJSON.get("lowerLayerDemandId").getValue());
                 List<String> upperLayerLinksIds = StringUtils.toList(StringUtils.split(layerCouplingMJSON.get("upperLayerLinkIds").getValue()));
                 MulticastDemand md = netPlan.getMulticastDemandFromId(lowerLayerDemandId);
                 Set<Link> l = new LinkedHashSet<>();
@@ -517,10 +552,15 @@ public class ReaderNetPlanN2PJSONVersion_7 implements IReaderNetPlan_JSON
         JSONArray layersDemandsCoupled = json.get("layersDemandsCoupled").getValue();
         layersDemandsCoupled.stream().forEach(layerDemandsCoupled ->
         {
-            JSONObject layerCoupledJSON = layerDemandsCoupled.getValue();
-            long coupledDemandId = layerCoupledJSON.get("layerDemandId").getValue();
-            long bundleId = layerCoupledJSON.get("layerLinkId").getValue();
-            netPlan.getDemandFromId(coupledDemandId).coupleToUpperOrSameLayerLink(netPlan.getLinkFromId(bundleId));
+            JSONArray layerCoupledJSON = layerDemandsCoupled.getValue();
+            layerCoupledJSON.stream().forEach(obj ->
+            {
+                JSONObject this_layerCoupled = obj.getValue();
+                long coupledDemandId = Long.parseLong(this_layerCoupled.get("layerDemandId").getValue());
+                long bundleId = Long.parseLong(this_layerCoupled.get("layerLinkId").getValue());
+                netPlan.getDemandFromId(coupledDemandId).coupleToUpperOrSameLayerLink(netPlan.getLinkFromId(bundleId));
+
+            });
         });
 
         JSONArray netAttributes = json.get("attributes").getValue();
