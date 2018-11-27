@@ -1,8 +1,7 @@
-package com.net2plan;
+package com.net2plan.oaas;
 
 import com.net2plan.interfaces.networkDesign.Net2PlanException;
 import com.net2plan.interfaces.networkDesign.NetPlan;
-import com.net2plan.internal.Version;
 import com.shc.easyjson.JSON;
 import com.shc.easyjson.JSONArray;
 import com.shc.easyjson.JSONObject;
@@ -175,12 +174,12 @@ public class Net2PlanOaaSClient
         Response getC = client.getCatalogs();
         System.out.println(getC.readEntity(String.class));
 
-        Response getA = client.getAlgorithmByName("com.net2plan.examples.ocnbook.offline.Offline_cba_congControLinkBwSplitTwolQoS");
+        Response getA = client.getAlgorithmByName("com.net2plan.examples.ocnbook.offline.Offline_fa_ospfWeightOptimization_GRASP");
         System.out.println(getA.readEntity(String.class));
 
         File topologyFile = new File("C:\\Users\\César\\Desktop\\Net2Plan-0.6.1\\workspace\\data\\networkTopologies\\example7nodes.n2p");
         NetPlan netPlan = new NetPlan(topologyFile);
-        Response r2 = client.executeOperation("ALGORITHM","com.net2plan.examples.ocnbook.offline.Offline_cba_congControLinkBwSplitTwolQoS",null, netPlan);
+        Response r2 = client.executeOperation("ALGORITHM","com.net2plan.examples.ocnbook.offline.Offline_fa_ospfWeightOptimization_GRASP",null, netPlan);
         System.out.println("EXECUTE -> "+r2.readEntity(String.class));
     }
 

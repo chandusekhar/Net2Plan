@@ -1,4 +1,4 @@
-package com.net2plan;
+package com.net2plan.oaas;
 
 
 
@@ -16,16 +16,19 @@ import javax.ws.rs.core.Response;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Enumeration;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 
 public class ServerUtils
 {
+    protected static List<Triple<String, List<IAlgorithm>, List<IReport>>> catalogAlgorithmsAndReports;
+
+    static
+    {
+        catalogAlgorithmsAndReports = new LinkedList<>();
+    }
 
     /**
      * Directory where uploaded files will be stored while they are being analyzed
@@ -34,42 +37,42 @@ public class ServerUtils
     static { UPLOAD_DIR = new File(SystemUtils.getCurrentDir().getAbsolutePath() + File.separator + "upload"); }
 
     /**
-     * Creates a HTTP response 200, OK with a specific message
-     * @param message message to return (null if no message is desired)
+     * Creates a HTTP response 200, OK including a response JSON
+     * @param json JSON Object to return (null if no JSON is desired)
      * @return HTTP response 200, OK
      */
-    public static Response OK(Object message)
+    protected static Response OK(JSONObject json)
     {
-        if(message == null)
+        if(json == null || json.size() == 0)
             return Response.ok().build();
         else
-            return Response.ok(message).build();
+            return Response.ok(JSON.write(json)).build();
     }
 
     /**
-     * Creates a HTTP response 404, NOT FOUND with a specific message
-     * @param message message to return (null if no message is desired)
+     * Creates a HTTP response 404, NOT FOUND including a response JSON
+     * @param json JSON Object to return (null if no JSON is desired)
      * @return HTTP response 404, NOT FOUND
      */
-    public static Response NOT_FOUND(Object message)
+    protected static Response NOT_FOUND(JSONObject json)
     {
-        if(message != null)
-            return Response.status(Response.Status.NOT_FOUND).entity(message).build();
+        if(json == null || json.size() == 0)
+            return Response.status(Response.Status.NOT_FOUND).build();
 
-        return Response.status(Response.Status.NOT_FOUND).build();
+        return Response.status(Response.Status.NOT_FOUND).entity(JSON.write(json)).build();
     }
 
     /**
-     * Creates a HTTP response 500, SERVER ERROR with a specific message
-     * @param message message to return (null if no message is desired)
+     * Creates a HTTP response 500, SERVER ERROR including a response JSON
+     * @param json JSON Object to return (null if no JSON is desired)
      * @return HTTP response 500, SERVER ERROR
      */
-    public static Response SERVER_ERROR(Object message)
+    protected static Response SERVER_ERROR(JSONObject json)
     {
-        if(message == null)
+        if(json == null || json.size() == 0)
             return Response.serverError().build();
         else
-            return Response.serverError().entity(message).build();
+            return Response.serverError().entity(JSON.write(json)).build();
     }
 
     /**
@@ -166,27 +169,25 @@ public class ServerUtils
 
     /**
      * Obtains the JSON representation of a catalog (JAR file)
-     * @param catalogEntry Map entry represeting a catalog
+     * @param catalogEntry Triple object with the name of the catalog, a list of its algorithms and a list of its reports
      * @return JSON representation of the catalog
      */
-    protected static JSONObject parseCatalog(Map.Entry<String, List<IExternal>> catalogEntry)
+    protected static JSONObject parseCatalog(Triple<String, List<IAlgorithm>, List<IReport>> catalogEntry)
     {
-        String catalogName = catalogEntry.getKey();
-        List<IExternal> catalogExternals = catalogEntry.getValue();
+        String catalogName = catalogEntry.getFirst();
+        List<IAlgorithm> algorithms = catalogEntry.getSecond();
+        List<IReport> reports = catalogEntry.getThird();
         JSONObject catalogJSON = new JSONObject();
         JSONArray externalsArray = new JSONArray();
-        for(IExternal ext : catalogExternals)
+        for(IAlgorithm alg : algorithms)
         {
-            if(ext instanceof IAlgorithm)
-            {
-                JSONObject algJSON = parseAlgorithm((IAlgorithm)ext);
-                externalsArray.add(new JSONValue(algJSON));
-            }
-            else if(ext instanceof IReport)
-            {
-                JSONObject repJSON = parseReport((IReport)ext);
-                externalsArray.add(new JSONValue(repJSON));
-            }
+            JSONObject algJSON = parseAlgorithm(alg);
+            externalsArray.add(new JSONValue(algJSON));
+        }
+        for(IReport rep : reports)
+        {
+            JSONObject repJSON = parseReport(rep);
+            externalsArray.add(new JSONValue(repJSON));
         }
         catalogJSON.put("name", new JSONValue(catalogName));
         catalogJSON.put("files", new JSONValue(externalsArray));
@@ -212,13 +213,20 @@ public class ServerUtils
         return params;
     }
 
-    protected static JSONObject NOT_FOUND_JSON(String message)
+
+    /**
+     * Obtains a list with the catalog's names
+     * @return List of catalog's names
+     */
+    protected static List<String> getCatalogsNames()
     {
-        if(message == null)
-            message = "";
-        JSONObject notfound = new JSONObject();
-        notfound.put("message", new JSONValue(message));
-        return notfound;
+        List<String> catalogs = new LinkedList<>();
+        for(Triple<String, List<IAlgorithm>, List<IReport>> entry : catalogAlgorithmsAndReports)
+        {
+            catalogs.add(entry.getFirst());
+        }
+
+        return catalogs;
     }
 
 }

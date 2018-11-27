@@ -1,4 +1,4 @@
-package com.net2plan;
+package com.net2plan.oaas;
 
 
 import com.shc.easyjson.JSONArray;

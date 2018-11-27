@@ -37,6 +37,18 @@
             <version>0.7.0-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>com.net2plan.net2plan-oaas</groupId>
+            <artifactId>net2plan-oaas-server</artifactId>
+            <version>0.7.0-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.net2plan.net2plan-oaas</groupId>
+            <artifactId>net2plan-oaas-client</artifactId>
+            <version>0.7.0-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -117,6 +129,42 @@
                                 <include>com/net2plan/libraries/**</include>
                                 <include>com/net2plan/utils/**</include>
                                 <include>com/net2plan/research/**</include>
+                            </sourceFileIncludes>
+                            <!-- Output directory -->
+                            <additionalparam>-d ${project.build.directory}/apidocs/api</additionalparam>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>net2planOaaS-javadoc</id>
+                        <goals>
+                            <goal>javadoc</goal>
+                        </goals>
+                        <phase>package</phase>
+                        <configuration>
+                            <show>public</show>
+                            <author>true</author>
+                            <nodeprecated>true</nodeprecated>
+                            <nodeprecatedlist>false</nodeprecatedlist>
+                            <noindex>false</noindex>
+                            <nonavbar>false</nonavbar>
+                            <notree>false</notree>
+                            <source>1.8</source>
+                            <splitindex>true</splitindex>
+                            <use>true</use>
+                            <version>true</version>
+                            <overview>${project.basedir}/src/main/resources/resources/javadoc/overview-main.html
+                            </overview>
+                            <links>
+                                <link>../parallelcolt</link>
+                            </links>
+                            <detectOfflineLinks>false</detectOfflineLinks>
+                            <includeDependencySources>true</includeDependencySources>
+                            <dependencySourceIncludes>
+                                <!-- Net2Plan Core-->
+                                <dependencySourceInclude>com.net2plan:net2plan-core</dependencySourceInclude>
+                            </dependencySourceIncludes>
+                            <sourceFileIncludes>
+                                <include>com/net2plan/**</include>
                             </sourceFileIncludes>
                             <!-- Output directory -->
                             <additionalparam>-d ${project.build.directory}/apidocs/api</additionalparam>

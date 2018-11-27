@@ -1,4 +1,4 @@
-package com.net2plan;
+package com.net2plan.oaas;
 
 import com.net2plan.interfaces.networkDesign.Configuration;
 import com.net2plan.interfaces.networkDesign.IAlgorithm;
@@ -20,19 +20,17 @@ import java.util.*;
 
 
 /**
- * Net2Plan OaaS (Optimization as a Service) root resource (exposed at "OaaS" path)
+ * Net2Plan OaaS root resource (URL: /OaaS)
  */
 @Path("/OaaS")
 public class Net2PlanOaaS
 {
     public File UPLOAD_DIR = ServerUtils.UPLOAD_DIR;
-    public Map<String, List<IExternal>> catalog2ExternalMap = RestDatabase.catalog2ExternalMap;
-    public List<IAlgorithm> algorithms = RestDatabase.algorithms;
-    public List<IReport> reports = RestDatabase.reports;
+    public List<Triple<String, List<IAlgorithm>, List<IReport>>> catalogAlgorithmsAndReports = ServerUtils.catalogAlgorithmsAndReports;
 
 
     /**
-     * Get Catalogs resource (URL: /OaaS/catalogs, OPERATION: GET, PRODUCES: APPLICATION/JSON)
+     * Obtains the list of available catalogs (URL: /OaaS/catalogs, Operation: GET, Produces: APPLICATION/JSON)
      * @return HTTP Response
      */
     @GET
@@ -42,21 +40,19 @@ public class Net2PlanOaaS
     {
         JSONObject catalogsJSON = new JSONObject();
         JSONArray catalogsArray = new JSONArray();
-        for(Map.Entry<String, List<IExternal>> catalogEntry : catalog2ExternalMap.entrySet())
+        for(Triple<String, List<IAlgorithm>, List<IReport>> catalogEntry : catalogAlgorithmsAndReports)
         {
             JSONObject catalogJSON = ServerUtils.parseCatalog(catalogEntry);
             catalogsArray.add(new JSONValue(catalogJSON));
         }
         catalogsJSON.put("catalogs", new JSONValue(catalogsArray));
 
-        return ServerUtils.OK(JSON.write(catalogsJSON));
+        return ServerUtils.OK(catalogsJSON);
     }
 
     /**
-     *
-     * @param input
-     * @param fileMetaData
-     * @return
+     * Uploads a new catalog (JAR file) (URL: /OaaS/catalogs, Operation: POST, Consumes: MULTIPART FORM DATA (FORM NAME: file), Produces: APPLICATION/JSON)
+     * @return HTTP Response
      */
     @POST
     @Path("/catalogs")
@@ -66,12 +62,20 @@ public class Net2PlanOaaS
     {
         if(!UPLOAD_DIR.exists())
             UPLOAD_DIR.mkdirs();
+
         String catalogName = fileMetaData.getFileName();
-        Set<String> catalogsNames = catalog2ExternalMap.keySet();
+        List<String> catalogsNames = ServerUtils.getCatalogsNames();
+        JSONObject json = new JSONObject();
 
         if(catalogsNames.contains(catalogName))
-            return ServerUtils.SERVER_ERROR("Catalog "+catalogName+" exists");
+        {
+            json.put("message", new JSONValue("Catalog "+catalogName+" exists"));
+            return ServerUtils.SERVER_ERROR(json);
+        }
 
+
+        List<IAlgorithm> algorithms = new LinkedList<>();
+        List<IReport> reports = new LinkedList<>();
 
         File uploadedFile = new File(UPLOAD_DIR + File.separator + fileMetaData.getFileName());
         try
@@ -81,13 +85,11 @@ public class Net2PlanOaaS
             out.flush();
             out.close();
 
-            List<IExternal> externalFiles = new LinkedList<>();
             URLClassLoader cl = new URLClassLoader(new URL[]{uploadedFile.toURI().toURL()}, this.getClass().getClassLoader());
             List<Class<IExternal>> classes = ClassLoaderUtils.getClassesFromFile(uploadedFile, IExternal.class, cl);
             for(Class<IExternal> _class : classes)
             {
                 IExternal ext = _class.newInstance();
-                externalFiles.add(ext);
                 if(ext instanceof IAlgorithm)
                 {
                     IAlgorithm alg = (IAlgorithm)ext;
@@ -100,32 +102,39 @@ public class Net2PlanOaaS
                 }
             }
 
-            catalog2ExternalMap.put(catalogName, externalFiles);
+            catalogAlgorithmsAndReports.add(Triple.unmodifiableOf(catalogName, algorithms, reports));
             ServerUtils.cleanFolder(UPLOAD_DIR, false);
 
             return ServerUtils.OK(null);
 
         } catch (IOException e)
         {
-            return ServerUtils.SERVER_ERROR(e.getMessage());
+            json.put("message", new JSONValue(e.getMessage()));
+            return ServerUtils.SERVER_ERROR(json);
         } catch (IllegalAccessException e)
         {
-            return ServerUtils.SERVER_ERROR(e.getMessage());
+            json.put("message", new JSONValue(e.getMessage()));
+            return ServerUtils.SERVER_ERROR(json);
         } catch (InstantiationException e)
         {
-            return ServerUtils.SERVER_ERROR(e.getMessage());
+            json.put("message", new JSONValue(e.getMessage()));
+            return ServerUtils.SERVER_ERROR(json);
         }
     }
 
+    /**
+     * Obtains a catalog by its name (URL: /OaaS/catalogs/{catalogName}, Operation: GET, Produces: APPLICATION/JSON)
+     * @return HTTP Response
+     */
     @GET
     @Path("/catalogs/{name}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getCatalogByName(@PathParam("name") String catalogName)
     {
         JSONObject catalogJSON = null;
-        for(Map.Entry<String, List<IExternal>> catalogEntry : catalog2ExternalMap.entrySet())
+        for(Triple<String, List<IAlgorithm>, List<IReport>> catalogEntry : catalogAlgorithmsAndReports)
         {
-            String catalog = catalogEntry.getKey();
+            String catalog = catalogEntry.getFirst();
             if(catalog.equals(catalogName))
             {
                 catalogJSON = ServerUtils.parseCatalog(catalogEntry);
@@ -134,12 +143,18 @@ public class Net2PlanOaaS
         }
         if(catalogJSON == null)
         {
-            return ServerUtils.NOT_FOUND(JSON.write(ServerUtils.NOT_FOUND_JSON("Catalog "+catalogName+" not found")));
+            JSONObject json = new JSONObject();
+            json.put("message", new JSONValue("Catalog "+catalogName+" not found"));
+            return ServerUtils.NOT_FOUND(json);
         }
 
-        return ServerUtils.OK(JSON.write(catalogJSON));
+        return ServerUtils.OK(catalogJSON);
     }
 
+    /**
+     * Obtains the list of available algorithms (URL: /OaaS/algorithms, Operation: GET, Produces: APPLICATION/JSON)
+     * @return HTTP Response
+     */
     @GET
     @Path("/algorithms")
     @Produces(MediaType.APPLICATION_JSON)
@@ -147,40 +162,61 @@ public class Net2PlanOaaS
     {
         JSONObject algorithmsJSON = new JSONObject();
         JSONArray algorithmsArray = new JSONArray();
-        for(IAlgorithm alg : algorithms)
+        for(Triple<String, List<IAlgorithm>, List<IReport>> catalogEntry : catalogAlgorithmsAndReports)
         {
-            JSONObject algorithmJSON = ServerUtils.parseAlgorithm(alg);
-            algorithmsArray.add(new JSONValue(algorithmJSON));
+            List<IAlgorithm> algs = catalogEntry.getSecond();
+            for(IAlgorithm alg : algs)
+            {
+                JSONObject algorithmJSON = ServerUtils.parseAlgorithm(alg);
+                algorithmsArray.add(new JSONValue(algorithmJSON));
+            }
         }
         algorithmsJSON.put("algorithms",new JSONValue(algorithmsArray));
 
-        return ServerUtils.OK(JSON.write(algorithmsJSON));
+        return ServerUtils.OK(algorithmsJSON);
     }
 
+    /**
+     * Obtains an algorithm by its name (URL: /OaaS/algorithms/{algorithmName}, Operation: GET, Produces: APPLICATION/JSON)
+     * @return HTTP Response
+     */
     @GET
     @Path("/algorithms/{name}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAlgorithmByName(@PathParam("name") String algorithmName)
     {
         JSONObject algorithmJSON = null;
-        for(IAlgorithm alg : algorithms)
+        boolean found = false;
+        for(Triple<String, List<IAlgorithm>, List<IReport>> catalogEntry : catalogAlgorithmsAndReports)
         {
-            String algName = alg.getClass().getName();
-            if(algName.equals(algorithmName))
+            List<IAlgorithm> algs = catalogEntry.getSecond();
+            for(IAlgorithm alg : algs)
             {
-                algorithmJSON = ServerUtils.parseAlgorithm(alg);
-                break;
+                String algName = alg.getClass().getName();
+                if(algName.equals(algorithmName))
+                {
+                    algorithmJSON = ServerUtils.parseAlgorithm(alg);
+                    found = true;
+                }
             }
+            if(found)
+                break;
         }
 
         if(algorithmJSON == null)
         {
-            return ServerUtils.NOT_FOUND(JSON.write(ServerUtils.NOT_FOUND_JSON("Algorithm "+algorithmName+" not found")));
+            JSONObject json = new JSONObject();
+            json.put("message", new JSONValue("Algorithm "+algorithmName+" not found"));
+            return ServerUtils.NOT_FOUND(json);
         }
 
-        return ServerUtils.OK(JSON.write(algorithmJSON));
+        return ServerUtils.OK(algorithmJSON);
     }
 
+    /**
+     * Obtains the list of available reports (URL: /OaaS/reports, Operation: GET, Produces: APPLICATION/JSON)
+     * @return HTTP Response
+     */
     @GET
     @Path("/reports")
     @Produces(MediaType.APPLICATION_JSON)
@@ -188,53 +224,84 @@ public class Net2PlanOaaS
     {
         JSONObject reportsJSON = new JSONObject();
         JSONArray reportsArray = new JSONArray();
-        for(IReport rep : reports)
+        for(Triple<String, List<IAlgorithm>, List<IReport>> catalogEntry : catalogAlgorithmsAndReports)
         {
-            JSONObject reportJSON = ServerUtils.parseReport(rep);
-            reportsArray.add(new JSONValue(reportJSON));
+            List<IReport> reps = catalogEntry.getThird();
+            for(IReport rep : reps)
+            {
+                JSONObject reportJSON = ServerUtils.parseReport(rep);
+                reportsArray.add(new JSONValue(reportJSON));
+            }
         }
         reportsJSON.put("reports",new JSONValue(reportsArray));
 
-        return ServerUtils.OK(JSON.write(reportsJSON));
+        return ServerUtils.OK(reportsJSON);
     }
 
+    /**
+     * Obtains a report by its name (URL: /OaaS/reports/{reportName}, Operation: GET, Produces: APPLICATION/JSON)
+     * @return HTTP Response
+     */
     @GET
     @Path("/reports/{name}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getReportByName(@PathParam("name") String reportName)
     {
         JSONObject reportJSON = null;
-        for(IReport rep : reports)
+        boolean found = false;
+        for(Triple<String, List<IAlgorithm>, List<IReport>> catalogEntry : catalogAlgorithmsAndReports)
         {
-            String repName = rep.getClass().getName();
-            if(repName.equals(reportName))
+            List<IReport> reps = catalogEntry.getThird();
+            for(IReport rep : reps)
             {
-                reportJSON = ServerUtils.parseReport(rep);
-                break;
+                String repName = rep.getClass().getName();
+                if(repName.equals(reportName))
+                {
+                    reportJSON = ServerUtils.parseReport(rep);
+                    found = true;
+                }
             }
+            if(found)
+                break;
         }
 
         if(reportJSON == null)
         {
-            return ServerUtils.NOT_FOUND(JSON.write(ServerUtils.NOT_FOUND_JSON("Report "+reportName+" not found")));
+            JSONObject json = new JSONObject();
+            json.put("message", new JSONValue("Report "+reportName+" not found"));
+            return ServerUtils.NOT_FOUND(json);
         }
 
-        return ServerUtils.OK(JSON.write(reportJSON));
+        return ServerUtils.OK(reportJSON);
     }
 
+    /**
+     * Sends a request to execute an algorithm or a report
+     * @param input input JSON Object. It has to be send using a specific format:
+     *              <ul>
+     *                  <li type="square">type: ALGORITHM / REPORT</li>
+     *                  <li type="square">name: name of the algorithm or report to execute.</li>
+     *                  <li type="square">userparams: map defining the user's custom parameter values. (The have to be the same as the defined in the algorithm or report, if not, the execution will fail)</li>
+     *                  <li type="square">netPlan: NetPlan design (JSON formatted) in which the algorithm or report will be executed in.
+     *                  To create this JSON representation, the method saveToJSON() in NetPlan class will help.</li>
+     *              </ul>
+     * @return HTTP Response
+     */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/execute")
     public Response execute(String input)
     {
+        JSONObject errorJSON = new JSONObject();
         String response = "";
         JSONObject inputJSON = null;
         try {
             inputJSON = JSON.parse(input);
         } catch (ParseException e)
         {
-            return ServerUtils.SERVER_ERROR(e.getMessage());
+            errorJSON.put("message", new JSONValue(e.getMessage()));
+            return ServerUtils.SERVER_ERROR(errorJSON);
         }
         String type = inputJSON.get("type").getValue();
         String executeName = inputJSON.get("name").getValue();
@@ -245,17 +312,30 @@ public class Net2PlanOaaS
 
         if(type.equalsIgnoreCase("ALGORITHM"))
         {
+            boolean found = false;
             IAlgorithm algorithm = null;
-            for(IAlgorithm alg : algorithms)
+            for(Triple<String, List<IAlgorithm>, List<IReport>> catalogEntry : catalogAlgorithmsAndReports)
             {
-                if(executeName.equals(alg.getClass().getName()))
+                List<IAlgorithm> algs = catalogEntry.getSecond();
+                for(IAlgorithm alg : algs)
                 {
-                    algorithm = alg;
-                    break;
+                    String algName = alg.getClass().getName();
+                    if(algName.equals(executeName))
+                    {
+                        algorithm = alg;
+                        found = true;
+                    }
                 }
+                if(found)
+                    break;
             }
+
             if(algorithm == null)
-                return ServerUtils.NOT_FOUND("Algorithm "+executeName+" not found");
+            {
+                errorJSON.put("message", new JSONValue("Algorithm "+executeName+" not found"));
+                return ServerUtils.NOT_FOUND(errorJSON);
+            }
+
 
             List<Triple<String, String, String>> algorithmParameters_raw = algorithm.getParameters();
             Map<String, String> algorithmParameters = new LinkedHashMap<>();
@@ -285,7 +365,8 @@ public class Net2PlanOaaS
                                 algorithmParameters.put(paramName, userParamValue);
                             }
                             else{
-                                return ServerUtils.SERVER_ERROR("Parameter "+paramName+ " can't be set as "+userParamValue+". Its possible values are: "+possibleValues);
+                                errorJSON.put("message", new JSONValue("Parameter "+paramName+ " can't be set as "+userParamValue+". Its possible values are: "+possibleValues));
+                                return ServerUtils.SERVER_ERROR(errorJSON);
                             }
                         }
                         else if(paramDefaultValue.startsWith("#boolean#"))
@@ -295,7 +376,8 @@ public class Net2PlanOaaS
                                 algorithmParameters.put(paramName, userParamValue);
                             }
                             else{
-                                return ServerUtils.SERVER_ERROR("Parameter "+paramName+ " can't be set as "+userParamValue+". Its possible values are true or false");
+                                errorJSON.put("message", new JSONValue("Parameter "+paramName+ " can't be set as "+userParamValue+". Its possible values are true or false"));
+                                return ServerUtils.SERVER_ERROR(errorJSON);
                             }
                         }
                         else{
@@ -303,7 +385,8 @@ public class Net2PlanOaaS
                         }
                     }
                     else{
-                        return ServerUtils.SERVER_ERROR("Undefined parameter "+paramName+" for this algorithm: "+algorithm.getClass().getName());
+                        errorJSON.put("message", new JSONValue("Undefined parameter "+paramName+" for this algorithm: "+algorithm.getClass().getName()));
+                        return ServerUtils.SERVER_ERROR(errorJSON);
                     }
                 }
             }
@@ -337,23 +420,36 @@ public class Net2PlanOaaS
                 response = algorithm.executeAlgorithm(netPlan, algorithmParameters, net2planParameters);
             }catch(Exception e)
             {
-                return ServerUtils.SERVER_ERROR(e.getMessage());
+                errorJSON.put("message", new JSONValue(e.getMessage()));
+                return ServerUtils.SERVER_ERROR(errorJSON);
             }
 
         }
         else if(type.equalsIgnoreCase("REPORT"))
         {
             IReport report = null;
-            for(IReport rep : reports)
+            boolean found = false;
+            for(Triple<String, List<IAlgorithm>, List<IReport>> catalogEntry : catalogAlgorithmsAndReports)
             {
-                if(executeName.equals(rep.getClass().getName()))
+                List<IReport> reps = catalogEntry.getThird();
+                for(IReport rep : reps)
                 {
-                    report = rep;
-                    break;
+                    String repName = rep.getClass().getName();
+                    if(repName.equals(executeName))
+                    {
+                        report = rep;
+                        found = true;
+                    }
                 }
+                if(found)
+                    break;
             }
             if(report == null)
-                return ServerUtils.NOT_FOUND("Report "+executeName+" not found");
+            {
+                errorJSON.put("message", new JSONValue("Report "+executeName+" not found"));
+                return ServerUtils.NOT_FOUND(errorJSON);
+            }
+
 
             List<Triple<String, String, String>> reportParameters_raw = report.getParameters();
             Map<String, String> reportParameters = new LinkedHashMap<>();
@@ -382,7 +478,8 @@ public class Net2PlanOaaS
                                 reportParameters.put(paramName, userParamValue);
                             }
                             else{
-                                return ServerUtils.SERVER_ERROR("Parameter "+paramName+ " can't be set as "+userParamValue+". Its possible values are: "+possibleValues);
+                                errorJSON.put("message", new JSONValue("Parameter "+paramName+ " can't be set as "+userParamValue+". Its possible values are: "+possibleValues));
+                                return ServerUtils.SERVER_ERROR(errorJSON);
                             }
                         }
                         else if(paramDefaultValue.startsWith("#boolean#"))
@@ -392,7 +489,8 @@ public class Net2PlanOaaS
                                 reportParameters.put(paramName, userParamValue);
                             }
                             else{
-                                return ServerUtils.SERVER_ERROR("Parameter "+paramName+ " can't be set as "+userParamValue+". Its possible values are true or false");
+                                errorJSON.put("message", new JSONValue("Parameter "+paramName+ " can't be set as "+userParamValue+". Its possible values are true or false"));
+                                return ServerUtils.SERVER_ERROR(errorJSON);
                             }
                         }
                         else{
@@ -400,7 +498,8 @@ public class Net2PlanOaaS
                         }
                     }
                     else{
-                        return ServerUtils.SERVER_ERROR("Undefined parameter "+paramName+" for this report: "+report.getClass().getName());
+                        errorJSON.put("message", new JSONValue("Undefined parameter "+paramName+" for this report: "+report.getClass().getName()));
+                        return ServerUtils.SERVER_ERROR(errorJSON);
                     }
                 }
             }
@@ -434,7 +533,8 @@ public class Net2PlanOaaS
                 response = report.executeReport(netPlan, reportParameters, net2planParameters);
             }catch(Exception e)
             {
-                return ServerUtils.SERVER_ERROR(e.getMessage());
+                errorJSON.put("message", new JSONValue(e.getMessage()));
+                return ServerUtils.SERVER_ERROR(errorJSON);
             }
         }
 
@@ -442,7 +542,7 @@ public class Net2PlanOaaS
         responseJSON.put("outputNetPlan", new JSONValue(netPlan.saveToJSON()));
         responseJSON.put("executeResponse", new JSONValue(response));
 
-        return ServerUtils.OK(JSON.write(responseJSON));
+        return ServerUtils.OK(responseJSON);
     }
 
 
