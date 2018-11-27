@@ -117,7 +117,7 @@
             <includes>
                 <include>${project.groupId}.net2plan-oaas:net2plan-oaas-server:*</include>
             </includes>
-            <outputDirectory>rest</outputDirectory>
+            <outputDirectory>OaaS</outputDirectory>
             <outputFileNameMapping>Net2Plan-OaaS.war</outputFileNameMapping>
         </dependencySet>
         <dependencySet>
@@ -127,7 +127,7 @@
             <includes>
                 <include>${project.groupId}.net2plan-oaas:net2plan-oaas-client:*</include>
             </includes>
-            <outputDirectory>rest</outputDirectory>
+            <outputDirectory>OaaS</outputDirectory>
             <outputFileNameMapping>Net2Plan-OaaS-Client.jar</outputFileNameMapping>
         </dependencySet>
         <!--External resources-->

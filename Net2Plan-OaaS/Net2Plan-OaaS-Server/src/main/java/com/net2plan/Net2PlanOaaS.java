@@ -16,10 +16,7 @@ import javax.ws.rs.core.Response;
 import java.io.*;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 /**
@@ -34,6 +31,10 @@ public class Net2PlanOaaS
     public List<IReport> reports = RestDatabase.reports;
 
 
+    /**
+     * Get Catalogs resource (URL: /OaaS/catalogs, OPERATION: GET, PRODUCES: APPLICATION/JSON)
+     * @return HTTP Response
+     */
     @GET
     @Path("/catalogs")
     @Produces(MediaType.APPLICATION_JSON)
@@ -63,10 +64,16 @@ public class Net2PlanOaaS
     @Produces(MediaType.APPLICATION_JSON)
     public Response uploadCatalog(@FormDataParam("file") byte [] input, @FormDataParam("file") FormDataContentDisposition fileMetaData)
     {
-        File uploadedFile = new File(UPLOAD_DIR + File.separator + fileMetaData.getFileName());
         if(!UPLOAD_DIR.exists())
             UPLOAD_DIR.mkdirs();
+        String catalogName = fileMetaData.getFileName();
+        Set<String> catalogsNames = catalog2ExternalMap.keySet();
 
+        if(catalogsNames.contains(catalogName))
+            return ServerUtils.SERVER_ERROR("Catalog "+catalogName+" exists");
+
+
+        File uploadedFile = new File(UPLOAD_DIR + File.separator + fileMetaData.getFileName());
         try
         {
             OutputStream out = new FileOutputStream(uploadedFile);
@@ -93,7 +100,7 @@ public class Net2PlanOaaS
                 }
             }
 
-            catalog2ExternalMap.put(fileMetaData.getName(), externalFiles);
+            catalog2ExternalMap.put(catalogName, externalFiles);
             ServerUtils.cleanFolder(UPLOAD_DIR, false);
 
             return ServerUtils.OK(null);

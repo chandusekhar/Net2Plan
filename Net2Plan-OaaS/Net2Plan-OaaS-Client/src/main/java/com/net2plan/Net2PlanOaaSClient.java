@@ -34,7 +34,7 @@ public class Net2PlanOaaSClient
         else
             throw new Net2PlanException("More than one port is not allowed");
 
-        this.baseURL =  "http://"+ipAddress+":"+port+"/net2plan-oaas-server-"+ Version.getVersion()+"-SNAPSHOT/OaaS";
+        this.baseURL =  "http://"+ipAddress+":"+port+"/Net2Plan-OaaS/OaaS";
         this.client = ClientBuilder.newClient().register(MultiPartFeature.class);
         this.target = this.client.target(baseURL);
     }
@@ -170,18 +170,18 @@ public class Net2PlanOaaSClient
 
         File catalog = new File("C:\\Users\\César\\Desktop\\Net2Plan-0.6.1\\workspace\\BuiltInExamples.jar");
         Response r = client.uploadCatalog(catalog);
-        System.out.println("UPLOAD CATALOG -> "+r.getStatus()+", "+r.readEntity(String.class));
+        System.out.println("UPLOAD CATALOG -> "+r.readEntity(String.class));
 
         Response getC = client.getCatalogs();
         System.out.println(getC.readEntity(String.class));
 
-        Response getA = client.getAlgorithmByName("com.net2plan.examples.ocnbook.offline.Offline_fa_ospfWeightOptimization_EA");
+        Response getA = client.getAlgorithmByName("com.net2plan.examples.ocnbook.offline.Offline_cba_congControLinkBwSplitTwolQoS");
         System.out.println(getA.readEntity(String.class));
 
         File topologyFile = new File("C:\\Users\\César\\Desktop\\Net2Plan-0.6.1\\workspace\\data\\networkTopologies\\example7nodes.n2p");
         NetPlan netPlan = new NetPlan(topologyFile);
-        Response r2 = client.executeOperation("ALGORITHM","com.net2plan.examples.ocnbook.offline.Offline_fa_ospfWeightOptimization_EA",null, netPlan);
-        System.out.println("EXECUTE -> "+r2.getStatus()+", "+r2.readEntity(String.class));
+        Response r2 = client.executeOperation("ALGORITHM","com.net2plan.examples.ocnbook.offline.Offline_cba_congControLinkBwSplitTwolQoS",null, netPlan);
+        System.out.println("EXECUTE -> "+r2.readEntity(String.class));
     }
 
 }
