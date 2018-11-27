@@ -65,6 +65,56 @@ public class Net2PlanOaaSClient
     }
 
     /**
+     * Obtains a list of all the available algorithms
+     * @return HTTP Response
+     */
+    public Response getAlgorithms()
+    {
+        WebTarget this_target = target.path("algorithms");
+        Invocation.Builder inv = this_target.request().accept(MediaType.APPLICATION_JSON);
+        Response r = inv.get();
+        return r;
+    }
+
+    /**
+     * Obtains the algorithm represented by name {name}
+     * @param name algorithm's name
+     * @return HTTP Response
+     */
+    public Response getAlgorithmByName(String name)
+    {
+        WebTarget this_target = target.path("algorithms/"+name);
+        Invocation.Builder inv = this_target.request().accept(MediaType.APPLICATION_JSON);
+        Response r = inv.get();
+        return r;
+    }
+
+    /**
+     * Obtains a list of all the available reports
+     * @return HTTP Response
+     */
+    public Response getReports()
+    {
+        WebTarget this_target = target.path("reports");
+        Invocation.Builder inv = this_target.request().accept(MediaType.APPLICATION_JSON);
+        Response r = inv.get();
+        return r;
+    }
+
+    /**
+     * Obtains the report represented by name {name}
+     * @param name report's name
+     * @return HTTP Response
+     */
+    public Response getReportByName(String name)
+    {
+        WebTarget this_target = target.path("reports/"+name);
+        Invocation.Builder inv = this_target.request().accept(MediaType.APPLICATION_JSON);
+        Response r = inv.get();
+        return r;
+    }
+
+    /**
      * Uploads a catalog (JAR file) including different algorithms and/or reports
      * @param catalogFile catalog (JAR file)
      * @return HTTP Response
@@ -92,7 +142,7 @@ public class Net2PlanOaaSClient
      */
     public Response executeOperation(String type, String name, Map<String, String> userParams, NetPlan netPlan)
     {
-        WebTarget this_target = target.path("executeOperation");
+        WebTarget this_target = target.path("execute");
 
         JSONObject json = new JSONObject();
         json.put("type",new JSONValue(type));
@@ -121,6 +171,12 @@ public class Net2PlanOaaSClient
         File catalog = new File("C:\\Users\\César\\Desktop\\Net2Plan-0.6.1\\workspace\\BuiltInExamples.jar");
         Response r = client.uploadCatalog(catalog);
         System.out.println("UPLOAD CATALOG -> "+r.getStatus()+", "+r.readEntity(String.class));
+
+        Response getC = client.getCatalogs();
+        System.out.println(getC.readEntity(String.class));
+
+        Response getA = client.getAlgorithmByName("com.net2plan.examples.ocnbook.offline.Offline_fa_ospfWeightOptimization_EA");
+        System.out.println(getA.readEntity(String.class));
 
         File topologyFile = new File("C:\\Users\\César\\Desktop\\Net2Plan-0.6.1\\workspace\\data\\networkTopologies\\example7nodes.n2p");
         NetPlan netPlan = new NetPlan(topologyFile);
