@@ -118,7 +118,17 @@
                 <include>${project.groupId}.net2plan-oaas:net2plan-oaas-server:*</include>
             </includes>
             <outputDirectory>rest</outputDirectory>
-            <outputFileNameMapping>Net2Plan-REST-API.war</outputFileNameMapping>
+            <outputFileNameMapping>Net2Plan-OaaS.war</outputFileNameMapping>
+        </dependencySet>
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <useTransitiveDependencies>false</useTransitiveDependencies>
+            <unpack>false</unpack>
+            <includes>
+                <include>${project.groupId}.net2plan-oaas:net2plan-oaas-client:*</include>
+            </includes>
+            <outputDirectory>rest</outputDirectory>
+            <outputFileNameMapping>Net2Plan-OaaS-Client.jar</outputFileNameMapping>
         </dependencySet>
         <!--External resources-->
         <dependencySet>

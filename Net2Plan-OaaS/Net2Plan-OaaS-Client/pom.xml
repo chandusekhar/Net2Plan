@@ -9,6 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
+    <groupId>com.net2plan.net2plan-oaas</groupId>
     <artifactId>net2plan-oaas-client</artifactId>
     <packaging>jar</packaging>
 

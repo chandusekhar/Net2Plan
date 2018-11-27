@@ -8,10 +8,11 @@
 
     <modelVersion>4.0.0</modelVersion>
 
+    <groupId>com.net2plan.net2plan-oaas</groupId>
     <artifactId>net2plan-oaas-server</artifactId>
     <packaging>war</packaging>
 
-    <build>
+    <!-- <build>
         <finalName>net2plan-oaas-server-${project.version}</finalName>
         <plugins>
             <plugin>
@@ -21,7 +22,7 @@
                 <inherited>true</inherited>
             </plugin>
         </plugins>
-    </build>
+    </build> -->
 
     <dependencies>
         <dependency>
