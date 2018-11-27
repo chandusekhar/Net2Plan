@@ -160,11 +160,11 @@
                             <detectOfflineLinks>false</detectOfflineLinks>
                             <includeDependencySources>true</includeDependencySources>
                             <dependencySourceIncludes>
-                                <!-- Net2Plan Core-->
-                                <dependencySourceInclude>com.net2plan:net2plan-core</dependencySourceInclude>
+                                <!-- Net2Plan OaaS-->
+                                <dependencySourceInclude>com.net2plan:net2plan-oaas</dependencySourceInclude>
                             </dependencySourceIncludes>
                             <sourceFileIncludes>
-                                <include>com/net2plan/**</include>
+                                <include>com/net2plan/oaas/**</include>
                             </sourceFileIncludes>
                             <!-- Output directory -->
                             <additionalparam>-d ${project.build.directory}/apidocs/api</additionalparam>
