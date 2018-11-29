@@ -1,5 +1,7 @@
 package com.net2plan.oaas;
 
+import com.net2plan.utils.Pair;
+
 import java.sql.*;
 
 public class DatabaseController
@@ -9,7 +11,7 @@ public class DatabaseController
     private final String defaultTableName = "users";
     private String databaseName;
 
-    public DatabaseController(String dbIpPort, String dbUser, String dbPass, String... optionalDatabase)
+    protected DatabaseController(String dbIpPort, String dbUser, String dbPass, String... optionalDatabase)
     {
         try {
             this.connection = DriverManager.getConnection("jdbc:mysql://"+dbIpPort+"?useLegacyDatetimeCode=false&serverTimezone=UTC", dbUser, dbPass);
@@ -81,21 +83,23 @@ public class DatabaseController
         executeQuery("USE "+dbName);
     }
 
-    public boolean logInUser(String user, String password)
+    protected Pair<Boolean, ResultSet> authenticate(String user, String password)
     {
         boolean exists = false;
-        String loginQuery = "SELECT * FROM users WHERE user = '" + user + "' AND password = '" + password + "'";
+        ResultSet set = null;
+        String loginQuery = "SELECT * FROM " + defaultTableName + " WHERE user = '" + user + "' AND password = '" + password + "'";
         ResultSet loginSet = executeQuery(loginQuery);
         try {
             if(loginSet.next())
             {
                 exists = true;
+                set = loginSet;
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
-        return exists;
+        return Pair.unmodifiableOf(exists, set);
     }
 
 }

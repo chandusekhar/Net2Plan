@@ -16,6 +16,7 @@ import javax.ws.rs.core.Response;
 import java.io.*;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.sql.ResultSet;
 import java.util.*;
 
 
@@ -72,9 +73,21 @@ public class Net2PlanOaaS
             JSONObject conf = JSON.parse(authJSON);
             String user = conf.get("username").getValue();
             String pass = conf.get("password").getValue();
-            boolean auth = dbController.logInUser(user, pass);
-            if(auth)
+            Pair<Boolean, ResultSet> auth = dbController.authenticate(user, pass);
+            boolean authBool = auth.getFirst();
+            if(authBool)
             {
+                ResultSet set = auth.getSecond();
+                if(set.next())
+                {
+                    String name = set.getString("user");
+                    long id = set.getLong("id");
+                    ServerUtils.authenticateUserIfNotAuthenticatedYet(name, id);
+                }
+                else{
+                    json.put("message", new JSONValue("Error retrieving information from Database"));
+                    return ServerUtils.SERVER_ERROR(json);
+                }
                 json.put("message", new JSONValue("Authenticated"));
                 resp = ServerUtils.OK(json);
             }

@@ -6,6 +6,7 @@ import com.net2plan.interfaces.networkDesign.IAlgorithm;
 import com.net2plan.interfaces.networkDesign.IReport;
 import com.net2plan.internal.IExternal;
 import com.net2plan.internal.SystemUtils;
+import com.net2plan.utils.Pair;
 import com.net2plan.utils.Triple;
 import com.shc.easyjson.JSON;
 import com.shc.easyjson.JSONArray;
@@ -25,11 +26,13 @@ public class ServerUtils
 {
     protected static List<Triple<String, List<IAlgorithm>, List<IReport>>> catalogAlgorithmsAndReports;
     protected static DatabaseController dbController;
+    protected static List<Pair<String, Long>> user_id_pairList;
 
     static
     {
         catalogAlgorithmsAndReports = new LinkedList<>();
         dbController = null;
+        user_id_pairList = new LinkedList<>();
     }
 
     /**
@@ -37,6 +40,22 @@ public class ServerUtils
      */
     protected final static File UPLOAD_DIR;
     static { UPLOAD_DIR = new File(SystemUtils.getCurrentDir().getAbsolutePath() + File.separator + "upload"); }
+
+    protected synchronized static void authenticateUserIfNotAuthenticatedYet(String user, long userId)
+    {
+        for(Pair<String, Long> pair : user_id_pairList)
+        {
+            String pUser = pair.getFirst();
+            long pId = pair.getSecond();
+            if(pUser.equals(user) && pId == userId)
+            {
+                return;
+            }
+        }
+
+        user_id_pairList.add(Pair.unmodifiableOf(user, userId));
+    }
+
 
     /**
      * Creates a HTTP response 200, OK including a response JSON
@@ -49,6 +68,15 @@ public class ServerUtils
             return Response.ok().build();
         else
             return Response.ok(JSON.write(json)).build();
+    }
+
+    /**
+     * Creates a HTTP response 403, UNAUTHORIZED
+     * @return HTTP response 403, UNAUTHORIZED
+     */
+    protected static Response UNAUTHORIZED()
+    {
+        return Response.status(Response.Status.UNAUTHORIZED).build();
     }
 
     /**

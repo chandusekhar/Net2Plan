@@ -10,6 +10,7 @@ import org.glassfish.jersey.media.multipart.MultiPart;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.media.multipart.file.FileDataBodyPart;
 
+import javax.ws.rs.Path;
 import javax.ws.rs.client.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -23,7 +24,7 @@ public class Net2PlanOaaSClient
     private WebTarget target;
     private final int defaultPort = 8080;
 
-    public Net2PlanOaaSClient(String ipAddress, String user, String password, int... optionalPort)
+    public Net2PlanOaaSClient(String ipAddress, int... optionalPort)
     {
         int port;
         if(optionalPort.length == 0)
@@ -37,6 +38,46 @@ public class Net2PlanOaaSClient
         this.client = ClientBuilder.newClient().register(MultiPartFeature.class);
         this.target = this.client.target(baseURL);
         ClientUtils.configureSecureClient();
+    }
+
+    /**
+     * Establishes the Database configuration of the admin user
+     * @param dbUser admin username
+     * @param dbPass admin password
+     * @param dbIpPort ip:port where the database is running
+     * @return HTTP Response
+     */
+    public Response establishDatabaseConfiguration(String dbUser, String dbPass, String dbIpPort)
+    {
+        JSONObject json = new JSONObject();
+        json.put("username", new JSONValue(dbUser));
+        json.put("password", new JSONValue(dbPass));
+        json.put("ipport", new JSONValue(dbIpPort));
+
+        WebTarget this_target = target.path("databaseConfiguration");
+        Invocation.Builder inv = this_target.request(MediaType.APPLICATION_JSON_TYPE).accept(MediaType.APPLICATION_JSON_TYPE);
+        Response r = inv.post(Entity.entity(JSON.write(json), MediaType.APPLICATION_JSON_TYPE));
+
+        return r;
+    }
+
+    /**
+     * Authenticates an user
+     * @param user user name
+     * @param pass user password
+     * @return HTTP Response
+     */
+    public Response authenticateUser(String user, String pass)
+    {
+        JSONObject json = new JSONObject();
+        json.put("username", new JSONValue(user));
+        json.put("password", new JSONValue(pass));
+
+        WebTarget this_target = target.path("authenticate");
+        Invocation.Builder inv = this_target.request(MediaType.APPLICATION_JSON_TYPE).accept(MediaType.APPLICATION_JSON_TYPE);
+        Response r = inv.post(Entity.entity(JSON.write(json), MediaType.APPLICATION_JSON_TYPE));
+
+        return r;
     }
 
     /**
@@ -166,7 +207,7 @@ public class Net2PlanOaaSClient
 
     public static void main(String [] args)
     {
-        Net2PlanOaaSClient client = new Net2PlanOaaSClient("localhost","","");
+        Net2PlanOaaSClient client = new Net2PlanOaaSClient("localhost");
 
         File catalog = new File("C:\\Users\\César\\Desktop\\Net2Plan-0.6.1\\workspace\\BuiltInExamples.jar");
         Response r = client.uploadCatalog(catalog);
