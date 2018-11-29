@@ -25,9 +25,71 @@ import java.util.*;
 @Path("/OaaS")
 public class Net2PlanOaaS
 {
-    public File UPLOAD_DIR = ServerUtils.UPLOAD_DIR;
-    public List<Triple<String, List<IAlgorithm>, List<IReport>>> catalogAlgorithmsAndReports = ServerUtils.catalogAlgorithmsAndReports;
+    private File UPLOAD_DIR = ServerUtils.UPLOAD_DIR;
+    private List<Triple<String, List<IAlgorithm>, List<IReport>>> catalogAlgorithmsAndReports = ServerUtils.catalogAlgorithmsAndReports;
+    private DatabaseController dbController = ServerUtils.dbController;
 
+    /**
+     * Establishes the user and the password of the Database admin (URL: /OaaS/databaseConfiguration, Operation: POST, Consumes: APPLICATION/JSON, Produces: APPLICATION/JSON)
+     * @return HTTP Response
+     */
+    @POST
+    @Path("/databaseConfiguration")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response setDatabaseConfiguration(String confJSON)
+    {
+        JSONObject json = new JSONObject();
+        try {
+            JSONObject conf = JSON.parse(confJSON);
+            String user = conf.get("username").getValue();
+            String pass = conf.get("password").getValue();
+            String ipPort = conf.get("ipport").getValue();
+            ServerUtils.dbController = new DatabaseController(ipPort, user, pass);
+        } catch (Exception e)
+        {
+            json.put("message", new JSONValue(e.getMessage()));
+            return ServerUtils.SERVER_ERROR(json);
+        }
+
+        json.put("message",new JSONValue("SQL Connection established successfully"));
+        return ServerUtils.OK(json);
+    }
+
+    /**
+     * Authenticates an user with its password (URL: /OaaS/authenticate, Operation: POST, Consumes: APPLICATION/JSON, Produces: APPLICATION/JSON)
+     * @return HTTP Response
+     */
+    @POST
+    @Path("/authenticate")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response authenticate(String authJSON)
+    {
+        JSONObject json = new JSONObject();
+        Response resp;
+        try {
+            JSONObject conf = JSON.parse(authJSON);
+            String user = conf.get("username").getValue();
+            String pass = conf.get("password").getValue();
+            boolean auth = dbController.logInUser(user, pass);
+            if(auth)
+            {
+                json.put("message", new JSONValue("Authenticated"));
+                resp = ServerUtils.OK(json);
+            }
+            else{
+                json.put("message", new JSONValue("No authenticated"));
+                resp = ServerUtils.SERVER_ERROR(json);
+            }
+        } catch (Exception e)
+        {
+            json.put("message", new JSONValue(e.getMessage()));
+            return ServerUtils.SERVER_ERROR(json);
+        }
+
+        return resp;
+    }
 
     /**
      * Obtains the list of available catalogs (URL: /OaaS/catalogs, Operation: GET, Produces: APPLICATION/JSON)

@@ -36,6 +36,7 @@ public class Net2PlanOaaSClient
         this.baseURL =  "http://"+ipAddress+":"+port+"/Net2Plan-OaaS/OaaS";
         this.client = ClientBuilder.newClient().register(MultiPartFeature.class);
         this.target = this.client.target(baseURL);
+        ClientUtils.configureSecureClient();
     }
 
     /**

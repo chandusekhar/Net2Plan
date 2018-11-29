@@ -24,10 +24,12 @@ import java.util.jar.JarFile;
 public class ServerUtils
 {
     protected static List<Triple<String, List<IAlgorithm>, List<IReport>>> catalogAlgorithmsAndReports;
+    protected static DatabaseController dbController;
 
     static
     {
         catalogAlgorithmsAndReports = new LinkedList<>();
+        dbController = null;
     }
 
     /**

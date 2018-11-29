@@ -12,7 +12,7 @@ public class DatabaseController
     public DatabaseController(String dbIpPort, String dbUser, String dbPass, String... optionalDatabase)
     {
         try {
-            this.connection = DriverManager.getConnection("jdbc:mysql://"+dbIpPort, dbUser, dbPass);
+            this.connection = DriverManager.getConnection("jdbc:mysql://"+dbIpPort+"?useLegacyDatetimeCode=false&serverTimezone=UTC", dbUser, dbPass);
             int optionalDBsize = optionalDatabase.length;
             if(optionalDBsize == 0)
                 this.databaseName = defaultDataBaseName;
@@ -37,6 +37,11 @@ public class DatabaseController
         {
             setDatabase(databaseName);
             createDefaultTableIfNotExists();
+        }
+        else{
+            String createDatabaseQuery = "CREATE DATABASE "+databaseName;
+            executeQuery(createDatabaseQuery);
+            setDatabase(databaseName);
         }
 
         } catch (SQLException e)
