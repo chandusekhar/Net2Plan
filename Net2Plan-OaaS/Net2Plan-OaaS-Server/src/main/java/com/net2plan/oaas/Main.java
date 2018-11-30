@@ -1,10 +1,19 @@
 package com.net2plan.oaas;
 
 
+import java.sql.SQLException;
+
 public class Main
 {
     public static void main(String [] args)
     {
-        DatabaseController cont = new DatabaseController("localhost:3306","girtel","girtelserver");
+        try {
+            DatabaseController cont = new DatabaseController("localhost:3306","girtel","girtelserver");
+        } catch (SQLException e)
+        {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 }

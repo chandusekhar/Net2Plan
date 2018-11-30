@@ -11,28 +11,17 @@ public class DatabaseController
     private final String defaultTableName = "users";
     private String databaseName;
 
-    protected DatabaseController(String dbIpPort, String dbUser, String dbPass, String... optionalDatabase)
+    protected DatabaseController(String dbIpPort, String dbUser, String dbPass) throws SQLException, ClassNotFoundException
     {
-        try {
-            this.connection = DriverManager.getConnection("jdbc:mysql://"+dbIpPort+"?useLegacyDatetimeCode=false&serverTimezone=UTC", dbUser, dbPass);
-            int optionalDBsize = optionalDatabase.length;
-            if(optionalDBsize == 0)
-                this.databaseName = defaultDataBaseName;
-            else if(optionalDBsize == 1)
-                this.databaseName = optionalDatabase[0];
-            else{
-                throw new RuntimeException("More than one database is not allowed");
-            }
-            checkIfDatabaseIsCreated();
-        } catch (SQLException e)
-        {
-            e.printStackTrace();
-        }
+        Class.forName("com.mysql.cj.jdbc.Driver");
+        this.connection = DriverManager.getConnection("jdbc:mysql://"+dbIpPort+"?useLegacyDatetimeCode=false&serverTimezone=UTC", dbUser, dbPass);
+        this.databaseName = defaultDataBaseName;
+        checkIfDatabaseIsCreated();
+
     }
 
-    private void checkIfDatabaseIsCreated()
+    private void checkIfDatabaseIsCreated() throws SQLException
     {
-        try {
         String checkDatabaseQuery = "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = '" + databaseName + "'";
         ResultSet checkSet = executeQuery(checkDatabaseQuery);
         if(checkSet.next())
@@ -46,57 +35,43 @@ public class DatabaseController
             setDatabase(databaseName);
         }
 
-        } catch (SQLException e)
-        {
-            e.printStackTrace();
-        }
 
     }
 
-    private void createDefaultTableIfNotExists()
+    private void createDefaultTableIfNotExists() throws SQLException
     {
         String createTableQuery = "CREATE TABLE IF NOT EXISTS " + defaultTableName + " (id INT NOT NULL AUTO_INCREMENT, user VARCHAR(20) NOT NULL, password VARCHAR(100) NOT NULL, category ENUM('BRONZE','SILVER','GOLD') NOT NULL, PRIMARY KEY (id))";
         executeQuery(createTableQuery);
     }
 
-    private ResultSet executeQuery(String query)
+    private ResultSet executeQuery(String query) throws SQLException
     {
         ResultSet set = null;
-        try {
-            Statement statement = connection.createStatement();
-            boolean execute = statement.execute(query);
-            if(execute)
-                set = statement.getResultSet();
-            else
-                set = null;
-
-        } catch (SQLException e)
-        {
-            e.printStackTrace();
-        }
+        Statement statement = connection.createStatement();
+        boolean execute = statement.execute(query);
+        if(execute)
+            set = statement.getResultSet();
+        else
+            set = null;
 
         return set;
     }
 
-    private void setDatabase(String dbName)
+    private void setDatabase(String dbName) throws SQLException
     {
         executeQuery("USE "+dbName);
     }
 
-    protected Pair<Boolean, ResultSet> authenticate(String user, String password)
+    protected Pair<Boolean, ResultSet> authenticate(String user, String password) throws SQLException
     {
         boolean exists = false;
         ResultSet set = null;
         String loginQuery = "SELECT * FROM " + defaultTableName + " WHERE user = '" + user + "' AND password = '" + password + "'";
         ResultSet loginSet = executeQuery(loginQuery);
-        try {
-            if(loginSet.next())
-            {
-                exists = true;
-                set = loginSet;
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
+        if(loginSet.first())
+        {
+            exists = true;
+            set = loginSet;
         }
 
         return Pair.unmodifiableOf(exists, set);

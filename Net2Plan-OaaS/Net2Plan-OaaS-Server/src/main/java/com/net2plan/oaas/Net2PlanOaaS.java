@@ -10,7 +10,10 @@ import com.shc.easyjson.*;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.*;
@@ -29,6 +32,10 @@ public class Net2PlanOaaS
     private File UPLOAD_DIR = ServerUtils.UPLOAD_DIR;
     private List<Triple<String, List<IAlgorithm>, List<IReport>>> catalogAlgorithmsAndReports = ServerUtils.catalogAlgorithmsAndReports;
     private DatabaseController dbController = ServerUtils.dbController;
+
+    @Context
+    HttpServletRequest webRequest;
+
 
     /**
      * Establishes the user and the password of the Database admin (URL: /OaaS/databaseConfiguration, Operation: POST, Consumes: APPLICATION/JSON, Produces: APPLICATION/JSON)
@@ -67,8 +74,9 @@ public class Net2PlanOaaS
     @Produces(MediaType.APPLICATION_JSON)
     public Response authenticate(String authJSON)
     {
+        HttpSession session = webRequest.getSession(true);
         JSONObject json = new JSONObject();
-        Response resp;
+        Response resp = null;
         try {
             JSONObject conf = JSON.parse(authJSON);
             String user = conf.get("username").getValue();
@@ -78,18 +86,28 @@ public class Net2PlanOaaS
             if(authBool)
             {
                 ResultSet set = auth.getSecond();
-                if(set.next())
+                if(set != null)
                 {
-                    String name = set.getString("user");
-                    long id = set.getLong("id");
-                    ServerUtils.authenticateUserIfNotAuthenticatedYet(name, id);
+                    if(set.first())
+                    {
+                        String username = set.getString("user");
+                        long id = set.getLong("id");
+                        String category = set.getString("category");
+
+                        session.setAttribute("USER_NAME", username);
+                        session.setAttribute("ID", id);
+                        session.setAttribute("CATEGORY", category);
+                    }
+                    else{
+                        json.put("message", new JSONValue("Error retrieving information from Database"));
+                        return ServerUtils.SERVER_ERROR(json);
+                    }
+                    json.put("message", new JSONValue("Authenticated"));
+                    resp = ServerUtils.OK(json);
                 }
                 else{
-                    json.put("message", new JSONValue("Error retrieving information from Database"));
-                    return ServerUtils.SERVER_ERROR(json);
+                    System.out.println("RESULT SET NULL");
                 }
-                json.put("message", new JSONValue("Authenticated"));
-                resp = ServerUtils.OK(json);
             }
             else{
                 json.put("message", new JSONValue("No authenticated"));
@@ -113,6 +131,9 @@ public class Net2PlanOaaS
     @Produces(MediaType.APPLICATION_JSON)
     public Response getCatalogs()
     {
+        if(!authorizeUser())
+            return ServerUtils.UNAUTHORIZED();
+
         JSONObject catalogsJSON = new JSONObject();
         JSONArray catalogsArray = new JSONArray();
         for(Triple<String, List<IAlgorithm>, List<IReport>> catalogEntry : catalogAlgorithmsAndReports)
@@ -135,6 +156,9 @@ public class Net2PlanOaaS
     @Produces(MediaType.APPLICATION_JSON)
     public Response uploadCatalog(@FormDataParam("file") byte [] input, @FormDataParam("file") FormDataContentDisposition fileMetaData)
     {
+        if(!authorizeUser())
+            return ServerUtils.UNAUTHORIZED();
+
         if(!UPLOAD_DIR.exists())
             UPLOAD_DIR.mkdirs();
 
@@ -206,6 +230,9 @@ public class Net2PlanOaaS
     @Produces(MediaType.APPLICATION_JSON)
     public Response getCatalogByName(@PathParam("name") String catalogName)
     {
+        if(!authorizeUser())
+            return ServerUtils.UNAUTHORIZED();
+
         JSONObject catalogJSON = null;
         for(Triple<String, List<IAlgorithm>, List<IReport>> catalogEntry : catalogAlgorithmsAndReports)
         {
@@ -235,6 +262,9 @@ public class Net2PlanOaaS
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAlgorithms()
     {
+        if(!authorizeUser())
+            return ServerUtils.UNAUTHORIZED();
+
         JSONObject algorithmsJSON = new JSONObject();
         JSONArray algorithmsArray = new JSONArray();
         for(Triple<String, List<IAlgorithm>, List<IReport>> catalogEntry : catalogAlgorithmsAndReports)
@@ -260,6 +290,9 @@ public class Net2PlanOaaS
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAlgorithmByName(@PathParam("name") String algorithmName)
     {
+        if(!authorizeUser())
+            return ServerUtils.UNAUTHORIZED();
+
         JSONObject algorithmJSON = null;
         boolean found = false;
         for(Triple<String, List<IAlgorithm>, List<IReport>> catalogEntry : catalogAlgorithmsAndReports)
@@ -297,6 +330,9 @@ public class Net2PlanOaaS
     @Produces(MediaType.APPLICATION_JSON)
     public Response getReports()
     {
+        if(!authorizeUser())
+            return ServerUtils.UNAUTHORIZED();
+
         JSONObject reportsJSON = new JSONObject();
         JSONArray reportsArray = new JSONArray();
         for(Triple<String, List<IAlgorithm>, List<IReport>> catalogEntry : catalogAlgorithmsAndReports)
@@ -322,6 +358,9 @@ public class Net2PlanOaaS
     @Produces(MediaType.APPLICATION_JSON)
     public Response getReportByName(@PathParam("name") String reportName)
     {
+        if(!authorizeUser())
+            return ServerUtils.UNAUTHORIZED();
+
         JSONObject reportJSON = null;
         boolean found = false;
         for(Triple<String, List<IAlgorithm>, List<IReport>> catalogEntry : catalogAlgorithmsAndReports)
@@ -352,7 +391,7 @@ public class Net2PlanOaaS
 
     /**
      * Sends a request to execute an algorithm or a report
-     * @param input input JSON Object. It has to be send using a specific format:
+     * @param input input JSON Object. It has to be sent using a specific format:
      *              <ul>
      *                  <li type="square">type: ALGORITHM / REPORT</li>
      *                  <li type="square">name: name of the algorithm or report to execute.</li>
@@ -368,6 +407,9 @@ public class Net2PlanOaaS
     @Path("/execute")
     public Response execute(String input)
     {
+        if(!authorizeUser())
+            return ServerUtils.UNAUTHORIZED();
+
         JSONObject errorJSON = new JSONObject();
         String response = "";
         JSONObject inputJSON = null;
@@ -618,6 +660,63 @@ public class Net2PlanOaaS
         responseJSON.put("executeResponse", new JSONValue(response));
 
         return ServerUtils.OK(responseJSON);
+    }
+
+    private boolean authorizeUser(String... allowedCategoryOptional)
+    {
+        String allowedCategory = (allowedCategoryOptional.length == 1) ? allowedCategoryOptional[0] : "";
+        HttpSession session = webRequest.getSession(false);
+        boolean allow = false;
+        String username = (String) session.getAttribute("USER_NAME");
+        String id = (String) session.getAttribute("ID");
+        String category = (String) session.getAttribute("CATEGORY");
+
+        System.out.println("USERNAME -> "+username);
+        System.out.println("ID -> "+id);
+        System.out.println("CATEGORY -> "+category);
+        if(username != null && id != null && category != null)
+        {
+            System.out.println("NOT NULL");
+            System.out.println("USERNAME -> "+username);
+            System.out.println("ID -> "+id);
+            System.out.println("CATEGORY -> "+category);
+            System.out.println("ALLOWED CATEGORY -> "+allowedCategory);
+
+            if(allowedCategory.equalsIgnoreCase("BRONZE"))
+            {
+                if(category.equalsIgnoreCase("BRONZE") || category.equalsIgnoreCase("SILVER") || category.equalsIgnoreCase("GOLD"))
+                    allow = true;
+                else
+                    throw new RuntimeException("Unknown user category -> "+category);
+            }
+            else if(allowedCategory.equalsIgnoreCase("SILVER"))
+            {
+                if(category.equalsIgnoreCase("BRONZE"))
+                    allow = false;
+                else if(category.equalsIgnoreCase("SILVER") || category.equalsIgnoreCase("GOLD"))
+                    allow = true;
+                else
+                    throw new RuntimeException("Unknown user category -> "+category);
+            }
+            else if(allowedCategory.equalsIgnoreCase("GOLD"))
+            {
+                if(category.equalsIgnoreCase("BRONZE") || category.equalsIgnoreCase("SILVER"))
+                {
+                    allow = false;
+                }
+                else if(category.equalsIgnoreCase("GOLD"))
+                {
+                    allow = true;
+                }
+                else
+                    throw new RuntimeException("Unknown user category -> "+category);
+            }
+            else
+                allow = true;
+        }
+
+        System.out.println("ALLOW");
+        return allow;
     }
 
 

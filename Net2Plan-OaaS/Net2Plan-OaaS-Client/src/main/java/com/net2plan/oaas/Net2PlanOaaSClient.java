@@ -10,7 +10,6 @@ import org.glassfish.jersey.media.multipart.MultiPart;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.media.multipart.file.FileDataBodyPart;
 
-import javax.ws.rs.Path;
 import javax.ws.rs.client.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -219,10 +218,29 @@ public class Net2PlanOaaSClient
         Response getA = client.getAlgorithmByName("com.net2plan.examples.ocnbook.offline.Offline_fa_ospfWeightOptimization_GRASP");
         System.out.println(getA.readEntity(String.class));
 
+        Response db = client.establishDatabaseConfiguration("girtel", "girtelserver", "localhost:3306");
+        System.out.println(db.readEntity(String.class));
+
+        Response auth = client.authenticateUser("cesar2", "cesar2");
+        System.out.println(auth.readEntity(String.class));
+
+        File catalog_2 = new File("C:\\Users\\César\\Desktop\\Net2Plan-0.6.1\\workspace\\BuiltInExamples.jar");
+        Response r2 = client.uploadCatalog(catalog_2);
+        System.out.println("UPLOAD CATALOG -> "+r2.readEntity(String.class));
+
+        Response auth2 = client.authenticateUser("cesar", "cesar");
+        System.out.println(auth2.readEntity(String.class));
+
+        Response getC2 = client.getCatalogs();
+        System.out.println(getC2.readEntity(String.class));
+
+        Response getA2 = client.getAlgorithmByName("com.net2plan.examples.ocnbook.offline.Offline_fa_ospfWeightOptimization_GRASP");
+        System.out.println(getA2.readEntity(String.class));
+
         File topologyFile = new File("C:\\Users\\César\\Desktop\\Net2Plan-0.6.1\\workspace\\data\\networkTopologies\\example7nodes.n2p");
         NetPlan netPlan = new NetPlan(topologyFile);
-        Response r2 = client.executeOperation("ALGORITHM","com.net2plan.examples.ocnbook.offline.Offline_fa_ospfWeightOptimization_GRASP",null, netPlan);
-        System.out.println("EXECUTE -> "+r2.readEntity(String.class));
+       /* Response r2 = client.executeOperation("ALGORITHM","com.net2plan.examples.ocnbook.offline.Offline_fa_ospfWeightOptimization_GRASP",null, netPlan);
+        System.out.println("EXECUTE -> "+r2.readEntity(String.class));*/
     }
 
 }

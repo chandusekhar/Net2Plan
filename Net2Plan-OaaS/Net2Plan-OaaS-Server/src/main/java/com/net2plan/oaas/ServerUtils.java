@@ -13,6 +13,9 @@ import com.shc.easyjson.JSONArray;
 import com.shc.easyjson.JSONObject;
 import com.shc.easyjson.JSONValue;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import java.io.File;
 import java.io.IOException;
@@ -26,13 +29,11 @@ public class ServerUtils
 {
     protected static List<Triple<String, List<IAlgorithm>, List<IReport>>> catalogAlgorithmsAndReports;
     protected static DatabaseController dbController;
-    protected static List<Pair<String, Long>> user_id_pairList;
 
     static
     {
         catalogAlgorithmsAndReports = new LinkedList<>();
         dbController = null;
-        user_id_pairList = new LinkedList<>();
     }
 
     /**
@@ -40,21 +41,6 @@ public class ServerUtils
      */
     protected final static File UPLOAD_DIR;
     static { UPLOAD_DIR = new File(SystemUtils.getCurrentDir().getAbsolutePath() + File.separator + "upload"); }
-
-    protected synchronized static void authenticateUserIfNotAuthenticatedYet(String user, long userId)
-    {
-        for(Pair<String, Long> pair : user_id_pairList)
-        {
-            String pUser = pair.getFirst();
-            long pId = pair.getSecond();
-            if(pUser.equals(user) && pId == userId)
-            {
-                return;
-            }
-        }
-
-        user_id_pairList.add(Pair.unmodifiableOf(user, userId));
-    }
 
 
     /**
@@ -76,7 +62,9 @@ public class ServerUtils
      */
     protected static Response UNAUTHORIZED()
     {
-        return Response.status(Response.Status.UNAUTHORIZED).build();
+        JSONObject json = new JSONObject();
+        json.put("message", new JSONValue("Unauthorized"));
+        return Response.status(Response.Status.UNAUTHORIZED).entity(JSON.write(json)).build();
     }
 
     /**
