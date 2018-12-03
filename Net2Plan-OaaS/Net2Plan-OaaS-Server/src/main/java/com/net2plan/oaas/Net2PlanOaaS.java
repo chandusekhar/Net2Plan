@@ -16,6 +16,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.xml.ws.spi.http.HttpContext;
 import java.io.*;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -666,11 +667,16 @@ public class Net2PlanOaaS
     {
         String allowedCategory = (allowedCategoryOptional.length == 1) ? allowedCategoryOptional[0] : "";
         HttpSession session = webRequest.getSession(false);
+        System.out.println(session);
+        if(session == null)
+            session = webRequest.getSession();
+        System.out.println(session);
         boolean allow = false;
         String username = (String) session.getAttribute("USER_NAME");
         String id = (String) session.getAttribute("ID");
         String category = (String) session.getAttribute("CATEGORY");
 
+        System.out.println("ID DE SESSION -> "+session.getId());
         System.out.println("USERNAME -> "+username);
         System.out.println("ID -> "+id);
         System.out.println("CATEGORY -> "+category);

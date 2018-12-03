@@ -18,8 +18,6 @@ import java.util.Map;
 
 public class Net2PlanOaaSClient
 {
-    private String baseURL;
-    private Client client;
     private WebTarget target;
     private final int defaultPort = 8080;
 
@@ -33,9 +31,9 @@ public class Net2PlanOaaSClient
         else
             throw new Net2PlanException("More than one port is not allowed");
 
-        this.baseURL =  "http://"+ipAddress+":"+port+"/Net2Plan-OaaS/OaaS";
-        this.client = ClientBuilder.newClient().register(MultiPartFeature.class);
-        this.target = this.client.target(baseURL);
+        String baseURL =  "http://"+ipAddress+":"+port+"/Net2Plan-OaaS/OaaS";
+        Client client = ClientBuilder.newBuilder().build().register(MultiPartFeature.class);
+        this.target = client.target(baseURL);
         ClientUtils.configureSecureClient();
     }
 
@@ -56,7 +54,6 @@ public class Net2PlanOaaSClient
         WebTarget this_target = target.path("databaseConfiguration");
         Invocation.Builder inv = this_target.request(MediaType.APPLICATION_JSON_TYPE).accept(MediaType.APPLICATION_JSON_TYPE);
         Response r = inv.post(Entity.entity(JSON.write(json), MediaType.APPLICATION_JSON_TYPE));
-
         return r;
     }
 

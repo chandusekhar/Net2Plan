@@ -42,7 +42,6 @@ public class ServerUtils
     protected final static File UPLOAD_DIR;
     static { UPLOAD_DIR = new File(SystemUtils.getCurrentDir().getAbsolutePath() + File.separator + "upload"); }
 
-
     /**
      * Creates a HTTP response 200, OK including a response JSON
      * @param json JSON Object to return (null if no JSON is desired)
@@ -246,5 +245,7 @@ public class ServerUtils
 
         return catalogs;
     }
+
+
 
 }
