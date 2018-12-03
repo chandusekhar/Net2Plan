@@ -29,11 +29,13 @@ public class ServerUtils
 {
     protected static List<Triple<String, List<IAlgorithm>, List<IReport>>> catalogAlgorithmsAndReports;
     protected static DatabaseController dbController;
+    protected static Map<String, Triple<String, Long, String>> tokens;
 
     static
     {
         catalogAlgorithmsAndReports = new LinkedList<>();
         dbController = null;
+        tokens = new LinkedHashMap<>();
     }
 
     /**
@@ -42,6 +44,24 @@ public class ServerUtils
     protected final static File UPLOAD_DIR;
     static { UPLOAD_DIR = new File(SystemUtils.getCurrentDir().getAbsolutePath() + File.separator + "upload"); }
 
+    protected static synchronized String addToken(String user, long id, String category)
+    {
+        String src = user + id + category + Math.random();
+        byte [] srcEncoded = Base64.getEncoder().encode(src.getBytes());
+        String token = new String(srcEncoded);
+        tokens.put(token, Triple.unmodifiableOf(user, id, category));
+        return token;
+    }
+
+    protected static synchronized boolean validateToken(String token)
+    {
+        return tokens.containsKey(token);
+    }
+
+    protected static synchronized Triple<String, Long, String> getInfoFromToken(String token)
+    {
+        return tokens.get(token);
+    }
     /**
      * Creates a HTTP response 200, OK including a response JSON
      * @param json JSON Object to return (null if no JSON is desired)

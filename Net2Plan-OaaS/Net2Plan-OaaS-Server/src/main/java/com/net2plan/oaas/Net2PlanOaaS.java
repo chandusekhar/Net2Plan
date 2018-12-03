@@ -37,7 +37,6 @@ public class Net2PlanOaaS
     @Context
     HttpServletRequest webRequest;
 
-
     /**
      * Establishes the user and the password of the Database admin (URL: /OaaS/databaseConfiguration, Operation: POST, Consumes: APPLICATION/JSON, Produces: APPLICATION/JSON)
      * @return HTTP Response
@@ -75,7 +74,6 @@ public class Net2PlanOaaS
     @Produces(MediaType.APPLICATION_JSON)
     public Response authenticate(String authJSON)
     {
-        HttpSession session = webRequest.getSession(true);
         JSONObject json = new JSONObject();
         Response resp = null;
         try {
@@ -95,24 +93,24 @@ public class Net2PlanOaaS
                         long id = set.getLong("id");
                         String category = set.getString("category");
 
-                        session.setAttribute("USER_NAME", username);
-                        session.setAttribute("ID", id);
-                        session.setAttribute("CATEGORY", category);
+                        String token = ServerUtils.addToken(username, id, category);
+                        json.put("message", new JSONValue("Authenticated"));
+                        json.put("token", new JSONValue(token));
+                        resp = ServerUtils.OK(json);
                     }
                     else{
                         json.put("message", new JSONValue("Error retrieving information from Database"));
                         return ServerUtils.SERVER_ERROR(json);
                     }
-                    json.put("message", new JSONValue("Authenticated"));
-                    resp = ServerUtils.OK(json);
                 }
                 else{
-                    System.out.println("RESULT SET NULL");
+                    json.put("message", new JSONValue("Error retrieving information from Database"));
+                    return ServerUtils.SERVER_ERROR(json);
                 }
             }
             else{
                 json.put("message", new JSONValue("No authenticated"));
-                resp = ServerUtils.SERVER_ERROR(json);
+                return ServerUtils.SERVER_ERROR(json);
             }
         } catch (Exception e)
         {
@@ -132,7 +130,8 @@ public class Net2PlanOaaS
     @Produces(MediaType.APPLICATION_JSON)
     public Response getCatalogs()
     {
-        if(!authorizeUser())
+        String token = webRequest.getHeader("token");
+        if(!authorizeUser(token))
             return ServerUtils.UNAUTHORIZED();
 
         JSONObject catalogsJSON = new JSONObject();
@@ -157,7 +156,8 @@ public class Net2PlanOaaS
     @Produces(MediaType.APPLICATION_JSON)
     public Response uploadCatalog(@FormDataParam("file") byte [] input, @FormDataParam("file") FormDataContentDisposition fileMetaData)
     {
-        if(!authorizeUser())
+        String token = webRequest.getHeader("token");
+        if(!authorizeUser(token))
             return ServerUtils.UNAUTHORIZED();
 
         if(!UPLOAD_DIR.exists())
@@ -231,7 +231,8 @@ public class Net2PlanOaaS
     @Produces(MediaType.APPLICATION_JSON)
     public Response getCatalogByName(@PathParam("name") String catalogName)
     {
-        if(!authorizeUser())
+        String token = webRequest.getHeader("token");
+        if(!authorizeUser(token))
             return ServerUtils.UNAUTHORIZED();
 
         JSONObject catalogJSON = null;
@@ -263,7 +264,8 @@ public class Net2PlanOaaS
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAlgorithms()
     {
-        if(!authorizeUser())
+        String token = webRequest.getHeader("token");
+        if(!authorizeUser(token))
             return ServerUtils.UNAUTHORIZED();
 
         JSONObject algorithmsJSON = new JSONObject();
@@ -291,7 +293,8 @@ public class Net2PlanOaaS
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAlgorithmByName(@PathParam("name") String algorithmName)
     {
-        if(!authorizeUser())
+        String token = webRequest.getHeader("token");
+        if(!authorizeUser(token))
             return ServerUtils.UNAUTHORIZED();
 
         JSONObject algorithmJSON = null;
@@ -331,7 +334,8 @@ public class Net2PlanOaaS
     @Produces(MediaType.APPLICATION_JSON)
     public Response getReports()
     {
-        if(!authorizeUser())
+        String token = webRequest.getHeader("token");
+        if(!authorizeUser(token))
             return ServerUtils.UNAUTHORIZED();
 
         JSONObject reportsJSON = new JSONObject();
@@ -359,7 +363,8 @@ public class Net2PlanOaaS
     @Produces(MediaType.APPLICATION_JSON)
     public Response getReportByName(@PathParam("name") String reportName)
     {
-        if(!authorizeUser())
+        String token = webRequest.getHeader("token");
+        if(!authorizeUser(token))
             return ServerUtils.UNAUTHORIZED();
 
         JSONObject reportJSON = null;
@@ -408,7 +413,8 @@ public class Net2PlanOaaS
     @Path("/execute")
     public Response execute(String input)
     {
-        if(!authorizeUser())
+        String token = webRequest.getHeader("token");
+        if(!authorizeUser(token))
             return ServerUtils.UNAUTHORIZED();
 
         JSONObject errorJSON = new JSONObject();
@@ -663,26 +669,18 @@ public class Net2PlanOaaS
         return ServerUtils.OK(responseJSON);
     }
 
-    private boolean authorizeUser(String... allowedCategoryOptional)
+    private boolean authorizeUser(String token, String... allowedCategoryOptional)
     {
         String allowedCategory = (allowedCategoryOptional.length == 1) ? allowedCategoryOptional[0] : "";
-        HttpSession session = webRequest.getSession(false);
-        System.out.println(session);
-        if(session == null)
-            session = webRequest.getSession();
-        System.out.println(session);
         boolean allow = false;
-        String username = (String) session.getAttribute("USER_NAME");
-        String id = (String) session.getAttribute("ID");
-        String category = (String) session.getAttribute("CATEGORY");
 
-        System.out.println("ID DE SESSION -> "+session.getId());
-        System.out.println("USERNAME -> "+username);
-        System.out.println("ID -> "+id);
-        System.out.println("CATEGORY -> "+category);
-        if(username != null && id != null && category != null)
+        if(ServerUtils.validateToken(token))
         {
-            System.out.println("NOT NULL");
+            System.out.println("TOKEN VALIDATE");
+            Triple<String, Long, String> tokenInfo = ServerUtils.getInfoFromToken(token);
+            String username = tokenInfo.getFirst();
+            long id = tokenInfo.getSecond();
+            String category = tokenInfo.getThird();
             System.out.println("USERNAME -> "+username);
             System.out.println("ID -> "+id);
             System.out.println("CATEGORY -> "+category);

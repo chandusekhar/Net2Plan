@@ -2,10 +2,7 @@ package com.net2plan.oaas;
 
 import com.net2plan.interfaces.networkDesign.Net2PlanException;
 import com.net2plan.interfaces.networkDesign.NetPlan;
-import com.shc.easyjson.JSON;
-import com.shc.easyjson.JSONArray;
-import com.shc.easyjson.JSONObject;
-import com.shc.easyjson.JSONValue;
+import com.shc.easyjson.*;
 import org.glassfish.jersey.media.multipart.MultiPart;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.media.multipart.file.FileDataBodyPart;
@@ -20,6 +17,7 @@ public class Net2PlanOaaSClient
 {
     private WebTarget target;
     private final int defaultPort = 8080;
+    private String authToken;
 
     public Net2PlanOaaSClient(String ipAddress, int... optionalPort)
     {
@@ -73,6 +71,15 @@ public class Net2PlanOaaSClient
         Invocation.Builder inv = this_target.request(MediaType.APPLICATION_JSON_TYPE).accept(MediaType.APPLICATION_JSON_TYPE);
         Response r = inv.post(Entity.entity(JSON.write(json), MediaType.APPLICATION_JSON_TYPE));
 
+        String entity = r.readEntity(String.class);
+        try {
+            JSONObject entityJSON = JSON.parse(entity);
+            JSONValue tokenValue = entityJSON.get("token");
+            this.authToken = (tokenValue == null) ? "" : tokenValue.getValue();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
         return r;
     }
 
@@ -83,7 +90,7 @@ public class Net2PlanOaaSClient
     public Response getCatalogs()
     {
         WebTarget this_target = target.path("catalogs");
-        Invocation.Builder inv = this_target.request().accept(MediaType.APPLICATION_JSON);
+        Invocation.Builder inv = this_target.request().header("token",authToken).accept(MediaType.APPLICATION_JSON);
         Response r = inv.get();
         return r;
     }
@@ -96,7 +103,7 @@ public class Net2PlanOaaSClient
     public Response getCatalogByName(String name)
     {
         WebTarget this_target = target.path("catalogs/"+name);
-        Invocation.Builder inv = this_target.request().accept(MediaType.APPLICATION_JSON);
+        Invocation.Builder inv = this_target.request().header("token",authToken).accept(MediaType.APPLICATION_JSON);
         Response r = inv.get();
         return r;
     }
@@ -108,7 +115,7 @@ public class Net2PlanOaaSClient
     public Response getAlgorithms()
     {
         WebTarget this_target = target.path("algorithms");
-        Invocation.Builder inv = this_target.request().accept(MediaType.APPLICATION_JSON);
+        Invocation.Builder inv = this_target.request().header("token",authToken).accept(MediaType.APPLICATION_JSON);
         Response r = inv.get();
         return r;
     }
@@ -121,7 +128,7 @@ public class Net2PlanOaaSClient
     public Response getAlgorithmByName(String name)
     {
         WebTarget this_target = target.path("algorithms/"+name);
-        Invocation.Builder inv = this_target.request().accept(MediaType.APPLICATION_JSON);
+        Invocation.Builder inv = this_target.request().header("token",authToken).accept(MediaType.APPLICATION_JSON);
         Response r = inv.get();
         return r;
     }
@@ -133,7 +140,7 @@ public class Net2PlanOaaSClient
     public Response getReports()
     {
         WebTarget this_target = target.path("reports");
-        Invocation.Builder inv = this_target.request().accept(MediaType.APPLICATION_JSON);
+        Invocation.Builder inv = this_target.request().header("token",authToken).accept(MediaType.APPLICATION_JSON);
         Response r = inv.get();
         return r;
     }
@@ -146,7 +153,7 @@ public class Net2PlanOaaSClient
     public Response getReportByName(String name)
     {
         WebTarget this_target = target.path("reports/"+name);
-        Invocation.Builder inv = this_target.request().accept(MediaType.APPLICATION_JSON);
+        Invocation.Builder inv = this_target.request().header("token",authToken).accept(MediaType.APPLICATION_JSON);
         Response r = inv.get();
         return r;
     }
@@ -163,7 +170,7 @@ public class Net2PlanOaaSClient
         MultiPart multi = new MultiPart();
         multi.bodyPart(body);
 
-        Invocation.Builder inv = this_target.request(MediaType.MULTIPART_FORM_DATA).accept(MediaType.APPLICATION_JSON);
+        Invocation.Builder inv = this_target.request(MediaType.MULTIPART_FORM_DATA).header("token",authToken).accept(MediaType.APPLICATION_JSON);
         Response r = inv.post(Entity.entity(multi,MediaType.MULTIPART_FORM_DATA));
 
         return r;
@@ -195,7 +202,7 @@ public class Net2PlanOaaSClient
         JSONObject netPlanJSON = netPlan.saveToJSON();
         json.put("netPlan", new JSONValue(netPlanJSON));
 
-        Invocation.Builder inv = this_target.request(MediaType.APPLICATION_JSON_TYPE).accept(MediaType.APPLICATION_JSON_TYPE);
+        Invocation.Builder inv = this_target.request(MediaType.APPLICATION_JSON_TYPE).header("token",authToken).accept(MediaType.APPLICATION_JSON_TYPE);
         Response r = inv.post(Entity.entity(JSON.write(json), MediaType.APPLICATION_JSON_TYPE));
 
         return r;
@@ -204,10 +211,6 @@ public class Net2PlanOaaSClient
     public static void main(String [] args)
     {
         Net2PlanOaaSClient client = new Net2PlanOaaSClient("localhost");
-
-        File catalog = new File("C:\\Users\\César\\Desktop\\Net2Plan-0.6.1\\workspace\\BuiltInExamples.jar");
-        Response r = client.uploadCatalog(catalog);
-        System.out.println("UPLOAD CATALOG -> "+r.readEntity(String.class));
 
         Response getC = client.getCatalogs();
         System.out.println(getC.readEntity(String.class));
@@ -219,14 +222,18 @@ public class Net2PlanOaaSClient
         System.out.println(db.readEntity(String.class));
 
         Response auth = client.authenticateUser("cesar2", "cesar2");
-        System.out.println(auth.readEntity(String.class));
+        System.out.println(auth.getStatus());
+
+        File catalog = new File("C:\\Users\\César\\Desktop\\Net2Plan-0.6.1\\workspace\\BuiltInExamples.jar");
+        Response r = client.uploadCatalog(catalog);
+        System.out.println("UPLOAD CATALOG -> "+r.readEntity(String.class));
+
+        Response auth2 = client.authenticateUser("cesar", "cesar");
+        System.out.println(auth2.getStatus());
 
         File catalog_2 = new File("C:\\Users\\César\\Desktop\\Net2Plan-0.6.1\\workspace\\BuiltInExamples.jar");
         Response r2 = client.uploadCatalog(catalog_2);
         System.out.println("UPLOAD CATALOG -> "+r2.readEntity(String.class));
-
-        Response auth2 = client.authenticateUser("cesar", "cesar");
-        System.out.println(auth2.readEntity(String.class));
 
         Response getC2 = client.getCatalogs();
         System.out.println(getC2.readEntity(String.class));
