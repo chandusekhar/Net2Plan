@@ -252,7 +252,7 @@ public class Net2PlanOaaSClient
 
         File topologyFile = new File("C:\\Users\\César\\Desktop\\Net2Plan-0.6.1\\workspace\\data\\networkTopologies\\example7nodes_ipOverWDM.n2p");
         NetPlan netPlan = new NetPlan(topologyFile);
-        Map<String, String> params = new LinkedHashMap<>();
+        /*Map<String, String> params = new LinkedHashMap<>();
         params.put("grasp_initializationType","random");
         params.put("ospf_maxLinkWeight","8");
         params.put("grasp_differenceInWeightToBeNeighbors","3");
@@ -261,8 +261,9 @@ public class Net2PlanOaaSClient
         params.put("ospf_weightOfMaxUtilizationInObjectiveFunction","0.6");
         params.put("grasp_rclRandomnessFactor","0.6");
         params.put("algorithm_maxExecutionTimeInSeconds","40");
-        params.put("grasp_maxNumIterations","70000");
-        Response rex = client.executeOperation("ALGORITHM","Offline_fa_ospfWeightOptimization_GRASP",params, netPlan);
+        params.put("grasp_maxNumIterations","70000");*/
+
+        Response rex = client.executeOperation("REPORT","Report_delay",null, netPlan);
         System.out.println("EXECUTE -> "+rex.readEntity(String.class));
     }
 
