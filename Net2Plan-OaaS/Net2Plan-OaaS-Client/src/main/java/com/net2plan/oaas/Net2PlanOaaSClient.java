@@ -250,7 +250,7 @@ public class Net2PlanOaaSClient
         Response getA2 = client.getAlgorithmByName("Offline_fa_ospfWeightOptimization_GRASP");
         System.out.println(getA2.readEntity(String.class));
 
-        File topologyFile = new File("C:\\Users\\César\\Desktop\\Net2Plan-0.6.1\\workspace\\data\\networkTopologies\\example7nodes.n2p");
+        File topologyFile = new File("C:\\Users\\César\\Desktop\\Net2Plan-0.6.1\\workspace\\data\\networkTopologies\\example7nodes_ipOverWDM.n2p");
         NetPlan netPlan = new NetPlan(topologyFile);
         Map<String, String> params = new LinkedHashMap<>();
         params.put("grasp_initializationType","random");
