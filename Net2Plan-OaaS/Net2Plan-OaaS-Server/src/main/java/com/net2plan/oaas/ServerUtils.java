@@ -7,6 +7,8 @@ import com.net2plan.interfaces.networkDesign.IReport;
 import com.net2plan.internal.IExternal;
 import com.net2plan.internal.SystemUtils;
 import com.net2plan.utils.Pair;
+import com.net2plan.utils.Quadruple;
+import com.net2plan.utils.StringUtils;
 import com.net2plan.utils.Triple;
 import com.shc.easyjson.JSON;
 import com.shc.easyjson.JSONArray;
@@ -27,7 +29,7 @@ import java.util.jar.JarFile;
 
 public class ServerUtils
 {
-    protected static List<Triple<String, List<IAlgorithm>, List<IReport>>> catalogAlgorithmsAndReports;
+    protected static List<Quadruple<String, String, List<IAlgorithm>, List<IReport>>> catalogAlgorithmsAndReports;
     protected static DatabaseController dbController;
     protected static Map<String, Triple<String, Long, String>> tokens;
 
@@ -146,7 +148,7 @@ public class ServerUtils
     protected static JSONObject parseAlgorithm(IAlgorithm alg)
     {
         JSONObject algorithmJSON = new JSONObject();
-        String algName = (alg.getClass().getName() == null) ? "" : alg.getClass().getName();
+        String algName = getAlgorithmName(alg);
         String algDescription = (alg.getDescription() == null) ? "" : alg.getDescription().replaceAll("\"","");
         algorithmJSON.put("name", new JSONValue(algName));
         algorithmJSON.put("type", new JSONValue("algorithm"));
@@ -178,7 +180,7 @@ public class ServerUtils
     protected static JSONObject parseReport(IReport rep)
     {
         JSONObject reportJSON = new JSONObject();
-        String repName = (rep.getClass().getName() == null) ? "" : rep.getClass().getName();
+        String repName = getReportName(rep);
         String repTitle = (rep.getTitle() == null) ? "" : rep.getTitle();
         String repDescription = (rep.getDescription() == null) ? "" : rep.getDescription().replaceAll("\"","");
         reportJSON.put("name", new JSONValue(repName));
@@ -206,14 +208,15 @@ public class ServerUtils
 
     /**
      * Obtains the JSON representation of a catalog (JAR file)
-     * @param catalogEntry Triple object with the name of the catalog, a list of its algorithms and a list of its reports
+     * @param catalogEntry Quadruple object with the name of the catalog, catalog's category, a list of its algorithms and a list of its reports
      * @return JSON representation of the catalog
      */
-    protected static JSONObject parseCatalog(Triple<String, List<IAlgorithm>, List<IReport>> catalogEntry)
+    protected static JSONObject parseCatalog(Quadruple<String, String, List<IAlgorithm>, List<IReport>> catalogEntry)
     {
         String catalogName = catalogEntry.getFirst();
-        List<IAlgorithm> algorithms = catalogEntry.getSecond();
-        List<IReport> reports = catalogEntry.getThird();
+        String catalogCategory = catalogEntry.getSecond();
+        List<IAlgorithm> algorithms = catalogEntry.getThird();
+        List<IReport> reports = catalogEntry.getFourth();
         JSONObject catalogJSON = new JSONObject();
         JSONArray externalsArray = new JSONArray();
         for(IAlgorithm alg : algorithms)
@@ -227,6 +230,7 @@ public class ServerUtils
             externalsArray.add(new JSONValue(repJSON));
         }
         catalogJSON.put("name", new JSONValue(catalogName));
+        catalogJSON.put("category", new JSONValue(catalogCategory));
         catalogJSON.put("files", new JSONValue(externalsArray));
         return catalogJSON;
     }
@@ -258,12 +262,73 @@ public class ServerUtils
     protected static List<String> getCatalogsNames()
     {
         List<String> catalogs = new LinkedList<>();
-        for(Triple<String, List<IAlgorithm>, List<IReport>> entry : catalogAlgorithmsAndReports)
+        for(Quadruple<String, String, List<IAlgorithm>, List<IReport>> entry : catalogAlgorithmsAndReports)
         {
             catalogs.add(entry.getFirst());
         }
 
         return catalogs;
+    }
+
+    protected static String getAlgorithmName(IAlgorithm alg)
+    {
+        try {
+        String [] classSplitted = StringUtils.split(alg.getClass().getName(),".");
+        int size = classSplitted.length;
+        return classSplitted[size - 1];
+        }catch(Exception e)
+        {
+         return "";
+        }
+    }
+
+    protected static String getReportName(IReport rep)
+    {
+        try {
+            String[] classSplitted = StringUtils.split(rep.getClass().getName(), ".");
+            int size = classSplitted.length;
+            return classSplitted[size - 1];
+        }catch(Exception e)
+        {
+            return "";
+        }
+    }
+
+    protected static String getCategoryFromExecutionName(String executeName)
+    {
+        String category = "ALL";
+        boolean found = false;
+        for(Quadruple<String, String, List<IAlgorithm>, List<IReport>> entry : catalogAlgorithmsAndReports)
+        {
+            List<IAlgorithm> algs = entry.getThird();
+            for(IAlgorithm alg : algs)
+            {
+                String algName = getAlgorithmName(alg);
+                if(executeName.equals(algName))
+                {
+                    found = true;
+                    category = entry.getSecond();
+                    break;
+                }
+            }
+            if(found)
+                break;
+            List<IReport> reps = entry.getFourth();
+            for(IReport rep : reps)
+            {
+                String repName = getReportName(rep);
+                if(executeName.equals(repName))
+                {
+                    found = true;
+                    category = entry.getSecond();
+                    break;
+                }
+            }
+            if(found)
+                break;
+        }
+
+        return category;
     }
 
 

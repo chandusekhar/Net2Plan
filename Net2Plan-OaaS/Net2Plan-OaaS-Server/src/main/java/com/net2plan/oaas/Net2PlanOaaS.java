@@ -31,7 +31,7 @@ import java.util.*;
 public class Net2PlanOaaS
 {
     private File UPLOAD_DIR = ServerUtils.UPLOAD_DIR;
-    private List<Triple<String, List<IAlgorithm>, List<IReport>>> catalogAlgorithmsAndReports = ServerUtils.catalogAlgorithmsAndReports;
+    private List<Quadruple<String, String, List<IAlgorithm>, List<IReport>>> catalogAlgorithmsAndReports = ServerUtils.catalogAlgorithmsAndReports;
     private DatabaseController dbController = ServerUtils.dbController;
 
     @Context
@@ -136,7 +136,7 @@ public class Net2PlanOaaS
 
         JSONObject catalogsJSON = new JSONObject();
         JSONArray catalogsArray = new JSONArray();
-        for(Triple<String, List<IAlgorithm>, List<IReport>> catalogEntry : catalogAlgorithmsAndReports)
+        for(Quadruple<String, String, List<IAlgorithm>, List<IReport>> catalogEntry : catalogAlgorithmsAndReports)
         {
             JSONObject catalogJSON = ServerUtils.parseCatalog(catalogEntry);
             catalogsArray.add(new JSONValue(catalogJSON));
@@ -152,20 +152,22 @@ public class Net2PlanOaaS
      */
     @POST
     @Path("/catalogs")
-    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Consumes({MediaType.MULTIPART_FORM_DATA, MediaType.APPLICATION_JSON})
     @Produces(MediaType.APPLICATION_JSON)
     public Response uploadCatalog(@FormDataParam("file") byte [] input, @FormDataParam("file") FormDataContentDisposition fileMetaData)
     {
+        JSONObject json = new JSONObject();
         String token = webRequest.getHeader("token");
-        if(!authorizeUser(token))
+        if(!authorizeUser(token, "GOLD"))
             return ServerUtils.UNAUTHORIZED();
 
         if(!UPLOAD_DIR.exists())
             UPLOAD_DIR.mkdirs();
 
+        String catalogCategory = webRequest.getHeader("category");
+
         String catalogName = fileMetaData.getFileName();
         List<String> catalogsNames = ServerUtils.getCatalogsNames();
-        JSONObject json = new JSONObject();
 
         if(catalogsNames.contains(catalogName))
         {
@@ -202,7 +204,7 @@ public class Net2PlanOaaS
                 }
             }
 
-            catalogAlgorithmsAndReports.add(Triple.unmodifiableOf(catalogName, algorithms, reports));
+            catalogAlgorithmsAndReports.add(Quadruple.unmodifiableOf(catalogName, catalogCategory, algorithms, reports));
             ServerUtils.cleanFolder(UPLOAD_DIR, false);
 
             return ServerUtils.OK(null);
@@ -236,7 +238,7 @@ public class Net2PlanOaaS
             return ServerUtils.UNAUTHORIZED();
 
         JSONObject catalogJSON = null;
-        for(Triple<String, List<IAlgorithm>, List<IReport>> catalogEntry : catalogAlgorithmsAndReports)
+        for(Quadruple<String, String, List<IAlgorithm>, List<IReport>> catalogEntry : catalogAlgorithmsAndReports)
         {
             String catalog = catalogEntry.getFirst();
             if(catalog.equals(catalogName))
@@ -270,9 +272,9 @@ public class Net2PlanOaaS
 
         JSONObject algorithmsJSON = new JSONObject();
         JSONArray algorithmsArray = new JSONArray();
-        for(Triple<String, List<IAlgorithm>, List<IReport>> catalogEntry : catalogAlgorithmsAndReports)
+        for(Quadruple<String, String, List<IAlgorithm>, List<IReport>> catalogEntry : catalogAlgorithmsAndReports)
         {
-            List<IAlgorithm> algs = catalogEntry.getSecond();
+            List<IAlgorithm> algs = catalogEntry.getThird();
             for(IAlgorithm alg : algs)
             {
                 JSONObject algorithmJSON = ServerUtils.parseAlgorithm(alg);
@@ -299,12 +301,12 @@ public class Net2PlanOaaS
 
         JSONObject algorithmJSON = null;
         boolean found = false;
-        for(Triple<String, List<IAlgorithm>, List<IReport>> catalogEntry : catalogAlgorithmsAndReports)
+        for(Quadruple<String, String, List<IAlgorithm>, List<IReport>> catalogEntry : catalogAlgorithmsAndReports)
         {
-            List<IAlgorithm> algs = catalogEntry.getSecond();
+            List<IAlgorithm> algs = catalogEntry.getThird();
             for(IAlgorithm alg : algs)
             {
-                String algName = alg.getClass().getName();
+                String algName = ServerUtils.getAlgorithmName(alg);
                 if(algName.equals(algorithmName))
                 {
                     algorithmJSON = ServerUtils.parseAlgorithm(alg);
@@ -340,9 +342,9 @@ public class Net2PlanOaaS
 
         JSONObject reportsJSON = new JSONObject();
         JSONArray reportsArray = new JSONArray();
-        for(Triple<String, List<IAlgorithm>, List<IReport>> catalogEntry : catalogAlgorithmsAndReports)
+        for(Quadruple<String, String, List<IAlgorithm>, List<IReport>> catalogEntry : catalogAlgorithmsAndReports)
         {
-            List<IReport> reps = catalogEntry.getThird();
+            List<IReport> reps = catalogEntry.getFourth();
             for(IReport rep : reps)
             {
                 JSONObject reportJSON = ServerUtils.parseReport(rep);
@@ -369,12 +371,12 @@ public class Net2PlanOaaS
 
         JSONObject reportJSON = null;
         boolean found = false;
-        for(Triple<String, List<IAlgorithm>, List<IReport>> catalogEntry : catalogAlgorithmsAndReports)
+        for(Quadruple<String, String, List<IAlgorithm>, List<IReport>> catalogEntry : catalogAlgorithmsAndReports)
         {
-            List<IReport> reps = catalogEntry.getThird();
+            List<IReport> reps = catalogEntry.getFourth();
             for(IReport rep : reps)
             {
-                String repName = rep.getClass().getName();
+                String repName = ServerUtils.getReportName(rep);
                 if(repName.equals(reportName))
                 {
                     reportJSON = ServerUtils.parseReport(rep);
@@ -413,10 +415,6 @@ public class Net2PlanOaaS
     @Path("/execute")
     public Response execute(String input)
     {
-        String token = webRequest.getHeader("token");
-        if(!authorizeUser(token))
-            return ServerUtils.UNAUTHORIZED();
-
         JSONObject errorJSON = new JSONObject();
         String response = "";
         JSONObject inputJSON = null;
@@ -432,18 +430,24 @@ public class Net2PlanOaaS
         JSONArray userParams = inputJSON.get("userparams").getValue();
         JSONObject inputNetPlan = inputJSON.get("netPlan").getValue();
 
+        String category = ServerUtils.getCategoryFromExecutionName(executeName);
+
+        String token = webRequest.getHeader("token");
+        if(!authorizeUser(token, category))
+            return ServerUtils.UNAUTHORIZED();
+
         NetPlan netPlan = new NetPlan(inputNetPlan);
 
         if(type.equalsIgnoreCase("ALGORITHM"))
         {
             boolean found = false;
             IAlgorithm algorithm = null;
-            for(Triple<String, List<IAlgorithm>, List<IReport>> catalogEntry : catalogAlgorithmsAndReports)
+            for(Quadruple<String, String, List<IAlgorithm>, List<IReport>> catalogEntry : catalogAlgorithmsAndReports)
             {
-                List<IAlgorithm> algs = catalogEntry.getSecond();
+                List<IAlgorithm> algs = catalogEntry.getThird();
                 for(IAlgorithm alg : algs)
                 {
-                    String algName = alg.getClass().getName();
+                    String algName = ServerUtils.getAlgorithmName(alg);
                     if(algName.equals(executeName))
                     {
                         algorithm = alg;
@@ -553,12 +557,12 @@ public class Net2PlanOaaS
         {
             IReport report = null;
             boolean found = false;
-            for(Triple<String, List<IAlgorithm>, List<IReport>> catalogEntry : catalogAlgorithmsAndReports)
+            for(Quadruple<String, String, List<IAlgorithm>, List<IReport>> catalogEntry : catalogAlgorithmsAndReports)
             {
-                List<IReport> reps = catalogEntry.getThird();
+                List<IReport> reps = catalogEntry.getFourth();
                 for(IReport rep : reps)
                 {
-                    String repName = rep.getClass().getName();
+                    String repName = ServerUtils.getReportName(rep);
                     if(repName.equals(executeName))
                     {
                         report = rep;
@@ -669,22 +673,21 @@ public class Net2PlanOaaS
         return ServerUtils.OK(responseJSON);
     }
 
+    /**
+     * Checks if the user is authorized to access the API functionalities
+     * @param token user's token
+     * @param allowedCategoryOptional optional allowed Category
+     * @return true if the user is authorized, false if not
+     */
     private boolean authorizeUser(String token, String... allowedCategoryOptional)
     {
-        String allowedCategory = (allowedCategoryOptional.length == 1) ? allowedCategoryOptional[0] : "";
+        String allowedCategory = (allowedCategoryOptional.length == 1) ? allowedCategoryOptional[0] : "ALL";
         boolean allow = false;
 
         if(ServerUtils.validateToken(token))
         {
-            System.out.println("TOKEN VALIDATE");
             Triple<String, Long, String> tokenInfo = ServerUtils.getInfoFromToken(token);
-            String username = tokenInfo.getFirst();
-            long id = tokenInfo.getSecond();
             String category = tokenInfo.getThird();
-            System.out.println("USERNAME -> "+username);
-            System.out.println("ID -> "+id);
-            System.out.println("CATEGORY -> "+category);
-            System.out.println("ALLOWED CATEGORY -> "+allowedCategory);
 
             if(allowedCategory.equalsIgnoreCase("BRONZE"))
             {
@@ -715,11 +718,12 @@ public class Net2PlanOaaS
                 else
                     throw new RuntimeException("Unknown user category -> "+category);
             }
-            else
+            else if(allowedCategory.equalsIgnoreCase("ALL"))
                 allow = true;
+            else
+                throw new RuntimeException("Unknown catalog category -> "+allowedCategory);
         }
 
-        System.out.println("ALLOW");
         return allow;
     }
 

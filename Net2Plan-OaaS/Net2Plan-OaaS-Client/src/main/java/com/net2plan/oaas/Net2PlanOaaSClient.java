@@ -11,6 +11,7 @@ import javax.ws.rs.client.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.File;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class Net2PlanOaaSClient
@@ -19,6 +20,11 @@ public class Net2PlanOaaSClient
     private final int defaultPort = 8080;
     private String authToken;
 
+    /**
+     * Net2Plan OaaS Client constructor
+     * @param ipAddress IP Address where Net2Plan OaaS is running
+     * @param optionalPort port where OaaS is running (default value: 8080)
+     */
     public Net2PlanOaaSClient(String ipAddress, int... optionalPort)
     {
         int port;
@@ -32,6 +38,7 @@ public class Net2PlanOaaSClient
         String baseURL =  "http://"+ipAddress+":"+port+"/Net2Plan-OaaS/OaaS";
         Client client = ClientBuilder.newBuilder().build().register(MultiPartFeature.class);
         this.target = client.target(baseURL);
+        this.authToken = "";
         ClientUtils.configureSecureClient();
     }
 
@@ -161,16 +168,18 @@ public class Net2PlanOaaSClient
     /**
      * Uploads a catalog (JAR file) including different algorithms and/or reports
      * @param catalogFile catalog (JAR file)
+     * @param optionalCategory BRONZE, SILVER, GOLD, ALL
      * @return HTTP Response
      */
-    public Response uploadCatalog(File catalogFile)
+    public Response uploadCatalog(File catalogFile, String... optionalCategory)
     {
+        String category = (optionalCategory.length == 1) ? optionalCategory[0] : "ALL";
         WebTarget this_target = target.path("catalogs");
         FileDataBodyPart body = new FileDataBodyPart("file",catalogFile);
         MultiPart multi = new MultiPart();
         multi.bodyPart(body);
 
-        Invocation.Builder inv = this_target.request(MediaType.MULTIPART_FORM_DATA).header("token",authToken).accept(MediaType.APPLICATION_JSON);
+        Invocation.Builder inv = this_target.request(MediaType.APPLICATION_JSON).header("token",authToken).header("category",category);
         Response r = inv.post(Entity.entity(multi,MediaType.MULTIPART_FORM_DATA));
 
         return r;
@@ -222,14 +231,14 @@ public class Net2PlanOaaSClient
         System.out.println(db.readEntity(String.class));
 
         Response auth = client.authenticateUser("cesar2", "cesar2");
-        System.out.println(auth.getStatus());
+        System.out.println("AUTENTICANDO USER cesar2");
 
         File catalog = new File("C:\\Users\\César\\Desktop\\Net2Plan-0.6.1\\workspace\\BuiltInExamples.jar");
         Response r = client.uploadCatalog(catalog);
         System.out.println("UPLOAD CATALOG -> "+r.readEntity(String.class));
 
-        Response auth2 = client.authenticateUser("cesar", "cesar");
-        System.out.println(auth2.getStatus());
+        Response auth2 = client.authenticateUser("root", "root");
+        System.out.println("AUTENTICANDO USER root");
 
         File catalog_2 = new File("C:\\Users\\César\\Desktop\\Net2Plan-0.6.1\\workspace\\BuiltInExamples.jar");
         Response r2 = client.uploadCatalog(catalog_2);
@@ -238,13 +247,23 @@ public class Net2PlanOaaSClient
         Response getC2 = client.getCatalogs();
         System.out.println(getC2.readEntity(String.class));
 
-        Response getA2 = client.getAlgorithmByName("com.net2plan.examples.ocnbook.offline.Offline_fa_ospfWeightOptimization_GRASP");
+        Response getA2 = client.getAlgorithmByName("Offline_fa_ospfWeightOptimization_GRASP");
         System.out.println(getA2.readEntity(String.class));
 
         File topologyFile = new File("C:\\Users\\César\\Desktop\\Net2Plan-0.6.1\\workspace\\data\\networkTopologies\\example7nodes.n2p");
         NetPlan netPlan = new NetPlan(topologyFile);
-       /* Response r2 = client.executeOperation("ALGORITHM","com.net2plan.examples.ocnbook.offline.Offline_fa_ospfWeightOptimization_GRASP",null, netPlan);
-        System.out.println("EXECUTE -> "+r2.readEntity(String.class));*/
+        Map<String, String> params = new LinkedHashMap<>();
+        params.put("grasp_initializationType","random");
+        params.put("ospf_maxLinkWeight","8");
+        params.put("grasp_differenceInWeightToBeNeighbors","3");
+        params.put("algorithm_randomSeed","5");
+        params.put("algorithm_outputFileNameRoot","");
+        params.put("ospf_weightOfMaxUtilizationInObjectiveFunction","0.6");
+        params.put("grasp_rclRandomnessFactor","0.6");
+        params.put("algorithm_maxExecutionTimeInSeconds","40");
+        params.put("grasp_maxNumIterations","70000");
+        Response rex = client.executeOperation("ALGORITHM","Offline_fa_ospfWeightOptimization_GRASP",params, netPlan);
+        System.out.println("EXECUTE -> "+rex.readEntity(String.class));
     }
 
 }
