@@ -221,22 +221,6 @@ public class Net2PlanOaaSClient
     {
         Net2PlanOaaSClient client = new Net2PlanOaaSClient("localhost");
 
-        Response getC = client.getCatalogs();
-        System.out.println(getC.readEntity(String.class));
-
-        Response getA = client.getAlgorithmByName("com.net2plan.examples.ocnbook.offline.Offline_fa_ospfWeightOptimization_GRASP");
-        System.out.println(getA.readEntity(String.class));
-
-        Response db = client.establishDatabaseConfiguration("girtel", "girtelserver", "localhost:3306");
-        System.out.println(db.readEntity(String.class));
-
-        Response auth = client.authenticateUser("cesar2", "cesar2");
-        System.out.println("AUTENTICANDO USER cesar2");
-
-        File catalog = new File("C:\\Users\\César\\Desktop\\Net2Plan-0.6.1\\workspace\\BuiltInExamples.jar");
-        Response r = client.uploadCatalog(catalog);
-        System.out.println("UPLOAD CATALOG -> "+r.readEntity(String.class));
-
         Response auth2 = client.authenticateUser("root", "root");
         System.out.println("AUTENTICANDO USER root");
 
