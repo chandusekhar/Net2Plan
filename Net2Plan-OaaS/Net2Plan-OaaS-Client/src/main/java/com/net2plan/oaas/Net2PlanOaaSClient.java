@@ -11,7 +11,6 @@ import javax.ws.rs.client.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.File;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class Net2PlanOaaSClient
@@ -35,7 +34,7 @@ public class Net2PlanOaaSClient
         else
             throw new Net2PlanException("More than one port is not allowed");
 
-        String baseURL =  "http://"+ipAddress+":"+port+"/Net2Plan-OaaS/OaaS";
+        String baseURL =  "http://"+ipAddress+":"+port+"/Net2Plan-OaaS";
         Client client = ClientBuilder.newBuilder().build().register(MultiPartFeature.class);
         this.target = client.target(baseURL);
         this.authToken = "";
@@ -56,7 +55,7 @@ public class Net2PlanOaaSClient
         json.put("password", new JSONValue(dbPass));
         json.put("ipport", new JSONValue(dbIpPort));
 
-        WebTarget this_target = target.path("databaseConfiguration");
+        WebTarget this_target = target.path("/OaaS/databaseConfiguration");
         Invocation.Builder inv = this_target.request(MediaType.APPLICATION_JSON_TYPE).accept(MediaType.APPLICATION_JSON_TYPE);
         Response r = inv.post(Entity.entity(JSON.write(json), MediaType.APPLICATION_JSON_TYPE));
         return r;
@@ -74,18 +73,19 @@ public class Net2PlanOaaSClient
         json.put("username", new JSONValue(user));
         json.put("password", new JSONValue(pass));
 
-        WebTarget this_target = target.path("authenticate");
+        WebTarget this_target = target.path("/authenticate");
         Invocation.Builder inv = this_target.request(MediaType.APPLICATION_JSON_TYPE).accept(MediaType.APPLICATION_JSON_TYPE);
         Response r = inv.post(Entity.entity(JSON.write(json), MediaType.APPLICATION_JSON_TYPE));
 
         String entity = r.readEntity(String.class);
-        try {
+        System.out.println(entity);
+       /* try {
             JSONObject entityJSON = JSON.parse(entity);
             JSONValue tokenValue = entityJSON.get("token");
             this.authToken = (tokenValue == null) ? "" : tokenValue.getValue();
         } catch (ParseException e) {
             e.printStackTrace();
-        }
+        }*/
 
         return r;
     }
@@ -96,7 +96,7 @@ public class Net2PlanOaaSClient
      */
     public Response getCatalogs()
     {
-        WebTarget this_target = target.path("catalogs");
+        WebTarget this_target = target.path("/OaaS/catalogs");
         Invocation.Builder inv = this_target.request().header("token",authToken).accept(MediaType.APPLICATION_JSON);
         Response r = inv.get();
         return r;
@@ -109,7 +109,7 @@ public class Net2PlanOaaSClient
      */
     public Response getCatalogByName(String name)
     {
-        WebTarget this_target = target.path("catalogs/"+name);
+        WebTarget this_target = target.path("/OaaS/catalogs/"+name);
         Invocation.Builder inv = this_target.request().header("token",authToken).accept(MediaType.APPLICATION_JSON);
         Response r = inv.get();
         return r;
@@ -121,7 +121,7 @@ public class Net2PlanOaaSClient
      */
     public Response getAlgorithms()
     {
-        WebTarget this_target = target.path("algorithms");
+        WebTarget this_target = target.path("/OaaS/algorithms");
         Invocation.Builder inv = this_target.request().header("token",authToken).accept(MediaType.APPLICATION_JSON);
         Response r = inv.get();
         return r;
@@ -134,7 +134,7 @@ public class Net2PlanOaaSClient
      */
     public Response getAlgorithmByName(String name)
     {
-        WebTarget this_target = target.path("algorithms/"+name);
+        WebTarget this_target = target.path("/OaaS/algorithms/"+name);
         Invocation.Builder inv = this_target.request().header("token",authToken).accept(MediaType.APPLICATION_JSON);
         Response r = inv.get();
         return r;
@@ -146,7 +146,7 @@ public class Net2PlanOaaSClient
      */
     public Response getReports()
     {
-        WebTarget this_target = target.path("reports");
+        WebTarget this_target = target.path("/OaaS/reports");
         Invocation.Builder inv = this_target.request().header("token",authToken).accept(MediaType.APPLICATION_JSON);
         Response r = inv.get();
         return r;
@@ -159,7 +159,7 @@ public class Net2PlanOaaSClient
      */
     public Response getReportByName(String name)
     {
-        WebTarget this_target = target.path("reports/"+name);
+        WebTarget this_target = target.path("/OaaS/reports/"+name);
         Invocation.Builder inv = this_target.request().header("token",authToken).accept(MediaType.APPLICATION_JSON);
         Response r = inv.get();
         return r;
@@ -174,7 +174,7 @@ public class Net2PlanOaaSClient
     public Response uploadCatalog(File catalogFile, String... optionalCategory)
     {
         String category = (optionalCategory.length == 1) ? optionalCategory[0] : "ALL";
-        WebTarget this_target = target.path("catalogs");
+        WebTarget this_target = target.path("/OaaS/catalogs");
         FileDataBodyPart body = new FileDataBodyPart("file",catalogFile);
         MultiPart multi = new MultiPart();
         multi.bodyPart(body);
@@ -195,7 +195,7 @@ public class Net2PlanOaaSClient
      */
     public Response executeOperation(String type, String name, Map<String, String> userParams, NetPlan netPlan)
     {
-        WebTarget this_target = target.path("execute");
+        WebTarget this_target = target.path("/OaaS/execute");
 
         JSONObject json = new JSONObject();
         json.put("type",new JSONValue(type));

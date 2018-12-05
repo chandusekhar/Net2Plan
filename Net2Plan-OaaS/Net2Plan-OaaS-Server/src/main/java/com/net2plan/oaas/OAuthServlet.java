@@ -14,11 +14,13 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.PrintWriter;
 
-public class Net2PlanOaaSServlet extends HttpServlet
+public class OAuthServlet extends HttpServlet
 {
     private OAuthIssuer oauthIssuerImpl = new OAuthIssuerImpl(new MD5Generator());
-    public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException,
+
+    public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
     {
         try {
             OAuthAuthzRequest oauthRequest = new OAuthAuthzRequest(request);
@@ -26,12 +28,18 @@ public class Net2PlanOaaSServlet extends HttpServlet
             String token = oauthIssuerImpl.accessToken();
 
             OAuthResponse oauthResponse = OAuthASResponse
-                    .authorizationResponse(request, HttpServletResponse.SC_OK)
+                    .tokenResponse(HttpServletResponse.SC_OK)
                     .setAccessToken(token)
                     .setExpiresIn("3600")
                     .buildJSONMessage();
 
             response.setStatus(oauthResponse.getResponseStatus());
+
+            PrintWriter pw = response.getWriter();
+            pw.print(oauthResponse.getBody());
+            pw.flush();
+            pw.close();
+
         } catch (OAuthSystemException e)
         {
             try {
@@ -39,6 +47,15 @@ public class Net2PlanOaaSServlet extends HttpServlet
                         .errorResponse(401)
                         .error(OAuthProblemException.error(e.getMessage()))
                         .buildBodyMessage();
+
+                response.setStatus(r.getResponseStatus());
+
+                PrintWriter pw = response.getWriter();
+                pw.print(r.getBody());
+                pw.flush();
+                pw.close();
+
+                response.sendError(401);
             } catch (OAuthSystemException e1)
             {
                 e1.printStackTrace();
@@ -46,12 +63,24 @@ public class Net2PlanOaaSServlet extends HttpServlet
         } catch (OAuthProblemException e)
         {
 
-            e.printStackTrace();
+            try {
+                OAuthResponse r = OAuthResponse
+                        .errorResponse(401)
+                        .error(OAuthProblemException.error(e.getMessage()))
+                        .buildBodyMessage();
+
+                response.setStatus(r.getResponseStatus());
+
+                PrintWriter pw = response.getWriter();
+                pw.print(r.getBody());
+                pw.flush();
+                pw.close();
+
+                response.sendError(401);
+            } catch (OAuthSystemException e1)
+            {
+                e1.printStackTrace();
+            }
         }
-    }
-
-    public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
-    {
-
     }
 }

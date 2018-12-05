@@ -25,10 +25,10 @@ import java.util.*;
 
 
 /**
- * Net2Plan OaaS root resource (URL: /OaaS)
+ * OaaS Resources
  */
 @Path("/OaaS")
-public class Net2PlanOaaS
+public class OaaSResources
 {
     private File UPLOAD_DIR = ServerUtils.UPLOAD_DIR;
     private List<Quadruple<String, String, List<IAlgorithm>, List<IReport>>> catalogAlgorithmsAndReports = ServerUtils.catalogAlgorithmsAndReports;
