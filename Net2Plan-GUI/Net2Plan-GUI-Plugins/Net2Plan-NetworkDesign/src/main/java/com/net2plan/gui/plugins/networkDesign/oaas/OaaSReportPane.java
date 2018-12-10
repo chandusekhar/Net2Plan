@@ -8,28 +8,16 @@
  * Contributors:
  *     Pablo Pavon Marino and others - initial API and implementation
  *******************************************************************************/
-package com.net2plan.gui.plugins.networkDesign.oaasReportsPane;
+package com.net2plan.gui.plugins.networkDesign.oaas;
 
 
 import com.net2plan.gui.plugins.GUINetworkDesign;
-import com.net2plan.gui.plugins.networkDesign.ReportBrowser;
-import com.net2plan.gui.plugins.networkDesign.ThreadExecutionController;
+import com.net2plan.gui.plugins.networkDesign.oaas.OaaSSelector;
 import com.net2plan.gui.utils.*;
-import com.net2plan.interfaces.networkDesign.Configuration;
-import com.net2plan.interfaces.networkDesign.IReport;
-import com.net2plan.internal.ErrorHandling;
-import com.net2plan.internal.SystemUtils;
-import com.net2plan.internal.plugins.IGUIModule;
-import com.net2plan.utils.ClassLoaderUtils;
-import com.net2plan.utils.Pair;
-import com.net2plan.utils.Triple;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.io.Closeable;
-import java.io.File;
-import java.util.Map;
 
 @SuppressWarnings("unchecked")
 public class OaaSReportPane extends JSplitPane
@@ -46,7 +34,7 @@ public class OaaSReportPane extends JSplitPane
 		this.mainWindow = mainWindow;
 
         ParameterValueDescriptionPanel reportParameters = new ParameterValueDescriptionPanel();
-        reportSelector = new OaaSSelector("Report", reportParameters);
+        reportSelector = new OaaSSelector(mainWindow,reportParameters);
         reportContainer = new JTabbedPane();
 
         final JPanel pnl_buttons = new JPanel(new WrapLayout());

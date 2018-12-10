@@ -83,6 +83,8 @@ public class Configuration
 		defaultOptions.add(Triple.unmodifiableOf("defaultNLPSolver", "#select# ipopt", "Default solver for NLP models"));
 		defaultOptions.add(Triple.unmodifiableOf("databaseUser", "girtel","Database user for OaaS Authentication"));
 		defaultOptions.add(Triple.unmodifiableOf("databasePassword", "#hidden# girtelserver", "Database password for OaaS Authentication"));
+		defaultOptions.add(Triple.unmodifiableOf("databaseAddress", "localhost", "IP Address where database server is running"));
+		defaultOptions.add(Triple.unmodifiableOf("databasePort","3306","IP port where database server is running"));
 
 		options = CommandLineParser.getParameters(defaultOptions, (SortedMap) null);
 

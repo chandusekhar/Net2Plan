@@ -15,7 +15,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
@@ -23,20 +22,15 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import java.util.stream.Collectors;
 
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
@@ -50,8 +44,9 @@ import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.border.LineBorder;
 
-import com.net2plan.gui.plugins.networkDesign.oaasExecPane.OaaSExecutionPanel;
-import com.net2plan.gui.plugins.networkDesign.oaasReportsPane.OaaSReportPane;
+import com.net2plan.gui.plugins.networkDesign.oaas.OaaSExecutionPanel;
+import com.net2plan.gui.plugins.networkDesign.oaas.OaaSReportPane;
+import com.net2plan.interfaces.networkDesign.*;
 import com.net2plan.oaas.Net2PlanOaaSClient;
 import org.apache.commons.collections15.BidiMap;
 import org.apache.commons.collections15.bidimap.DualHashBidiMap;
@@ -77,14 +72,7 @@ import com.net2plan.gui.plugins.networkDesign.visualizationControl.PickManager.P
 import com.net2plan.gui.plugins.networkDesign.visualizationControl.UndoRedoManager;
 import com.net2plan.gui.plugins.networkDesign.visualizationControl.VisualizationState;
 import com.net2plan.gui.plugins.networkDesign.whatIfAnalysisPane.WhatIfAnalysisPane;
-import com.net2plan.gui.utils.NetworkElementOrFr;
 import com.net2plan.gui.utils.ProportionalResizeJSplitPaneListener;
-import com.net2plan.interfaces.networkDesign.Link;
-import com.net2plan.interfaces.networkDesign.Net2PlanException;
-import com.net2plan.interfaces.networkDesign.NetPlan;
-import com.net2plan.interfaces.networkDesign.NetworkElement;
-import com.net2plan.interfaces.networkDesign.NetworkLayer;
-import com.net2plan.interfaces.networkDesign.Node;
 import com.net2plan.internal.Constants.NetworkElementType;
 import com.net2plan.internal.ErrorHandling;
 import com.net2plan.internal.plugins.IGUIModule;
@@ -131,6 +119,8 @@ public class GUINetworkDesign extends IGUIModule
 
     private WindowController windowController;
     private GUIWindow tableControlWindow;
+
+    private Net2PlanOaaSClient net2PlanOaaSClient;
 
 
     /**
@@ -1021,6 +1011,21 @@ public class GUINetworkDesign extends IGUIModule
         final AdvancedJTable_abstractElement table = viewEditTopTables.getNetPlanViewTable(layer).get(tableType);
         if (table == null) return new TreeSet<> ();
         return table.getSelectedElements();
+    }
+
+    public void configureNet2PlanOaaSClient(String ipAddress, int port)
+    {
+        String dbUser = Configuration.getOption("databaseUser");
+        String dbPass = Configuration.getOption("databasePassword");
+        String dbAddress = Configuration.getOption("databaseAddress");
+        String dbPort = Configuration.getOption("databasePort");
+        net2PlanOaaSClient = new Net2PlanOaaSClient(ipAddress, port);
+        net2PlanOaaSClient.establishDatabaseConfiguration(dbUser, dbPass, dbAddress + ":" + dbPort);
+    }
+
+    public Net2PlanOaaSClient getNet2PlanOaaSClient()
+    {
+        return net2PlanOaaSClient;
     }
 
 }

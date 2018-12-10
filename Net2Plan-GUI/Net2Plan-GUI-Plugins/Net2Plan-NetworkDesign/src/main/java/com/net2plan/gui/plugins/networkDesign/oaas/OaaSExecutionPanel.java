@@ -8,34 +8,14 @@
  * Contributors:
  *     Pablo Pavon Marino and others - initial API and implementation
  *******************************************************************************/
-package com.net2plan.gui.plugins.networkDesign.oaasExecPane;
+package com.net2plan.gui.plugins.networkDesign.oaas;
 
 import com.net2plan.gui.plugins.GUINetworkDesign;
-import com.net2plan.gui.plugins.networkDesign.ThreadExecutionController;
-import com.net2plan.gui.plugins.networkDesign.visualizationControl.VisualizationState;
-import com.net2plan.gui.utils.OaaSSelector;
+import com.net2plan.gui.plugins.networkDesign.oaas.OaaSSelector;
 import com.net2plan.gui.utils.ParameterValueDescriptionPanel;
-import com.net2plan.gui.utils.RunnableSelector;
-import com.net2plan.interfaces.networkDesign.Configuration;
-import com.net2plan.interfaces.networkDesign.IAlgorithm;
-import com.net2plan.interfaces.networkDesign.NetPlan;
-import com.net2plan.interfaces.networkDesign.NetworkLayer;
-import com.net2plan.internal.ErrorHandling;
-import com.net2plan.internal.SystemUtils;
-import com.net2plan.internal.plugins.IGUIModule;
-import com.net2plan.utils.ClassLoaderUtils;
-import com.net2plan.utils.Pair;
-import com.net2plan.utils.Triple;
 import net.miginfocom.swing.MigLayout;
-import org.apache.commons.collections15.BidiMap;
 
 import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.io.Closeable;
-import java.io.File;
-import java.util.HashSet;
-import java.util.Map;
 
 public class OaaSExecutionPanel extends JPanel
 {
@@ -52,7 +32,7 @@ public class OaaSExecutionPanel extends JPanel
 		setLayout(new MigLayout("insets 0 0 0 0", "[grow]", "[grow]"));
 
         ParameterValueDescriptionPanel algorithmParameters = new ParameterValueDescriptionPanel();
-        algorithmSelector = new OaaSSelector("Algorithm", algorithmParameters);
+        algorithmSelector = new OaaSSelector(mainWindow,algorithmParameters);
         JPanel pnl_buttons = new JPanel(new MigLayout("", "[center, grow]", "[]"));
 
         btn_execute = new JButton("Execute");
