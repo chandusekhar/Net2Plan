@@ -42,6 +42,7 @@ import java.util.regex.Pattern;
 public class ParameterValueDescriptionPanel extends JPanel
 {
     private final static TableCellRenderer CHECKBOX_RENDERER;
+    private final static TableCellRenderer PASSWORD_RENDERER;
     private final static String[] HEADER;
     private final static Comparator<Triple<String, String, String>> PARAMETER_COMPARATOR;
 
@@ -54,6 +55,7 @@ public class ParameterValueDescriptionPanel extends JPanel
     static
     {
         CHECKBOX_RENDERER = new CheckBoxRenderer();
+        PASSWORD_RENDERER = new PasswordRenderer();
         HEADER = StringUtils.arrayOf("Parameter", "Value", "Description");
         PARAMETER_COMPARATOR = new SortByParameterNameComparator();
     }
@@ -145,6 +147,14 @@ public class ParameterValueDescriptionPanel extends JPanel
         checkBox.setSelected(defaultValue);
         table.setCellEditor(rowIndex, columnIndex, new DefaultCellEditor(checkBox));
         table.setCellRenderer(rowIndex, columnIndex, CHECKBOX_RENDERER);
+    }
+
+    private void addPasswordCellEditor(String value, int rowIndex, int columnIndex)
+    {
+        JPasswordField passwordField = new JPasswordField();
+        passwordField.setText(value);
+        table.setCellEditor(rowIndex, columnIndex, new DefaultCellEditor(passwordField));
+        table.setCellRenderer(rowIndex, columnIndex, PASSWORD_RENDERER);
     }
 
     private void addComboCellEditor(String[] options, int rowIndex, int columnIndex)
@@ -384,6 +394,12 @@ public class ParameterValueDescriptionPanel extends JPanel
                         model.addRow(StringUtils.arrayOf(aux.getFirst(), Boolean.toString(isSelected), aux.getThird()));
                         addCheckboxCellEditor(isSelected, model.getRowCount() - 1, 1);
                         continue;
+                    } else if (defaultValue.startsWith("#hidden#"))
+                    {
+                        final String value = aux.getSecond().replaceFirst("#hidden#", "").trim();
+                        model.addRow(StringUtils.arrayOf(aux.getFirst(), aux.getSecond(), aux.getThird()));
+                        addPasswordCellEditor(value,model.getRowCount() - 1, 1);
+                        continue;
                     } else if (defaultValue.startsWith("#file#"))
                     {
                         final String fileDefaultValue = aux.getSecond().replaceFirst("#file#", "").trim();
@@ -463,6 +479,32 @@ public class ParameterValueDescriptionPanel extends JPanel
             }
 
             setSelected(value != null && Boolean.parseBoolean(value.toString()));
+            return this;
+        }
+    }
+
+    private static class PasswordRenderer extends JPasswordField implements TableCellRenderer
+    {
+
+        public PasswordRenderer()
+        {
+
+        }
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column)
+        {
+            if (isSelected)
+            {
+                setForeground(table.getSelectionForeground());
+                setBackground(table.getSelectionBackground());
+            } else
+            {
+                setForeground(table.getForeground());
+                setBackground(table.getBackground());
+            }
+
+            if(value != null)
+                setText(value.toString());
             return this;
         }
     }

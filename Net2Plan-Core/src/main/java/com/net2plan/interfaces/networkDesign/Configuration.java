@@ -81,6 +81,9 @@ public class Configuration
 		defaultOptions.add(Triple.unmodifiableOf("ipoptSolverLibraryName", "", "Default path for ipopt library (.dll/.so/.dylib file)"));
 		defaultOptions.add(Triple.unmodifiableOf("defaultILPSolver", "#select# glpk mipcl cplex xpress", "Default solver for LP/ILP models"));
 		defaultOptions.add(Triple.unmodifiableOf("defaultNLPSolver", "#select# ipopt", "Default solver for NLP models"));
+		defaultOptions.add(Triple.unmodifiableOf("databaseUser", "girtel","Database user for OaaS Authentication"));
+		defaultOptions.add(Triple.unmodifiableOf("databasePassword", "#hidden# girtelserver", "Database password for OaaS Authentication"));
+
 		options = CommandLineParser.getParameters(defaultOptions, (SortedMap) null);
 
 		optionsFile = new File(SystemUtils.getCurrentDir() + SystemUtils.getDirectorySeparator() + "options.ini");

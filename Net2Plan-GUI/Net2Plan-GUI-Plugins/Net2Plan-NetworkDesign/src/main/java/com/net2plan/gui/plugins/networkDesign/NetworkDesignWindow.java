@@ -17,15 +17,19 @@ public enum NetworkDesignWindow
 {
     network(NetworkDesignWindow.networkWindowName),
     offline(NetworkDesignWindow.offlineWindowName),
+    oassalgorithms(NetworkDesignWindow.oaasAlgorithmsWindowName),
     online(NetworkDesignWindow.onlineWindowName),
     whatif(NetworkDesignWindow.whatifWindowName),
-    report(NetworkDesignWindow.reportWindowName);
+    report(NetworkDesignWindow.reportWindowName),
+    oaasreports(NetworkDesignWindow.oaasReportsWindowName);
 
     private final static String networkWindowName = "View/Edit network state";
     private final static String offlineWindowName = "Offline algorithms";
+    private final static String oaasAlgorithmsWindowName = "OaaS algorithms";
     private final static String onlineWindowName = "Online simulation";
     private final static String whatifWindowName = "What-if analysis";
     private final static String reportWindowName = "View reports";
+    private final static String oaasReportsWindowName = "View OaaS reports";
 
     private final String text;
 
@@ -42,12 +46,16 @@ public enum NetworkDesignWindow
                 return network;
             case NetworkDesignWindow.offlineWindowName:
                 return offline;
+            case NetworkDesignWindow.oaasAlgorithmsWindowName:
+                return oassalgorithms;
             case NetworkDesignWindow.onlineWindowName:
                 return online;
             case NetworkDesignWindow.whatifWindowName:
                 return whatif;
             case NetworkDesignWindow.reportWindowName:
                 return report;
+            case NetworkDesignWindow.oaasReportsWindowName:
+                return oaasreports;
         }
 
         return null;
@@ -61,12 +69,16 @@ public enum NetworkDesignWindow
                 return NetworkDesignWindow.networkWindowName;
             case offline:
                 return NetworkDesignWindow.offlineWindowName;
+            case oassalgorithms:
+                return NetworkDesignWindow.oaasAlgorithmsWindowName;
             case online:
                 return NetworkDesignWindow.onlineWindowName;
             case whatif:
                 return NetworkDesignWindow.whatifWindowName;
             case report:
                 return NetworkDesignWindow.reportWindowName;
+            case oaasreports:
+                return NetworkDesignWindow.oaasReportsWindowName;
         }
 
         return null;
