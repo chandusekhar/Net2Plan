@@ -32,94 +32,9 @@ public class OaaSResources
 {
     private File UPLOAD_DIR = ServerUtils.UPLOAD_DIR;
     private List<Quadruple<String, String, List<IAlgorithm>, List<IReport>>> catalogAlgorithmsAndReports = ServerUtils.catalogAlgorithmsAndReports;
-    private DatabaseController dbController = ServerUtils.dbController;
 
     @Context
     HttpServletRequest webRequest;
-
-    /**
-     * Establishes the user and the password of the Database admin (URL: /OaaS/databaseConfiguration, Operation: POST, Consumes: APPLICATION/JSON, Produces: APPLICATION/JSON)
-     * @return HTTP Response
-     */
-    @POST
-    @Path("/databaseConfiguration")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response setDatabaseConfiguration(String confJSON)
-    {
-        JSONObject json = new JSONObject();
-        try {
-            JSONObject conf = JSON.parse(confJSON);
-            String user = conf.get("username").getValue();
-            String pass = conf.get("password").getValue();
-            String ipPort = conf.get("ipport").getValue();
-            ServerUtils.dbController = new DatabaseController(ipPort, user, pass);
-        } catch (Exception e)
-        {
-            json.put("message", new JSONValue(e.getMessage()));
-            return ServerUtils.SERVER_ERROR(json);
-        }
-
-        json.put("message",new JSONValue("SQL Connection established successfully"));
-        return ServerUtils.OK(json);
-    }
-
-    /**
-     * Authenticates an user with its password (URL: /OaaS/authenticate, Operation: POST, Consumes: APPLICATION/JSON, Produces: APPLICATION/JSON)
-     * @return HTTP Response
-     */
-    @POST
-    @Path("/authenticate")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response authenticate(String authJSON)
-    {
-        JSONObject json = new JSONObject();
-        Response resp = null;
-        try {
-            JSONObject conf = JSON.parse(authJSON);
-            String user = conf.get("username").getValue();
-            String pass = conf.get("password").getValue();
-            Pair<Boolean, ResultSet> auth = dbController.authenticate(user, pass);
-            boolean authBool = auth.getFirst();
-            if(authBool)
-            {
-                ResultSet set = auth.getSecond();
-                if(set != null)
-                {
-                    if(set.first())
-                    {
-                        String username = set.getString("user");
-                        long id = set.getLong("id");
-                        String category = set.getString("category");
-
-                        String token = ServerUtils.addToken(username, id, category);
-                        json.put("message", new JSONValue("Authenticated"));
-                        json.put("token", new JSONValue(token));
-                        resp = ServerUtils.OK(json);
-                    }
-                    else{
-                        json.put("message", new JSONValue("Error retrieving information from Database"));
-                        return ServerUtils.SERVER_ERROR(json);
-                    }
-                }
-                else{
-                    json.put("message", new JSONValue("Error retrieving information from Database"));
-                    return ServerUtils.SERVER_ERROR(json);
-                }
-            }
-            else{
-                json.put("message", new JSONValue("No authenticated"));
-                return ServerUtils.SERVER_ERROR(json);
-            }
-        } catch (Exception e)
-        {
-            json.put("message", new JSONValue(e.getMessage()));
-            return ServerUtils.SERVER_ERROR(json);
-        }
-
-        return resp;
-    }
 
     /**
      * Obtains the list of available catalogs (URL: /OaaS/catalogs, Operation: GET, Produces: APPLICATION/JSON)

@@ -55,15 +55,26 @@ public class ServerUtils
         return token;
     }
 
+    /**
+     * Checks if a token is valid or not
+     * @param token token to check
+     * @return true if token is valid, false if not
+     */
     protected static synchronized boolean validateToken(String token)
     {
         return tokens.containsKey(token);
     }
 
+    /**
+     * Returns the information associated to a token (user, id and category)
+     * @param token token to extract information
+     * @return Triple object with its username, its id and its category
+     */
     protected static synchronized Triple<String, Long, String> getInfoFromToken(String token)
     {
         return tokens.get(token);
     }
+
     /**
      * Creates a HTTP response 200, OK including a response JSON
      * @param json JSON Object to return (null if no JSON is desired)
@@ -270,6 +281,11 @@ public class ServerUtils
         return catalogs;
     }
 
+    /**
+     * Obtains the algorithm name from an IAlgorithm representation
+     * @param alg IAlgorithm representation
+     * @return alg's name
+     */
     protected static String getAlgorithmName(IAlgorithm alg)
     {
         try {
@@ -282,6 +298,11 @@ public class ServerUtils
         }
     }
 
+    /**
+     * Obtains the report name from an IReport representation
+     * @param rep IReport representation
+     * @return rep's name
+     */
     protected static String getReportName(IReport rep)
     {
         try {
@@ -294,6 +315,11 @@ public class ServerUtils
         }
     }
 
+    /**
+     * Obtains the category associated to an algorithm or a report
+     * @param executeName algorithm or report name
+     * @return category
+     */
     protected static String getCategoryFromExecutionName(String executeName)
     {
         String category = "ALL";

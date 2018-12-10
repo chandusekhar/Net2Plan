@@ -55,7 +55,7 @@ public class Net2PlanOaaSClient
         json.put("password", new JSONValue(dbPass));
         json.put("ipport", new JSONValue(dbIpPort));
 
-        WebTarget this_target = target.path("/OaaS/databaseConfiguration");
+        WebTarget this_target = target.path("/database/connection");
         Invocation.Builder inv = this_target.request(MediaType.APPLICATION_JSON_TYPE).accept(MediaType.APPLICATION_JSON_TYPE);
         Response r = inv.post(Entity.entity(JSON.write(json), MediaType.APPLICATION_JSON_TYPE));
         return r;
@@ -73,19 +73,19 @@ public class Net2PlanOaaSClient
         json.put("username", new JSONValue(user));
         json.put("password", new JSONValue(pass));
 
-        WebTarget this_target = target.path("/authenticate");
+        WebTarget this_target = target.path("/database/authenticate");
         Invocation.Builder inv = this_target.request(MediaType.APPLICATION_JSON_TYPE).accept(MediaType.APPLICATION_JSON_TYPE);
         Response r = inv.post(Entity.entity(JSON.write(json), MediaType.APPLICATION_JSON_TYPE));
 
         String entity = r.readEntity(String.class);
-        System.out.println(entity);
-       /* try {
+        try {
             JSONObject entityJSON = JSON.parse(entity);
             JSONValue tokenValue = entityJSON.get("token");
             this.authToken = (tokenValue == null) ? "" : tokenValue.getValue();
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }*/
+        } catch (ParseException e)
+        {
+            return Response.serverError().entity(e.getMessage()).build();
+        }
 
         return r;
     }
@@ -221,8 +221,9 @@ public class Net2PlanOaaSClient
     {
         Net2PlanOaaSClient client = new Net2PlanOaaSClient("localhost");
 
+        Response db = client.establishDatabaseConfiguration("girtel","girtelserver","localhost:3306");
+
         Response auth2 = client.authenticateUser("root", "root");
-        System.out.println("AUTENTICANDO USER root");
 
         File catalog_2 = new File("C:\\Users\\César\\Desktop\\Net2Plan-0.6.1\\workspace\\BuiltInExamples.jar");
         Response r2 = client.uploadCatalog(catalog_2);
