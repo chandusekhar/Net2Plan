@@ -5,12 +5,11 @@ import com.net2plan.gui.utils.ParameterValueDescriptionPanel;
 import com.net2plan.gui.utils.StringLabeller;
 import com.net2plan.gui.utils.WiderJComboBox;
 import com.net2plan.interfaces.networkDesign.Net2PlanException;
-import com.net2plan.internal.ErrorHandling;
+import com.net2plan.oaas.ClientUtils;
 import com.net2plan.oaas.Net2PlanOaaSClient;
+import com.net2plan.utils.Pair;
 import com.net2plan.utils.Triple;
-import com.shc.easyjson.JSON;
-import com.shc.easyjson.JSONObject;
-import com.shc.easyjson.ParseException;
+import com.shc.easyjson.*;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
@@ -19,6 +18,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
 import java.util.*;
+import java.util.List;
 
 /**
  * This class construct a panel that can be used to connect some algorithms or reports
@@ -30,17 +30,17 @@ import java.util.*;
  */
 
 @SuppressWarnings("unchecked")
-public class OaaSSelector extends JLabel
+public class OaaSSelector extends JPanel
 {
         private GUINetworkDesign callback;
-        private JButton connect, loadCatalogs;
+        private JButton connect;
         private JComboBox catalogSelector, execSelector;
-        private JTextField txt_file;
+        private JTextField txt_connect;
         private JTextArea txt_description;
         private ParameterValueDescriptionPanel parametersPanel;
         private String label;
-        private LoginDialog loginDialog;
         private Net2PlanOaaSClient net2PlanOaaSClient;
+        private ClientUtils.ExecutionType type;
 
 
         /**
@@ -49,13 +49,13 @@ public class OaaSSelector extends JLabel
          * @param parametersPanel Reference to the panel where parameters can be modified
          * @since 0.2.0
          */
-        public OaaSSelector(GUINetworkDesign callback, final ParameterValueDescriptionPanel parametersPanel)
+        public OaaSSelector(GUINetworkDesign callback, final ClientUtils.ExecutionType type, final ParameterValueDescriptionPanel parametersPanel)
         {
             this.label = "Connected to: ";
             this.parametersPanel = parametersPanel;
+            this.type = type;
 
             this.callback = callback;
-            loginDialog = new LoginDialog(callback);
 
             txt_description = new JTextArea();
             txt_description.setFont(new JLabel().getFont());
@@ -63,50 +63,215 @@ public class OaaSSelector extends JLabel
             txt_description.setWrapStyleWord(true);
             txt_description.setEditable(false);
 
-            txt_file = new JTextField();
-            txt_file.setEditable(false);
+            txt_connect = new JTextField();
+            txt_connect.setEditable(false);
             catalogSelector = new WiderJComboBox();
             catalogSelector.addActionListener(e ->
             {
                 if (catalogSelector.getItemCount() == 0 || catalogSelector.getSelectedIndex() == -1) return;
 
                 try {
+                    execSelector.removeAllItems();
+                    txt_description.setText("");
+                    parametersPanel.reset();
 
-                } catch (Throwable ex) {
-                    ex.printStackTrace();
-                    ErrorHandling.showErrorDialog("Error selecting " + label.toLowerCase(getLocale()));
+                    StringLabeller selected = (StringLabeller) catalogSelector.getSelectedItem();
+                    JSONArray selectedFiles = (JSONArray) selected.getObject();
+                    for(JSONValue sel : selectedFiles)
+                    {
+                        JSONObject execJSON = sel.getValue();
+                        String execType = execJSON.get("type").getValue();
+                        if(!execType.equalsIgnoreCase(type.toString()))
+                            return;
+                        String name = execJSON.get("name").getValue();
+                        String description = execJSON.get("description").getValue();
+                        JSONArray parameters = execJSON.get("parameters").getValue();
+                        StringLabeller executionLabeller = StringLabeller.unmodifiableOf(Pair.unmodifiableOf(parameters, description), name);
+                        execSelector.addItem(executionLabeller);
+                    }
+
+                    if(execSelector.getItemCount() > 0)
+                    {
+                        execSelector.setSelectedIndex(0);
+                        StringLabeller execSel = (StringLabeller) execSelector.getSelectedItem();
+                        Pair<JSONArray, String> execSelParametersDescriptionPair = (Pair<JSONArray, String>) execSel.getObject();
+                        String description = execSelParametersDescriptionPair.getSecond();
+                        JSONArray parameters = execSelParametersDescriptionPair.getFirst();
+
+                        txt_description.setText(description);
+                        List<Triple<String, String, String>> parametersList = new LinkedList<>();
+                        for(JSONValue param : parameters)
+                        {
+                            JSONObject paramJSON = param.getValue();
+                            String paramName = paramJSON.get("name").getValue();
+                            String paramDefaultValue = paramJSON.get("defaultValue").getValue();
+                            String paramDescription = paramJSON.get("description").getValue();
+                            parametersList.add(Triple.unmodifiableOf(paramName, paramDefaultValue, paramDescription));
+                        }
+                        parametersPanel.setParameters(parametersList);
+
+                    }
+
+                } catch (Throwable ex)
+                {
+                    throw new Net2PlanException(ex.getMessage());
+                }
+            });
+
+            execSelector = new WiderJComboBox();
+            execSelector.addActionListener(e ->
+            {
+                if (execSelector.getItemCount() == 0 || execSelector.getSelectedIndex() == -1) return;
+
+                try {
+                    txt_description.setText("");
+                    parametersPanel.reset();
+
+                    StringLabeller execSelected = (StringLabeller) execSelector.getSelectedItem();
+                    Pair<JSONArray, String> execSelParametersDescriptionPair = (Pair<JSONArray, String>) execSelected.getObject();
+                    String description = execSelParametersDescriptionPair.getSecond();
+                    JSONArray parameters = execSelParametersDescriptionPair.getFirst();
+
+                    txt_description.setText(description);
+                    List<Triple<String, String, String>> parametersList = new LinkedList<>();
+                    for(JSONValue param : parameters)
+                    {
+                        JSONObject paramJSON = param.getValue();
+                        String paramName = paramJSON.get("name").getValue();
+                        String paramDefaultValue = paramJSON.get("defaultValue").getValue();
+                        String paramDescription = paramJSON.get("description").getValue();
+                        parametersList.add(Triple.unmodifiableOf(paramName, paramDefaultValue, paramDescription));
+                    }
+                    parametersPanel.setParameters(parametersList);
+
+                } catch (Throwable ex)
+                {
+                    throw new Net2PlanException(ex.getMessage());
                 }
             });
 
             connect = new JButton("Connect");
             connect.addActionListener(e ->
             {
-                loginDialog.setVisible(true);
-            });
+                this.reset();
+                JPanel loginPanel = new JPanel();
+                loginPanel.setLayout(new BorderLayout());
 
-            loadCatalogs = new JButton("Load Catalogs");
-            loadCatalogs.addActionListener(e ->
-            {
-                net2PlanOaaSClient = callback.getNet2PlanOaaSClient();
-                Response getCatalogsResponse = net2PlanOaaSClient.getCatalogs();
-                String resp = getCatalogsResponse.readEntity(String.class);
-                try {
-                    JSONObject respJSON = JSON.parse(resp);
-                    System.out.println(JSON.write(respJSON));
-                } catch (ParseException e1) {
-                    e1.printStackTrace();
+                final JPanel middleJPanel = new JPanel(new MigLayout("fill, wrap 2"));
+
+
+                final JLabel ipLabel = new JLabel("IP Address");
+                final JLabel portLabel = new JLabel("Port");
+                final JLabel userLabel = new JLabel("User");
+                final JLabel passwordLabel = new JLabel("Password");
+                final JTextField ipField = new JTextField();
+                ipField.setColumns(20);
+                final JTextField portField = new JTextField();
+                portField.setColumns(20);
+                portField.setText("8080");
+                final JTextField userField = new JTextField();
+                userField.setColumns(20);
+                final JPasswordField passwordField = new JPasswordField();
+                passwordField.setColumns(20);
+
+                final JPanel infoPanel = new JPanel(new MigLayout("fill, wrap 2"));
+
+                infoPanel.add(ipLabel, "grow");
+                infoPanel.add(ipField, "grow");
+                infoPanel.add(portLabel, "grow");
+                infoPanel.add(portField, "grow");
+                infoPanel.add(userLabel, "grow");
+                infoPanel.add(userField, "grow");
+                infoPanel.add(passwordLabel, "grow");
+                infoPanel.add(passwordField, "grow");
+
+                loginPanel.add(infoPanel, BorderLayout.NORTH);
+
+                loginPanel.add(middleJPanel, BorderLayout.CENTER);
+
+                int opt = JOptionPane.showConfirmDialog(null, loginPanel, "OaaS Login", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
+                if(opt == JOptionPane.OK_OPTION)
+                {
+                   callback.configureNet2PlanOaaSClient(ipField.getText(), Integer.parseInt(portField.getText()));
+                   Net2PlanOaaSClient client = callback.getNet2PlanOaaSClient();
+                   client.authenticateUser(userField.getText(), new String(passwordField.getPassword()));
+                   txt_connect.setText("Connected to: http://"+ipField.getText()+":"+portField.getText());
+                   net2PlanOaaSClient = callback.getNet2PlanOaaSClient();
+                   Response getCatalogsResponse = net2PlanOaaSClient.getCatalogs();
+                   String resp = getCatalogsResponse.readEntity(String.class);
+                   try {
+                       JSONObject catalogsJSON = JSON.parse(resp);
+                       JSONArray catalogsArray = catalogsJSON.get("catalogs").getValue();
+                       for(JSONValue cat : catalogsArray)
+                       {
+                           JSONObject catalogJSON = cat.getValue();
+                           String catalogName = catalogJSON.get("name").getValue();
+                           JSONArray catalogFiles = catalogJSON.get("files").getValue();
+                           StringLabeller catalogLabeller = StringLabeller.unmodifiableOf(catalogFiles, catalogName);
+                           catalogSelector.addItem(catalogLabeller);
+                       }
+
+                       if(catalogSelector.getItemCount() > 0)
+                       {
+                           catalogSelector.setSelectedIndex(0);
+                           StringLabeller selected = (StringLabeller) catalogSelector.getSelectedItem();
+                           JSONArray selectedFiles = (JSONArray) selected.getObject();
+                           for(JSONValue sel : selectedFiles)
+                           {
+                               JSONObject execJSON = sel.getValue();
+                               String execType = execJSON.get("type").getValue();
+                               if(!execType.equalsIgnoreCase(type.toString()))
+                                   return;
+                               String name = execJSON.get("name").getValue();
+                               String description = execJSON.get("description").getValue();
+                               JSONArray parameters = execJSON.get("parameters").getValue();
+                               StringLabeller executionLabeller = StringLabeller.unmodifiableOf(Pair.unmodifiableOf(parameters, description), name);
+                               execSelector.addItem(executionLabeller);
+                           }
+
+                           if(execSelector.getItemCount() > 0)
+                           {
+                               execSelector.setSelectedIndex(0);
+                               StringLabeller execSel = (StringLabeller) execSelector.getSelectedItem();
+                               Pair<JSONArray, String> execSelParametersDescriptionPair = (Pair<JSONArray, String>) execSel.getObject();
+                               String description = execSelParametersDescriptionPair.getSecond();
+                               JSONArray parameters = execSelParametersDescriptionPair.getFirst();
+
+                               txt_description.setText(description);
+                               List<Triple<String, String, String>> parametersList = new LinkedList<>();
+                               for(JSONValue param : parameters)
+                               {
+                                   JSONObject paramJSON = param.getValue();
+                                   String paramName = paramJSON.get("name").getValue();
+                                   String paramDefaultValue = paramJSON.get("defaultValue").getValue();
+                                   String paramDescription = paramJSON.get("description").getValue();
+                                   parametersList.add(Triple.unmodifiableOf(paramName, paramDefaultValue, paramDescription));
+                               }
+                               parametersPanel.setParameters(parametersList);
+
+                           }
+                       }
+
+                   } catch (Exception ex)
+                   {
+                       throw new Net2PlanException(ex.getMessage());
+                   }
                 }
+                else{
+                   return;
+                }
+
 
             });
 
             setLayout(new MigLayout("", "[][grow][]", "[][][][][grow]"));
             add(new JLabel(label));
-            add(txt_file, "growx");
+            add(txt_connect, "growx");
             add(connect, "wrap");
-            add(new JLabel("Catalogs"));
-            add(txt_file, "growx");
-            add(loadCatalogs, "wrap");
+            //add(new JLabel("Catalogs"));
             add(catalogSelector, "skip, growx, spanx 2, wrap, wmin 100");
+            //add(new JLabel("Executions"));
+            add(execSelector, "skip, growx, spanx 2, wrap, wmin 100");
             add(new JLabel("Description"), "top");
             add(new JScrollPane(txt_description), "height 100::, spanx 2, grow, wrap");
             add(new JLabel("Parameters"), "spanx 3, wrap");
@@ -121,7 +286,6 @@ public class OaaSSelector extends JLabel
 
             catalogSelector.setEnabled(enabled);
             execSelector.setEnabled(enabled);
-            connect.setEnabled(enabled);
             parametersPanel.setEnabled(enabled);
         }
 
@@ -133,7 +297,7 @@ public class OaaSSelector extends JLabel
          */
         public Triple<File, String, Class> getRunnable()
         {
-            String filename = txt_file.getText();
+            String filename = txt_connect.getText();
             if (filename.isEmpty() || catalogSelector.getSelectedIndex() == -1 || execSelector.getSelectedIndex() == -1)
             {
                 throw new Net2PlanException(label + " must be selected");
@@ -164,104 +328,9 @@ public class OaaSSelector extends JLabel
         {
             catalogSelector.removeAllItems();
             execSelector.removeAllItems();
-            txt_file.setText("");
+            txt_connect.setText("");
             txt_description.setText("");
             parametersPanel.reset();
-        }
-
-        private class LoginDialog extends JDialog
-        {
-            private GUINetworkDesign callback;
-            public LoginDialog(GUINetworkDesign callback)
-            {
-                this.callback = callback;
-                initialize();
-            }
-
-            void initialize()
-            {
-                this.setTitle("OaaS Login");
-                this.setModal(true);
-                this.setModalityType(ModalityType.APPLICATION_MODAL);
-                this.setResizable(false);
-                this.setLayout(new BorderLayout());
-
-                final JPanel middleJPanel = new JPanel(new MigLayout("fill, wrap 2"));
-
-                final JButton btn_login = new JButton("Login");
-                final JButton btn_cancel = new JButton("Cancel");
-
-                JRootPane rootPane = SwingUtilities.getRootPane(this);
-                rootPane.setDefaultButton(btn_login);
-                rootPane.registerKeyboardAction(e -> {
-                    dispose();
-                }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
-
-                btn_cancel.addActionListener(e -> { setVisible(false); dispose(); } );
-                addWindowListener(new WindowAdapter()
-                {
-                    @Override
-                    public void windowClosing(WindowEvent windowEvent)
-                    {
-                        setVisible(false);
-                        dispose();
-                    }
-                });
-
-                final JLabel ipLabel = new JLabel("IP Address");
-                final JLabel portLabel = new JLabel("Port");
-                final JLabel userLabel = new JLabel("User");
-                final JLabel passwordLabel = new JLabel("Password");
-                final JTextField ipField = new JTextField();
-                ipField.setColumns(20);
-                final JTextField portField = new JTextField();
-                portField.setColumns(20);
-                portField.setText("8080");
-                final JTextField userField = new JTextField();
-                userField.setColumns(20);
-                final JPasswordField passwordField = new JPasswordField();
-                passwordField.setColumns(20);
-
-
-                btn_login.addActionListener(e ->
-                {
-                    try
-                    {
-                        callback.configureNet2PlanOaaSClient(ipField.getText(), Integer.parseInt(portField.getText()));
-                        Net2PlanOaaSClient client = callback.getNet2PlanOaaSClient();
-                        client.authenticateUser(userField.getText(), new String(passwordField.getPassword()));
-                        this.setVisible(false);
-                        dispose();
-                    }
-                    catch (Exception ex)
-                    {
-                        setVisible(false);
-                        dispose();
-                        ex.printStackTrace();
-                    }
-                });
-
-                final JPanel buttonPanel = new JPanel(new MigLayout("fill, wrap 2"));
-                final JPanel infoPanel = new JPanel(new MigLayout("fill, wrap 2"));
-                buttonPanel.add(btn_login, "grow");
-                buttonPanel.add(btn_cancel, "grow");
-
-                infoPanel.add(ipLabel, "grow");
-                infoPanel.add(ipField, "grow");
-                infoPanel.add(portLabel, "grow");
-                infoPanel.add(portField, "grow");
-                infoPanel.add(userLabel, "grow");
-                infoPanel.add(userField, "grow");
-                infoPanel.add(passwordLabel, "grow");
-                infoPanel.add(passwordField, "grow");
-
-                add(infoPanel, BorderLayout.NORTH);
-
-                add(middleJPanel, BorderLayout.CENTER);
-                add(buttonPanel, BorderLayout.SOUTH);
-                pack();
-                setLocationRelativeTo(SwingUtilities.getRoot(this));
-            }
         }
 
 }

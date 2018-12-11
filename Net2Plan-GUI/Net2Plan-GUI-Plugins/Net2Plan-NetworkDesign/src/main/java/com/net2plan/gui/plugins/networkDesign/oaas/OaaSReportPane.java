@@ -14,6 +14,7 @@ package com.net2plan.gui.plugins.networkDesign.oaas;
 import com.net2plan.gui.plugins.GUINetworkDesign;
 import com.net2plan.gui.plugins.networkDesign.oaas.OaaSSelector;
 import com.net2plan.gui.utils.*;
+import com.net2plan.oaas.ClientUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -34,7 +35,7 @@ public class OaaSReportPane extends JSplitPane
 		this.mainWindow = mainWindow;
 
         ParameterValueDescriptionPanel reportParameters = new ParameterValueDescriptionPanel();
-        reportSelector = new OaaSSelector(mainWindow,reportParameters);
+        reportSelector = new OaaSSelector(mainWindow, ClientUtils.ExecutionType.REPORT, reportParameters);
         reportContainer = new JTabbedPane();
 
         final JPanel pnl_buttons = new JPanel(new WrapLayout());

@@ -73,5 +73,24 @@ public class ClientUtils
 
     }
 
+    public enum ExecutionType
+    {
+        ALGORITHM("ALGORITHM"),
+        REPORT("REPORT");
+
+        private String label;
+
+        ExecutionType(String label)
+        {
+            this.label = label;
+        }
+
+        @Override
+        public String toString()
+        {
+            return this.label;
+        }
+    }
+
 }
 

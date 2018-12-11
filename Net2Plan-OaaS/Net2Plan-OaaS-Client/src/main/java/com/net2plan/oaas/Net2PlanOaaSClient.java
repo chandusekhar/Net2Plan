@@ -186,19 +186,19 @@ public class Net2PlanOaaSClient
     }
 
     /**
-     * Send an execution (algorithm or report) request to OaaS API
+     * Sends an execution (algorithm or report) request to OaaS API
      * @param type execution type (ALGORITHM, REPORT)
      * @param name algorithm or report name to executeOperation
      * @param userParams Map including names and customized values of the execution parameters
      * @param netPlan input NetPlan
      * @return HTTP Response
      */
-    public Response executeOperation(String type, String name, Map<String, String> userParams, NetPlan netPlan)
+    public Response executeOperation(ClientUtils.ExecutionType type, String name, Map<String, String> userParams, NetPlan netPlan)
     {
         WebTarget this_target = target.path("/OaaS/execute");
 
         JSONObject json = new JSONObject();
-        json.put("type",new JSONValue(type));
+        json.put("type",new JSONValue(type.toString()));
         json.put("name",new JSONValue(name));
         if(userParams == null || userParams.size() == 0)
             json.put("userparams", new JSONValue(new JSONArray()));
@@ -248,7 +248,7 @@ public class Net2PlanOaaSClient
         params.put("algorithm_maxExecutionTimeInSeconds","40");
         params.put("grasp_maxNumIterations","70000");*/
 
-        Response rex = client.executeOperation("REPORT","Report_delay",null, netPlan);
+        Response rex = client.executeOperation(ClientUtils.ExecutionType.REPORT,"Report_delay",null, netPlan);
         System.out.println("EXECUTE -> "+rex.readEntity(String.class));
     }
 

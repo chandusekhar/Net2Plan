@@ -13,6 +13,7 @@ package com.net2plan.gui.plugins.networkDesign.oaas;
 import com.net2plan.gui.plugins.GUINetworkDesign;
 import com.net2plan.gui.plugins.networkDesign.oaas.OaaSSelector;
 import com.net2plan.gui.utils.ParameterValueDescriptionPanel;
+import com.net2plan.oaas.ClientUtils;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
@@ -32,7 +33,7 @@ public class OaaSExecutionPanel extends JPanel
 		setLayout(new MigLayout("insets 0 0 0 0", "[grow]", "[grow]"));
 
         ParameterValueDescriptionPanel algorithmParameters = new ParameterValueDescriptionPanel();
-        algorithmSelector = new OaaSSelector(mainWindow,algorithmParameters);
+        algorithmSelector = new OaaSSelector(mainWindow, ClientUtils.ExecutionType.ALGORITHM, algorithmParameters);
         JPanel pnl_buttons = new JPanel(new MigLayout("", "[center, grow]", "[]"));
 
         btn_execute = new JButton("Execute");
