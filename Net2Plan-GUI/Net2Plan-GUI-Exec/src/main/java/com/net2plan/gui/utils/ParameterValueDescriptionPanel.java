@@ -12,7 +12,6 @@
 
 package com.net2plan.gui.utils;
 
-import com.net2plan.interfaces.networkDesign.Net2PlanException;
 import com.net2plan.internal.Constants.RunnableCodeType;
 import com.net2plan.internal.ErrorHandling;
 import com.net2plan.internal.SystemUtils;
@@ -80,7 +79,7 @@ public class ParameterValueDescriptionPanel extends JPanel
         File CURRENT_DIRECTORY = SystemUtils.getCurrentDir();
         ALGORITHM_DIRECTORY = new File(CURRENT_DIRECTORY + SystemUtils.getDirectorySeparator() + "workspace");
         ALGORITHM_DIRECTORY = ALGORITHM_DIRECTORY.isDirectory() ? ALGORITHM_DIRECTORY : CURRENT_DIRECTORY;
-        algorithms = new LinkedHashMap<String, Pair<RunnableSelector, Integer>>();
+        algorithms = new LinkedHashMap<>();
     }
 
     @Override
@@ -124,7 +123,7 @@ public class ParameterValueDescriptionPanel extends JPanel
                             model.setValueAt(StringUtils.mapToString(current.getRunnableParameters(), "=", ", "), rowModel + 2, 1);
 
                             break;
-                        } catch (Net2PlanException ex)
+                        } catch (Exception ex)
                         {
                             if (ErrorHandling.isDebugEnabled())
                                 ErrorHandling.addErrorOrException(ex, ParameterValueDescriptionPanel.class);

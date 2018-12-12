@@ -87,6 +87,37 @@
             <outputDirectory>lib</outputDirectory>
             <outputFileNameMapping>net2plan-core.jar</outputFileNameMapping>
         </dependencySet>
+        <!--REST API-->
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <useTransitiveDependencies>false</useTransitiveDependencies>
+            <unpack>false</unpack>
+            <includes>
+                <include>${project.groupId}.net2plan-oaas:net2plan-oaas-server:*</include>
+            </includes>
+            <outputDirectory>OaaS</outputDirectory>
+            <outputFileNameMapping>Net2Plan-OaaS.war</outputFileNameMapping>
+        </dependencySet>
+        <dependencySet>
+        <useProjectArtifact>false</useProjectArtifact>
+        <useTransitiveDependencies>false</useTransitiveDependencies>
+        <unpack>false</unpack>
+        <includes>
+            <include>${project.groupId}.net2plan-oaas:net2plan-oaas-client:*</include>
+        </includes>
+        <outputDirectory>OaaS</outputDirectory>
+        <outputFileNameMapping>Net2Plan-OaaS-Client.jar</outputFileNameMapping>
+    </dependencySet>
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <useTransitiveDependencies>false</useTransitiveDependencies>
+            <unpack>false</unpack>
+            <includes>
+                <include>${project.groupId}.net2plan-oaas:net2plan-oaas-client:*</include>
+            </includes>
+            <outputDirectory>lib</outputDirectory>
+            <outputFileNameMapping>net2plan-oaas-client.jar</outputFileNameMapping>
+        </dependencySet>
         <!--CLI Main-->
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
@@ -108,27 +139,6 @@
             </includes>
             <outputDirectory/>
             <outputFileNameMapping>Net2Plan.jar</outputFileNameMapping>
-        </dependencySet>
-        <!--REST API-->
-        <dependencySet>
-            <useProjectArtifact>false</useProjectArtifact>
-            <useTransitiveDependencies>false</useTransitiveDependencies>
-            <unpack>false</unpack>
-            <includes>
-                <include>${project.groupId}.net2plan-oaas:net2plan-oaas-server:*</include>
-            </includes>
-            <outputDirectory>OaaS</outputDirectory>
-            <outputFileNameMapping>Net2Plan-OaaS.war</outputFileNameMapping>
-        </dependencySet>
-        <dependencySet>
-            <useProjectArtifact>false</useProjectArtifact>
-            <useTransitiveDependencies>false</useTransitiveDependencies>
-            <unpack>false</unpack>
-            <includes>
-                <include>${project.groupId}.net2plan-oaas:net2plan-oaas-client:*</include>
-            </includes>
-            <outputDirectory>OaaS</outputDirectory>
-            <outputFileNameMapping>Net2Plan-OaaS-Client.jar</outputFileNameMapping>
         </dependencySet>
         <!--External resources-->
         <dependencySet>

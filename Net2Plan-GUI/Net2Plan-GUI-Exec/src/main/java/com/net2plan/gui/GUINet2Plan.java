@@ -515,7 +515,9 @@ public class GUINet2Plan extends JFrame implements ActionListener {
      * @since 0.2.0
      */
     public static void main(String[] args) {
+        System.out.println("UNO");
         SystemUtils.configureEnvironment(GUINet2Plan.class, Constants.UserInterface.GUI);
+        System.out.println("DOS");
 
         PrintStream stdout = System.out;
         PrintStream stderr = System.err;

@@ -29,6 +29,12 @@
         <dependency>
             <groupId>com.net2plan</groupId>
             <artifactId>net2plan-core</artifactId>
+            <version>0.7.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.net2plan.net2plan-oaas</groupId>
+            <artifactId>net2plan-oaas-client</artifactId>
+            <version>0.7.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
 
@@ -37,16 +43,16 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>3.0.2</version>
+                <version>3.1.0</version>
                 <configuration>
                     <archive>
                         <manifest>
+                            <mainClass>com.net2plan.gui.GUINet2Plan</mainClass>
                             <addClasspath>true</addClasspath>
                             <classpathPrefix>lib/</classpathPrefix>
-                            <mainClass>com.net2plan.gui.GUINet2Plan</mainClass>
                         </manifest>
                         <manifestEntries>
-                            <Class-Path>lib/net2plan-core.jar</Class-Path>
+                            <Class-Path>lib/net2plan-core.jar lib/net2plan-oaas-client.jar</Class-Path>
                         </manifestEntries>
                     </archive>
                 </configuration>

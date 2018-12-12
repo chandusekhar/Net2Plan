@@ -78,6 +78,7 @@ public class Net2PlanOaaSClient
         Response r = inv.post(Entity.entity(JSON.write(json), MediaType.APPLICATION_JSON_TYPE));
 
         String entity = r.readEntity(String.class);
+        System.out.println(entity);
         try {
             JSONObject entityJSON = JSON.parse(entity);
             JSONValue tokenValue = entityJSON.get("token");
@@ -248,8 +249,8 @@ public class Net2PlanOaaSClient
         params.put("algorithm_maxExecutionTimeInSeconds","40");
         params.put("grasp_maxNumIterations","70000");*/
 
-        Response rex = client.executeOperation(ClientUtils.ExecutionType.REPORT,"Report_delay",null, netPlan);
-        System.out.println("EXECUTE -> "+rex.readEntity(String.class));
+        //Response rex = client.executeOperation(ClientUtils.ExecutionType.REPORT,"Report_delay",null, netPlan);
+        //System.out.println("EXECUTE -> "+rex.readEntity(String.class));
     }
 
 }

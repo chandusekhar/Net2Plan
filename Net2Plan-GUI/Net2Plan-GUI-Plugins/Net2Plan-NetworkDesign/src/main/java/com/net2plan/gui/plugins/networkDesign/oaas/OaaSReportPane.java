@@ -12,7 +12,6 @@ package com.net2plan.gui.plugins.networkDesign.oaas;
 
 
 import com.net2plan.gui.plugins.GUINetworkDesign;
-import com.net2plan.gui.plugins.networkDesign.oaas.OaaSSelector;
 import com.net2plan.gui.utils.*;
 import com.net2plan.oaas.ClientUtils;
 

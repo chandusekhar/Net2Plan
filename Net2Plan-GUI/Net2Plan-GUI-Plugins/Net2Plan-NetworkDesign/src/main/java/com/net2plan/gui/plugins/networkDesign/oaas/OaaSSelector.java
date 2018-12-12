@@ -4,7 +4,6 @@ import com.net2plan.gui.plugins.GUINetworkDesign;
 import com.net2plan.gui.utils.ParameterValueDescriptionPanel;
 import com.net2plan.gui.utils.StringLabeller;
 import com.net2plan.gui.utils.WiderJComboBox;
-import com.net2plan.interfaces.networkDesign.Net2PlanException;
 import com.net2plan.oaas.ClientUtils;
 import com.net2plan.oaas.Net2PlanOaaSClient;
 import com.net2plan.utils.Pair;
@@ -15,7 +14,6 @@ import net.miginfocom.swing.MigLayout;
 import javax.swing.*;
 import javax.ws.rs.core.Response;
 import java.awt.*;
-import java.awt.event.*;
 import java.io.File;
 import java.util.*;
 import java.util.List;
@@ -114,7 +112,7 @@ public class OaaSSelector extends JPanel
 
                 } catch (Throwable ex)
                 {
-                    throw new Net2PlanException(ex.getMessage());
+                    throw new OaaSException(ex.getMessage());
                 }
             });
 
@@ -146,7 +144,7 @@ public class OaaSSelector extends JPanel
 
                 } catch (Throwable ex)
                 {
-                    throw new Net2PlanException(ex.getMessage());
+                    throw new OaaSException(ex.getMessage());
                 }
             });
 
@@ -192,75 +190,73 @@ public class OaaSSelector extends JPanel
                 int opt = JOptionPane.showConfirmDialog(null, loginPanel, "OaaS Login", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
                 if(opt == JOptionPane.OK_OPTION)
                 {
-                   callback.configureNet2PlanOaaSClient(ipField.getText(), Integer.parseInt(portField.getText()));
-                   Net2PlanOaaSClient client = callback.getNet2PlanOaaSClient();
-                   client.authenticateUser(userField.getText(), new String(passwordField.getPassword()));
-                   txt_connect.setText("Connected to: http://"+ipField.getText()+":"+portField.getText());
-                   net2PlanOaaSClient = callback.getNet2PlanOaaSClient();
-                   Response getCatalogsResponse = net2PlanOaaSClient.getCatalogs();
-                   String resp = getCatalogsResponse.readEntity(String.class);
-                   try {
-                       JSONObject catalogsJSON = JSON.parse(resp);
-                       JSONArray catalogsArray = catalogsJSON.get("catalogs").getValue();
-                       for(JSONValue cat : catalogsArray)
-                       {
-                           JSONObject catalogJSON = cat.getValue();
-                           String catalogName = catalogJSON.get("name").getValue();
-                           JSONArray catalogFiles = catalogJSON.get("files").getValue();
-                           StringLabeller catalogLabeller = StringLabeller.unmodifiableOf(catalogFiles, catalogName);
-                           catalogSelector.addItem(catalogLabeller);
-                       }
+                    callback.configureNet2PlanOaaSClient(ipField.getText(), Integer.parseInt(portField.getText()));
+                    Net2PlanOaaSClient client = callback.getNet2PlanOaaSClient();
+                    Response authResponse = client.authenticateUser(userField.getText(), new String(passwordField.getPassword()));
+                    if (authResponse.getStatus() == 500)
+                        throw new RuntimeException();
+                    txt_connect.setText("Connected to: http://" + ipField.getText() + ":" + portField.getText());
+                    net2PlanOaaSClient = callback.getNet2PlanOaaSClient();
+                    Response getCatalogsResponse = net2PlanOaaSClient.getCatalogs();
+                    String resp = getCatalogsResponse.readEntity(String.class);
+                    try {
+                        JSONObject catalogsJSON = JSON.parse(resp);
+                        JSONValue catalogsValue = catalogsJSON.get("catalogs");
+                        if (catalogsValue == null)
+                            throw new RuntimeException();
+                        JSONArray catalogsArray = catalogsJSON.get("catalogs").getValue();
+                        for (JSONValue cat : catalogsArray) {
+                            JSONObject catalogJSON = cat.getValue();
+                            String catalogName = catalogJSON.get("name").getValue();
+                            JSONArray catalogFiles = catalogJSON.get("files").getValue();
+                            StringLabeller catalogLabeller = StringLabeller.unmodifiableOf(catalogFiles, catalogName);
+                            catalogSelector.addItem(catalogLabeller);
+                        }
 
-                       if(catalogSelector.getItemCount() > 0)
-                       {
-                           catalogSelector.setSelectedIndex(0);
-                           StringLabeller selected = (StringLabeller) catalogSelector.getSelectedItem();
-                           JSONArray selectedFiles = (JSONArray) selected.getObject();
-                           for(JSONValue sel : selectedFiles)
-                           {
-                               JSONObject execJSON = sel.getValue();
-                               String execType = execJSON.get("type").getValue();
-                               if(!execType.equalsIgnoreCase(type.toString()))
-                                   return;
-                               String name = execJSON.get("name").getValue();
-                               String description = execJSON.get("description").getValue();
-                               JSONArray parameters = execJSON.get("parameters").getValue();
-                               StringLabeller executionLabeller = StringLabeller.unmodifiableOf(Pair.unmodifiableOf(parameters, description), name);
-                               execSelector.addItem(executionLabeller);
-                           }
+                        if (catalogSelector.getItemCount() > 0) {
+                            catalogSelector.setSelectedIndex(0);
+                            StringLabeller selected = (StringLabeller) catalogSelector.getSelectedItem();
+                            JSONArray selectedFiles = (JSONArray) selected.getObject();
+                            for (JSONValue sel : selectedFiles) {
+                                JSONObject execJSON = sel.getValue();
+                                String execType = execJSON.get("type").getValue();
+                                if (!execType.equalsIgnoreCase(type.toString()))
+                                    return;
+                                String name = execJSON.get("name").getValue();
+                                String description = execJSON.get("description").getValue();
+                                JSONArray parameters = execJSON.get("parameters").getValue();
+                                StringLabeller executionLabeller = StringLabeller.unmodifiableOf(Pair.unmodifiableOf(parameters, description), name);
+                                execSelector.addItem(executionLabeller);
+                            }
 
-                           if(execSelector.getItemCount() > 0)
-                           {
-                               execSelector.setSelectedIndex(0);
-                               StringLabeller execSel = (StringLabeller) execSelector.getSelectedItem();
-                               Pair<JSONArray, String> execSelParametersDescriptionPair = (Pair<JSONArray, String>) execSel.getObject();
-                               String description = execSelParametersDescriptionPair.getSecond();
-                               JSONArray parameters = execSelParametersDescriptionPair.getFirst();
+                            if (execSelector.getItemCount() > 0) {
+                                execSelector.setSelectedIndex(0);
+                                StringLabeller execSel = (StringLabeller) execSelector.getSelectedItem();
+                                Pair<JSONArray, String> execSelParametersDescriptionPair = (Pair<JSONArray, String>) execSel.getObject();
+                                String description = execSelParametersDescriptionPair.getSecond();
+                                JSONArray parameters = execSelParametersDescriptionPair.getFirst();
 
-                               txt_description.setText(description);
-                               List<Triple<String, String, String>> parametersList = new LinkedList<>();
-                               for(JSONValue param : parameters)
-                               {
-                                   JSONObject paramJSON = param.getValue();
-                                   String paramName = paramJSON.get("name").getValue();
-                                   String paramDefaultValue = paramJSON.get("defaultValue").getValue();
-                                   String paramDescription = paramJSON.get("description").getValue();
-                                   parametersList.add(Triple.unmodifiableOf(paramName, paramDefaultValue, paramDescription));
-                               }
-                               parametersPanel.setParameters(parametersList);
+                                txt_description.setText(description);
+                                List<Triple<String, String, String>> parametersList = new LinkedList<>();
+                                for (JSONValue param : parameters) {
+                                    JSONObject paramJSON = param.getValue();
+                                    String paramName = paramJSON.get("name").getValue();
+                                    String paramDefaultValue = paramJSON.get("defaultValue").getValue();
+                                    String paramDescription = paramJSON.get("description").getValue();
+                                    parametersList.add(Triple.unmodifiableOf(paramName, paramDefaultValue, paramDescription));
+                                }
+                                parametersPanel.setParameters(parametersList);
 
-                           }
-                       }
+                            }
+                        }
 
-                   } catch (Exception ex)
-                   {
-                       throw new Net2PlanException(ex.getMessage());
-                   }
+                    } catch (ParseException ex) {
+                        throw new RuntimeException(ex.getMessage());
+                    }
                 }
-                else{
-                   return;
+                else {
+                    return;
                 }
-
 
             });
 
@@ -290,39 +286,31 @@ public class OaaSSelector extends JPanel
         }
 
         /**
-         * Returns the information required to call a runnable code.
+         * Returns the information required to execute an algorithm or report using an OaaS instance
          *
-         * @return Runnable information
-         * @since 0.2.0
+         * @return Execution information
+         * @since 0.7.0
          */
-        public Triple<File, String, Class> getRunnable()
+        public Pair<ClientUtils.ExecutionType, String> getExecutionInformation()
         {
-            String filename = txt_connect.getText();
-            if (filename.isEmpty() || catalogSelector.getSelectedIndex() == -1 || execSelector.getSelectedIndex() == -1)
-            {
-                throw new Net2PlanException(label + " must be selected");
-            }
-
-            String algorithm = (String) ((StringLabeller) catalogSelector.getSelectedItem()).getObject();
-
-            return Triple.of(new File(filename), algorithm, this.getClass());
+            return Pair.unmodifiableOf(type, ((StringLabeller)execSelector.getSelectedItem()).getLabel());
         }
 
         /**
          * Returns the parameters introduced by user.
          *
          * @return Key-value map
-         * @since 0.2.0
+         * @since 0.7.0
          */
         public Map<String, String> getRunnableParameters()
         {
-            return new LinkedHashMap<String, String>(parametersPanel.getParameters());
+            return new LinkedHashMap<>(parametersPanel.getParameters());
         }
 
         /**
          * Resets the component.
          *
-         * @since 0.2.0
+         * @since 0.7.0
          */
         public void reset()
         {
