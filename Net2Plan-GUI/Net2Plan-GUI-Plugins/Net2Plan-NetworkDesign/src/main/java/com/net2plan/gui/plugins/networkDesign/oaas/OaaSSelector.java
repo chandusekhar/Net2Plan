@@ -4,9 +4,11 @@ import com.net2plan.gui.plugins.GUINetworkDesign;
 import com.net2plan.gui.utils.ParameterValueDescriptionPanel;
 import com.net2plan.gui.utils.StringLabeller;
 import com.net2plan.gui.utils.WiderJComboBox;
+import com.net2plan.interfaces.networkDesign.Net2PlanException;
 import com.net2plan.oaas.ClientUtils;
 import com.net2plan.oaas.Net2PlanOaaSClient;
 import com.net2plan.utils.Pair;
+import com.net2plan.utils.Quadruple;
 import com.net2plan.utils.Triple;
 import com.shc.easyjson.*;
 import net.miginfocom.swing.MigLayout;
@@ -39,6 +41,7 @@ public class OaaSSelector extends JPanel
         private String label;
         private Net2PlanOaaSClient net2PlanOaaSClient;
         private ClientUtils.ExecutionType type;
+        private LoginPanel loginPanel;
 
 
         /**
@@ -52,7 +55,7 @@ public class OaaSSelector extends JPanel
             this.label = "Connected to: ";
             this.parametersPanel = parametersPanel;
             this.type = type;
-
+            this.loginPanel = new LoginPanel();
             this.callback = callback;
 
             txt_description = new JTextArea();
@@ -152,50 +155,22 @@ public class OaaSSelector extends JPanel
             connect.addActionListener(e ->
             {
                 this.reset();
-                JPanel loginPanel = new JPanel();
-                loginPanel.setLayout(new BorderLayout());
-
-                final JPanel middleJPanel = new JPanel(new MigLayout("fill, wrap 2"));
-
-
-                final JLabel ipLabel = new JLabel("IP Address");
-                final JLabel portLabel = new JLabel("Port");
-                final JLabel userLabel = new JLabel("User");
-                final JLabel passwordLabel = new JLabel("Password");
-                final JTextField ipField = new JTextField();
-                ipField.setColumns(20);
-                final JTextField portField = new JTextField();
-                portField.setColumns(20);
-                portField.setText("8080");
-                final JTextField userField = new JTextField();
-                userField.setColumns(20);
-                final JPasswordField passwordField = new JPasswordField();
-                passwordField.setColumns(20);
-
-                final JPanel infoPanel = new JPanel(new MigLayout("fill, wrap 2"));
-
-                infoPanel.add(ipLabel, "grow");
-                infoPanel.add(ipField, "grow");
-                infoPanel.add(portLabel, "grow");
-                infoPanel.add(portField, "grow");
-                infoPanel.add(userLabel, "grow");
-                infoPanel.add(userField, "grow");
-                infoPanel.add(passwordLabel, "grow");
-                infoPanel.add(passwordField, "grow");
-
-                loginPanel.add(infoPanel, BorderLayout.NORTH);
-
-                loginPanel.add(middleJPanel, BorderLayout.CENTER);
 
                 int opt = JOptionPane.showConfirmDialog(null, loginPanel, "OaaS Login", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
                 if(opt == JOptionPane.OK_OPTION)
                 {
-                    callback.configureNet2PlanOaaSClient(ipField.getText(), Integer.parseInt(portField.getText()));
+                    Quadruple<String, String, String, String> loginInfo = loginPanel.getLoginInformation();
+                    String ip = loginInfo.getFirst();
+                    String port = loginInfo.getSecond();
+                    String user = loginInfo.getThird();
+                    String password = loginInfo.getFourth();
+
+                    callback.configureNet2PlanOaaSClient(ip, Integer.parseInt(port));
                     Net2PlanOaaSClient client = callback.getNet2PlanOaaSClient();
-                    Response authResponse = client.authenticateUser(userField.getText(), new String(passwordField.getPassword()));
+                    Response authResponse = client.authenticateUser(user, password);
                     if (authResponse.getStatus() == 500)
                         throw new RuntimeException();
-                    txt_connect.setText("Connected to: http://" + ipField.getText() + ":" + portField.getText());
+                    txt_connect.setText("Connected to: http://" + ip + ":" + port);
                     net2PlanOaaSClient = callback.getNet2PlanOaaSClient();
                     Response getCatalogsResponse = net2PlanOaaSClient.getCatalogs();
                     String resp = getCatalogsResponse.readEntity(String.class);
@@ -203,8 +178,8 @@ public class OaaSSelector extends JPanel
                         JSONObject catalogsJSON = JSON.parse(resp);
                         JSONValue catalogsValue = catalogsJSON.get("catalogs");
                         if (catalogsValue == null)
-                            throw new RuntimeException();
-                        JSONArray catalogsArray = catalogsJSON.get("catalogs").getValue();
+                            throw new Net2PlanException();
+                        JSONArray catalogsArray = catalogsValue.getValue();
                         for (JSONValue cat : catalogsArray) {
                             JSONObject catalogJSON = cat.getValue();
                             String catalogName = catalogJSON.get("name").getValue();
@@ -217,7 +192,8 @@ public class OaaSSelector extends JPanel
                             catalogSelector.setSelectedIndex(0);
                             StringLabeller selected = (StringLabeller) catalogSelector.getSelectedItem();
                             JSONArray selectedFiles = (JSONArray) selected.getObject();
-                            for (JSONValue sel : selectedFiles) {
+                            for (JSONValue sel : selectedFiles)
+                            {
                                 JSONObject execJSON = sel.getValue();
                                 String execType = execJSON.get("type").getValue();
                                 if (!execType.equalsIgnoreCase(type.toString()))
@@ -319,6 +295,58 @@ public class OaaSSelector extends JPanel
             txt_connect.setText("");
             txt_description.setText("");
             parametersPanel.reset();
+        }
+
+        private class LoginPanel extends JPanel
+        {
+            private JTextField ipField, portField, userField;
+            private JPasswordField passwordField;
+            public LoginPanel()
+            {
+                super();
+                initialize();
+            }
+
+            private void initialize()
+            {
+                setLayout(new BorderLayout());
+
+                final JPanel middleJPanel = new JPanel(new MigLayout("fill, wrap 2"));
+
+
+                final JLabel ipLabel = new JLabel("IP Address");
+                final JLabel portLabel = new JLabel("Port");
+                final JLabel userLabel = new JLabel("User");
+                final JLabel passwordLabel = new JLabel("Password");
+                ipField = new JTextField();
+                ipField.setColumns(20);
+                portField = new JTextField();
+                portField.setColumns(20);
+                portField.setText("8080");
+                userField = new JTextField();
+                userField.setColumns(20);
+                passwordField = new JPasswordField();
+                passwordField.setColumns(20);
+
+                final JPanel infoPanel = new JPanel(new MigLayout("fill, wrap 2"));
+
+                infoPanel.add(ipLabel, "grow");
+                infoPanel.add(ipField, "grow");
+                infoPanel.add(portLabel, "grow");
+                infoPanel.add(portField, "grow");
+                infoPanel.add(userLabel, "grow");
+                infoPanel.add(userField, "grow");
+                infoPanel.add(passwordLabel, "grow");
+                infoPanel.add(passwordField, "grow");
+
+                add(infoPanel, BorderLayout.NORTH);
+                add(middleJPanel, BorderLayout.CENTER);
+            }
+
+            public Quadruple<String, String, String, String> getLoginInformation()
+            {
+                return Quadruple.unmodifiableOf(ipField.getText(), portField.getText(), userField.getText(), new String(passwordField.getPassword()));
+            }
         }
 
 }

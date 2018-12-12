@@ -78,7 +78,6 @@ public class Net2PlanOaaSClient
         Response r = inv.post(Entity.entity(JSON.write(json), MediaType.APPLICATION_JSON_TYPE));
 
         String entity = r.readEntity(String.class);
-        System.out.println(entity);
         try {
             JSONObject entityJSON = JSON.parse(entity);
             JSONValue tokenValue = entityJSON.get("token");
