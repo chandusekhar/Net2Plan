@@ -13,6 +13,7 @@
 package com.net2plan.gui.plugins.networkDesign;
 
 import com.jom.JOMException;
+import com.net2plan.gui.plugins.GUINetworkDesignConstants;
 import com.net2plan.interfaces.networkDesign.Net2PlanException;
 import com.net2plan.internal.ErrorHandling;
 import com.net2plan.utils.StringUtils;
@@ -88,7 +89,7 @@ public class ThreadExecutionController {
         dialog.pack();
 
         Object out;
-        try {
+        try{
             worker.execute();
             dialog.setVisible(true);
 
@@ -136,7 +137,7 @@ public class ThreadExecutionController {
      */
     public interface IThreadExecutionHandler {
         /**
-         * Executes the handler and returns an object.
+         * Executes the handler depending on the working mode and returns an object.
          *
          * @param controller Reference to the controller
          * @return An object
@@ -160,6 +161,7 @@ public class ThreadExecutionController {
          * @since 0.2.0
          */
         public void executionFailed(ThreadExecutionController controller);
+
     }
 
     private class SwingWorkerCompletionWaiter extends SwingWorker implements PropertyChangeListener {

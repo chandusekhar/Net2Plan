@@ -16,7 +16,6 @@ import net.miginfocom.swing.MigLayout;
 import javax.swing.*;
 import javax.ws.rs.core.Response;
 import java.awt.*;
-import java.io.File;
 import java.util.*;
 import java.util.List;
 
@@ -170,7 +169,7 @@ public class OaaSSelector extends JPanel
                     Response authResponse = client.authenticateUser(user, password);
                     if (authResponse.getStatus() == 500)
                         throw new RuntimeException();
-                    txt_connect.setText("Connected to: http://" + ip + ":" + port);
+                    txt_connect.setText("http://" + ip + ":" + port);
                     net2PlanOaaSClient = callback.getNet2PlanOaaSClient();
                     Response getCatalogsResponse = net2PlanOaaSClient.getCatalogs();
                     String resp = getCatalogsResponse.readEntity(String.class);

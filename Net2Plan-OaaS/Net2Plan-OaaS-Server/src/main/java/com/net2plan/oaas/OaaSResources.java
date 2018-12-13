@@ -7,20 +7,22 @@ import com.net2plan.interfaces.networkDesign.NetPlan;
 import com.net2plan.internal.IExternal;
 import com.net2plan.utils.*;
 import com.shc.easyjson.*;
+import org.codehaus.stax2.XMLInputFactory2;
+import org.codehaus.stax2.XMLStreamReader2;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
+import org.xml.sax.helpers.XMLReaderFactory;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.xml.ws.spi.http.HttpContext;
+import javax.xml.stream.XMLStreamReader;
+import javax.xml.stream.events.XMLEvent;
 import java.io.*;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.sql.ResultSet;
 import java.util.*;
 
 
@@ -30,12 +32,64 @@ import java.util.*;
 @Path("/OaaS")
 public class OaaSResources
 {
-    private File UPLOAD_DIR = ServerUtils.UPLOAD_DIR;
+    private File TOMCAT_FILES_DIR = ServerUtils.TOMCAT_FILES_DIR;
+    private File USERS_FILE = ServerUtils.USER_CONFIG_FILE;
     private List<Quadruple<String, String, List<IAlgorithm>, List<IReport>>> catalogAlgorithmsAndReports = ServerUtils.catalogAlgorithmsAndReports;
 
     @Context
     HttpServletRequest webRequest;
 
+    @POST
+    @Path("/authenticate")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response authenticateUser(String authJSON)
+    {
+        JSONObject json = new JSONObject();
+        try {
+            JSONObject auth = JSON.parse(authJSON);
+            String username = auth.get("username").getValue();
+            String password = auth.get("password").getValue();
+            InputStream inputStream = new FileInputStream(USERS_FILE);
+            XMLInputFactory2 xmlInputFactory = (XMLInputFactory2) XMLInputFactory2.newInstance();
+            XMLStreamReader2 xmlStreamReader = (XMLStreamReader2) xmlInputFactory.createXMLStreamReader(inputStream);
+            boolean found = false;
+            while(xmlStreamReader.hasNext())
+            {
+                xmlStreamReader.next();
+                switch(xmlStreamReader.getEventType())
+                {
+                    case XMLEvent.START_ELEMENT:
+                        String startElementName = xmlStreamReader.getName().toString();
+                        switch(startElementName)
+                        {
+                            case "user":
+                                String user = xmlStreamReader.getAttributeValue(xmlStreamReader.getAttributeIndex(null, "name"));
+                                String pass = xmlStreamReader.getAttributeValue(xmlStreamReader.getAttributeIndex(null, "password"));
+                                String category = xmlStreamReader.getAttributeValue(xmlStreamReader.getAttributeIndex(null, "category"));
+                                if(username.equals(user) && password.equals(pass))
+                                {
+                                    String token = ServerUtils.addToken(user, category);
+                                    json.put("message",new JSONValue("Authenticated"));
+                                    json.put("token", new JSONValue(token));
+                                    found = true;
+                                }
+
+                                break;
+
+                        }
+                }
+                if(found)
+                    break;
+            }
+        } catch (Exception e)
+        {
+            json.put("message",new JSONValue(e.getMessage()));
+            return ServerUtils.SERVER_ERROR(json);
+        }
+
+        return ServerUtils.OK(json);
+    }
     /**
      * Obtains the list of available catalogs (URL: /OaaS/catalogs, Operation: GET, Produces: APPLICATION/JSON)
      * @return HTTP Response
@@ -76,8 +130,8 @@ public class OaaSResources
         if(!authorizeUser(token, "GOLD"))
             return ServerUtils.UNAUTHORIZED();
 
-        if(!UPLOAD_DIR.exists())
-            UPLOAD_DIR.mkdirs();
+        if(!TOMCAT_FILES_DIR.exists())
+            TOMCAT_FILES_DIR.mkdirs();
 
         String catalogCategory = webRequest.getHeader("category");
 
@@ -94,7 +148,7 @@ public class OaaSResources
         List<IAlgorithm> algorithms = new LinkedList<>();
         List<IReport> reports = new LinkedList<>();
 
-        File uploadedFile = new File(UPLOAD_DIR + File.separator + fileMetaData.getFileName());
+        File uploadedFile = new File(TOMCAT_FILES_DIR + File.separator + fileMetaData.getFileName());
         try
         {
             OutputStream out = new FileOutputStream(uploadedFile);
@@ -120,7 +174,7 @@ public class OaaSResources
             }
 
             catalogAlgorithmsAndReports.add(Quadruple.unmodifiableOf(catalogName, catalogCategory, algorithms, reports));
-            ServerUtils.cleanFolder(UPLOAD_DIR, false);
+            ServerUtils.cleanFolder(TOMCAT_FILES_DIR, false);
 
             return ServerUtils.OK(null);
 
@@ -601,8 +655,8 @@ public class OaaSResources
 
         if(ServerUtils.validateToken(token))
         {
-            Triple<String, Long, String> tokenInfo = ServerUtils.getInfoFromToken(token);
-            String category = tokenInfo.getThird();
+            Pair<String, String> tokenInfo = ServerUtils.getInfoFromToken(token);
+            String category = tokenInfo.getSecond();
 
             if(allowedCategory.equalsIgnoreCase("BRONZE"))
             {

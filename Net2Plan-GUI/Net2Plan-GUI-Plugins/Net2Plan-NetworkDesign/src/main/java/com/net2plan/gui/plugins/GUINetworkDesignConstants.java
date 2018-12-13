@@ -18,6 +18,11 @@ import com.net2plan.utils.Pair;
 public class GUINetworkDesignConstants
 {
 
+    public enum ExecutionMode
+    {
+        LOCAL, REMOTE;
+    }
+
     public enum AJTableType
     {
     	NODES("Nodes" , NetworkElementType.NODE),

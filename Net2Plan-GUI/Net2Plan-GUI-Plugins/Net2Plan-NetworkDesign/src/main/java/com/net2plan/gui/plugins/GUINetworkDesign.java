@@ -44,8 +44,6 @@ import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.border.LineBorder;
 
-import com.net2plan.gui.plugins.networkDesign.oaas.OaaSExecutionPanel;
-import com.net2plan.gui.plugins.networkDesign.oaas.OaaSReportPane;
 import com.net2plan.interfaces.networkDesign.*;
 import com.net2plan.oaas.Net2PlanOaaSClient;
 import org.apache.commons.collections15.BidiMap;
@@ -105,9 +103,7 @@ public class GUINetworkDesign extends IGUIModule
 
     private ViewEditTopologyTablesPane viewEditTopTables;
     private ViewReportPane reportPane;
-    private OaaSReportPane oaasReportPane;
     private OfflineExecutionPanel executionPane;
-    private OaaSExecutionPanel oaaSExecutionPanel;
     private OnlineSimulationPane onlineSimulationPane;
     private WhatIfAnalysisPane whatIfAnalysisPane;
 
@@ -214,7 +210,6 @@ public class GUINetworkDesign extends IGUIModule
         viewEditTopTables = new ViewEditTopologyTablesPane(GUINetworkDesign.this);
 
         reportPane = new ViewReportPane(GUINetworkDesign.this, JSplitPane.VERTICAL_SPLIT);
-        oaasReportPane = new OaaSReportPane(GUINetworkDesign.this, JSplitPane.VERTICAL_SPLIT);
 
         setDesign(currentNetPlan);
         Pair<BidiMap<NetworkLayer, Integer>, Map<NetworkLayer, Boolean>> res = VisualizationState.generateCanvasDefaultVisualizationLayerInfo(getDesign());
@@ -226,17 +221,14 @@ public class GUINetworkDesign extends IGUIModule
 
         onlineSimulationPane = new OnlineSimulationPane(this);
         executionPane = new OfflineExecutionPanel(this);
-        oaaSExecutionPanel = new OaaSExecutionPanel(this);
         whatIfAnalysisPane = new WhatIfAnalysisPane(this);
 
         final JTabbedPane tabPane = new JTabbedPane();
         tabPane.add(NetworkDesignWindow.getWindowName(NetworkDesignWindow.network), viewEditTopTables);
         tabPane.add(NetworkDesignWindow.getWindowName(NetworkDesignWindow.offline), executionPane);
-        tabPane.add(NetworkDesignWindow.getWindowName(NetworkDesignWindow.oassalgorithms), oaaSExecutionPanel);
         tabPane.add(NetworkDesignWindow.getWindowName(NetworkDesignWindow.online), onlineSimulationPane);
         tabPane.add(NetworkDesignWindow.getWindowName(NetworkDesignWindow.whatif), whatIfAnalysisPane);
         tabPane.add(NetworkDesignWindow.getWindowName(NetworkDesignWindow.report), reportPane);
-        tabPane.add(NetworkDesignWindow.getWindowName(NetworkDesignWindow.oaasreports), oaasReportPane);
 
         // Installing customized mouse listener
         MouseListener[] ml = tabPane.getListeners(MouseListener.class);
@@ -332,7 +324,7 @@ public class GUINetworkDesign extends IGUIModule
         };
 
         // Building tab controller
-        this.windowController = new WindowController(executionPane, oaaSExecutionPanel, onlineSimulationPane, whatIfAnalysisPane, reportPane, oaasReportPane);
+        this.windowController = new WindowController(executionPane, onlineSimulationPane, whatIfAnalysisPane, reportPane);
 
         addKeyCombinationActions();
         updateVisualizationAfterNewTopology();
@@ -766,20 +758,18 @@ public class GUINetworkDesign extends IGUIModule
         private GUIWindow oaasAlgorithmsWindow;
         private GUIWindow oaasReportsWindow;
 
-        private final JComponent offlineWindowComponent, oaasAlgorithmsWindowComponent, onlineWindowComponent;
-        private final JComponent whatitWindowComponent, reportWindowComponent, oaasReportsWindowComponent;
+        private final JComponent offlineWindowComponent, onlineWindowComponent;
+        private final JComponent whatitWindowComponent, reportWindowComponent;
 
-        WindowController(final JComponent offlineWindowComponent, final JComponent oaasAlgorithmsWindowComponent,
+        WindowController(final JComponent offlineWindowComponent,
                          final JComponent onlineWindowComponent, final JComponent whatifWindowComponent,
-                         final JComponent reportWindowComponent, final JComponent oaasReportsWindowComponent)
+                         final JComponent reportWindowComponent)
         {
 
             this.offlineWindowComponent = offlineWindowComponent;
-            this.oaasAlgorithmsWindowComponent = oaasAlgorithmsWindowComponent;
             this.onlineWindowComponent = onlineWindowComponent;
             this.whatitWindowComponent = whatifWindowComponent;
             this.reportWindowComponent = reportWindowComponent;
-            this.oaasReportsWindowComponent = oaasReportsWindowComponent;
         }
 
         private void buildOfflineWindow(final JComponent component)
@@ -809,32 +799,6 @@ public class GUINetworkDesign extends IGUIModule
             }
         }
 
-        private void buildOaaSAlgorithmsWindow(final JComponent component)
-        {
-            final String tabName = NetworkDesignWindow.getWindowName(NetworkDesignWindow.oassalgorithms);
-
-            oaasAlgorithmsWindow = new GUIWindow(component)
-            {
-                @Override
-                public String getTitle()
-                {
-                    return "Net2Plan - " + tabName;
-                }
-            };
-
-            oaasAlgorithmsWindow.addWindowListener(new CloseWindowAdapter(tabName, component));
-        }
-
-        void showOaaSAlgorithmsWindow(final boolean gainFocus)
-        {
-            buildOaaSAlgorithmsWindow(oaasAlgorithmsWindowComponent);
-
-            if (oaasAlgorithmsWindow != null)
-            {
-                oaasAlgorithmsWindow.showWindow(gainFocus);
-                oaasAlgorithmsWindow.setLocationRelativeTo(tableControlWindow);
-            }
-        }
 
         private void buildOnlineWindow(final JComponent component)
         {
@@ -915,47 +879,17 @@ public class GUINetworkDesign extends IGUIModule
             }
         }
 
-        private void buildOaaSReportsWindow(final JComponent component)
-        {
-            final String tabName = NetworkDesignWindow.getWindowName(NetworkDesignWindow.oaasreports);
-
-            oaasReportsWindow = new GUIWindow(component)
-            {
-                @Override
-                public String getTitle()
-                {
-                    return "Net2Plan - " + tabName;
-                }
-            };
-
-            oaasReportsWindow.addWindowListener(new CloseWindowAdapter(tabName, component));
-        }
-
-        void showOaaSReportsWindow(final boolean gainFocus)
-        {
-            buildOaaSReportsWindow(oaasReportsWindowComponent);
-
-            if (oaasReportsWindow != null)
-            {
-                oaasReportsWindow.showWindow(gainFocus);
-                oaasReportsWindow.setLocationRelativeTo(tableControlWindow);
-            }
-        }
 
         void hideAllWindows()
         {
             if (offlineWindow != null)
                 offlineWindow.dispatchEvent(new WindowEvent(offlineWindow, WindowEvent.WINDOW_CLOSING));
-            if (oaasAlgorithmsWindow != null)
-                oaasAlgorithmsWindow.dispatchEvent(new WindowEvent(oaasAlgorithmsWindow, WindowEvent.WINDOW_CLOSING));
             if (onlineWindow != null)
                 onlineWindow.dispatchEvent(new WindowEvent(onlineWindow, WindowEvent.WINDOW_CLOSING));
             if (whatifWindow != null)
                 whatifWindow.dispatchEvent(new WindowEvent(whatifWindow, WindowEvent.WINDOW_CLOSING));
             if (reportWindow != null)
                 reportWindow.dispatchEvent(new WindowEvent(reportWindow, WindowEvent.WINDOW_CLOSING));
-            if (oaasReportsWindow != null)
-                oaasReportsWindow.dispatchEvent(new WindowEvent(oaasReportsWindow, WindowEvent.WINDOW_CLOSING));
         }
 
         private class CloseWindowAdapter extends WindowAdapter
@@ -1015,12 +949,7 @@ public class GUINetworkDesign extends IGUIModule
 
     public void configureNet2PlanOaaSClient(String ipAddress, int port)
     {
-        String dbUser = Configuration.getOption("databaseUser");
-        String dbPass = Configuration.getOption("databasePassword");
-        String dbAddress = Configuration.getOption("databaseAddress");
-        String dbPort = Configuration.getOption("databasePort");
         net2PlanOaaSClient = new Net2PlanOaaSClient(ipAddress, port);
-        net2PlanOaaSClient.establishDatabaseConfiguration(dbUser, dbPass, dbAddress + ":" + dbPort);
     }
 
     public Net2PlanOaaSClient getNet2PlanOaaSClient()

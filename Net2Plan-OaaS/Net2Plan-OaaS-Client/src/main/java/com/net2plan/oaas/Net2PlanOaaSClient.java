@@ -42,26 +42,6 @@ public class Net2PlanOaaSClient
     }
 
     /**
-     * Establishes the Database configuration of the admin user
-     * @param dbUser admin username
-     * @param dbPass admin password
-     * @param dbIpPort ip:port where the database is running
-     * @return HTTP Response
-     */
-    public Response establishDatabaseConfiguration(String dbUser, String dbPass, String dbIpPort)
-    {
-        JSONObject json = new JSONObject();
-        json.put("username", new JSONValue(dbUser));
-        json.put("password", new JSONValue(dbPass));
-        json.put("ipport", new JSONValue(dbIpPort));
-
-        WebTarget this_target = target.path("/database/connection");
-        Invocation.Builder inv = this_target.request(MediaType.APPLICATION_JSON_TYPE).accept(MediaType.APPLICATION_JSON_TYPE);
-        Response r = inv.post(Entity.entity(JSON.write(json), MediaType.APPLICATION_JSON_TYPE));
-        return r;
-    }
-
-    /**
      * Authenticates an user
      * @param user user name
      * @param pass user password
@@ -73,7 +53,7 @@ public class Net2PlanOaaSClient
         json.put("username", new JSONValue(user));
         json.put("password", new JSONValue(pass));
 
-        WebTarget this_target = target.path("/database/authenticate");
+        WebTarget this_target = target.path("/OaaS/authenticate");
         Invocation.Builder inv = this_target.request(MediaType.APPLICATION_JSON_TYPE).accept(MediaType.APPLICATION_JSON_TYPE);
         Response r = inv.post(Entity.entity(JSON.write(json), MediaType.APPLICATION_JSON_TYPE));
 
@@ -221,15 +201,16 @@ public class Net2PlanOaaSClient
     {
         Net2PlanOaaSClient client = new Net2PlanOaaSClient("localhost");
 
-        Response db = client.establishDatabaseConfiguration("girtel","girtelserver","localhost:3306");
-
         Response auth2 = client.authenticateUser("root", "root");
 
-        File catalog_2 = new File("C:\\Users\\César\\Desktop\\Net2Plan-0.6.1\\workspace\\BuiltInExamples.jar");
+        File catalog_1 = new File("C:\\Users\\César\\Desktop\\Net2Plan-0.6.1\\workspace\\BuiltInExamples.jar");
+        File catalog_2 = new File("C:\\Users\\César\\Desktop\\Net2Plan-0.6.1\\workspace\\BuiltInExamples - copia.jar");
+        Response r1 = client.uploadCatalog(catalog_1);
         Response r2 = client.uploadCatalog(catalog_2);
-        System.out.println("UPLOAD CATALOG -> "+r2.readEntity(String.class));
 
-        Response getC2 = client.getCatalogs();
+
+
+        /*Response getC2 = client.getCatalogs();
         System.out.println(getC2.readEntity(String.class));
 
         Response getA2 = client.getAlgorithmByName("Offline_fa_ospfWeightOptimization_GRASP");

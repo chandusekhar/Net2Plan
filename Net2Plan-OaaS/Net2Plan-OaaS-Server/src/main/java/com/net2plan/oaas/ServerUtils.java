@@ -4,7 +4,6 @@ package com.net2plan.oaas;
 
 import com.net2plan.interfaces.networkDesign.IAlgorithm;
 import com.net2plan.interfaces.networkDesign.IReport;
-import com.net2plan.internal.IExternal;
 import com.net2plan.internal.SystemUtils;
 import com.net2plan.utils.Pair;
 import com.net2plan.utils.Quadruple;
@@ -15,43 +14,40 @@ import com.shc.easyjson.JSONArray;
 import com.shc.easyjson.JSONObject;
 import com.shc.easyjson.JSONValue;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.*;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
 
 
 public class ServerUtils
 {
     protected static List<Quadruple<String, String, List<IAlgorithm>, List<IReport>>> catalogAlgorithmsAndReports;
-    protected static DatabaseController dbController;
-    protected static Map<String, Triple<String, Long, String>> tokens;
+    protected static Map<String, Pair<String, String>> tokens;
 
     static
     {
         catalogAlgorithmsAndReports = new LinkedList<>();
-        dbController = null;
         tokens = new LinkedHashMap<>();
     }
 
     /**
      * Directory where uploaded files will be stored while they are being analyzed
      */
-    protected final static File UPLOAD_DIR;
-    static { UPLOAD_DIR = new File(SystemUtils.getCurrentDir().getAbsolutePath() + File.separator + "upload"); }
-
-    protected static synchronized String addToken(String user, long id, String category)
+    protected final static File TOMCAT_FILES_DIR, USER_CONFIG_FILE;
+    static
     {
-        String src = user + id + category + Math.random();
+        TOMCAT_FILES_DIR = new File(SystemUtils.getCurrentDir().getAbsolutePath() + File.separator + "tomcatFiles");
+        if(!TOMCAT_FILES_DIR.exists())
+            TOMCAT_FILES_DIR.mkdirs();
+        USER_CONFIG_FILE = new File(TOMCAT_FILES_DIR.getAbsolutePath() + File.separator + "oaas_users.xml");
+    }
+
+    protected static synchronized String addToken(String user, String category)
+    {
+        String src = user + category + Math.random();
         byte [] srcEncoded = Base64.getEncoder().encode(src.getBytes());
         String token = new String(srcEncoded);
-        tokens.put(token, Triple.unmodifiableOf(user, id, category));
+        tokens.put(token, Pair.unmodifiableOf(user, category));
         return token;
     }
 
@@ -66,11 +62,11 @@ public class ServerUtils
     }
 
     /**
-     * Returns the information associated to a token (user, id and category)
+     * Returns the information associated to a token (user and category)
      * @param token token to extract information
-     * @return Triple object with its username, its id and its category
+     * @return Pair object with its username and its category
      */
-    protected static synchronized Triple<String, Long, String> getInfoFromToken(String token)
+    protected static synchronized Pair<String, String> getInfoFromToken(String token)
     {
         return tokens.get(token);
     }
@@ -355,6 +351,11 @@ public class ServerUtils
         }
 
         return category;
+    }
+
+    protected static String getCategoryFromUser(String username)
+    {
+        return "";
     }
 
 
