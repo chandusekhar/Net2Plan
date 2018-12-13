@@ -32,6 +32,19 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>com.net2plan.net2plan-oaas</groupId>
+            <artifactId>net2plan-oaas-server</artifactId>
+            <version>0.7.0-SNAPSHOT</version>
+            <type>war</type>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.net2plan.net2plan-oaas</groupId>
+            <artifactId>net2plan-oaas-client</artifactId>
+            <version>0.7.0-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>com.net2plan</groupId>
             <artifactId>net2plan-examples</artifactId>
             <version>0.7.0-SNAPSHOT</version>
@@ -119,11 +132,13 @@
                                 <include>com/net2plan/research/**</include>
                             </sourceFileIncludes>
                             <!-- Output directory -->
-                            <additionalparam>-d ${project.build.directory}/apidocs/api</additionalparam>
+                            <additionalparam>
+                                -d ${project.build.directory}/apidocs/api
+                            </additionalparam>
                         </configuration>
                     </execution>
                     <execution>
-                        <id>net2planOaaS-javadoc</id>
+                        <id>net2plan-OaaS-server-javadoc</id>
                         <goals>
                             <goal>javadoc</goal>
                         </goals>
@@ -140,7 +155,7 @@
                             <splitindex>true</splitindex>
                             <use>true</use>
                             <version>true</version>
-                            <overview>${project.basedir}/src/main/resources/resources/javadoc/overview-main.html
+                            <overview>${project.basedir}/src/main/resources/resources/javadoc/overview-oaas.html
                             </overview>
                             <links>
                                 <link>../parallelcolt</link>
@@ -149,13 +164,15 @@
                             <includeDependencySources>true</includeDependencySources>
                             <dependencySourceIncludes>
                                 <!-- Net2Plan OaaS-->
-                                <dependencySourceInclude>com.net2plan:net2plan-oaas</dependencySourceInclude>
+                                <dependencySourceInclude>com.net2plan.net2plan-oaas:net2plan-oaas-server</dependencySourceInclude>
                             </dependencySourceIncludes>
                             <sourceFileIncludes>
                                 <include>com/net2plan/oaas/**</include>
                             </sourceFileIncludes>
                             <!-- Output directory -->
-                            <additionalparam>-d ${project.build.directory}/apidocs/api</additionalparam>
+                            <additionalparam>
+                                -d ${project.build.directory}/apidocs/oaas
+                            </additionalparam>
                         </configuration>
                     </execution>
                     <execution>

@@ -155,6 +155,7 @@ public class OfflineExecutionPanel extends JPanel implements ThreadExecutionCont
                 mainWindow.getDesign().assignFrom(netPlan);
                 break;
             case REMOTE:
+                try {
                 Pair<ClientUtils.ExecutionType, String> execInfo = remoteAlgorithmSelector.getExecutionInformation();
                 Map<String, String> execParameters = remoteAlgorithmSelector.getRunnableParameters();
                 NetPlan netPlan_copy = mainWindow.getDesign().copy();
@@ -162,18 +163,15 @@ public class OfflineExecutionPanel extends JPanel implements ThreadExecutionCont
                 Response algorithmResponse = client.executeOperation(execInfo.getFirst(), execInfo.getSecond(), execParameters, netPlan_copy);
                 String responseMessage = algorithmResponse.readEntity(String.class);
                 if(algorithmResponse.getStatus() != 200)
-                    throw new Net2PlanException(responseMessage);
+                    throw new Net2PlanException(JSON.parse(responseMessage).get("message").getValue());
 
+                JSONObject responseJSON = JSON.parse(responseMessage);
+                out = responseJSON.get("executeResponse").getValue();
+                JSONObject responseNetPlanJSON = responseJSON.get("outputNetPlan").getValue();
+                NetPlan responseNetPlan = new NetPlan(responseNetPlanJSON);
 
-                JSONObject responseJSON = null;
-                try {
-                    responseJSON = JSON.parse(responseMessage);
-                    out = responseJSON.get("executeResponse").getValue();
-                    JSONObject responseNetPlanJSON = responseJSON.get("outputNetPlan").getValue();
-                    NetPlan responseNetPlan = new NetPlan(responseNetPlanJSON);
-
-                    responseNetPlan.setNetworkLayerDefault(responseNetPlan.getNetworkLayer(0));
-                    mainWindow.getDesign().assignFrom(responseNetPlan);
+                responseNetPlan.setNetworkLayerDefault(responseNetPlan.getNetworkLayer(0));
+                mainWindow.getDesign().assignFrom(responseNetPlan);
 
                 } catch (Exception e)
                 {
