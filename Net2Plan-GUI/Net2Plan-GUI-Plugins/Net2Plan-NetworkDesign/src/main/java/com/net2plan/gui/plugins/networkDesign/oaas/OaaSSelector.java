@@ -82,7 +82,7 @@ public class OaaSSelector extends JPanel
                         JSONObject execJSON = sel.getValue();
                         String execType = execJSON.get("type").getValue();
                         if(!execType.equalsIgnoreCase(type.toString()))
-                            return;
+                            continue;
                         String name = execJSON.get("name").getValue();
                         String description = execJSON.get("description").getValue();
                         JSONArray parameters = execJSON.get("parameters").getValue();
@@ -179,7 +179,8 @@ public class OaaSSelector extends JPanel
                         if (catalogsValue == null)
                             throw new Net2PlanException();
                         JSONArray catalogsArray = catalogsValue.getValue();
-                        for (JSONValue cat : catalogsArray) {
+                        for (JSONValue cat : catalogsArray)
+                        {
                             JSONObject catalogJSON = cat.getValue();
                             String catalogName = catalogJSON.get("name").getValue();
                             JSONArray catalogFiles = catalogJSON.get("files").getValue();
@@ -187,7 +188,8 @@ public class OaaSSelector extends JPanel
                             catalogSelector.addItem(catalogLabeller);
                         }
 
-                        if (catalogSelector.getItemCount() > 0) {
+                        if (catalogSelector.getItemCount() > 0)
+                        {
                             catalogSelector.setSelectedIndex(0);
                             StringLabeller selected = (StringLabeller) catalogSelector.getSelectedItem();
                             JSONArray selectedFiles = (JSONArray) selected.getObject();
@@ -196,7 +198,7 @@ public class OaaSSelector extends JPanel
                                 JSONObject execJSON = sel.getValue();
                                 String execType = execJSON.get("type").getValue();
                                 if (!execType.equalsIgnoreCase(type.toString()))
-                                    return;
+                                    continue;
                                 String name = execJSON.get("name").getValue();
                                 String description = execJSON.get("description").getValue();
                                 JSONArray parameters = execJSON.get("parameters").getValue();

@@ -163,13 +163,11 @@
                             <detectOfflineLinks>false</detectOfflineLinks>
                             <includeDependencySources>true</includeDependencySources>
                             <dependencySourceIncludes>
-                                <!-- Net2Plan OaaS-->
                                 <dependencySourceInclude>com.net2plan.net2plan-oaas:net2plan-oaas-server</dependencySourceInclude>
                             </dependencySourceIncludes>
                             <sourceFileIncludes>
                                 <include>com/net2plan/oaas/**</include>
                             </sourceFileIncludes>
-                            <!-- Output directory -->
                             <additionalparam>
                                 -d ${project.build.directory}/apidocs/oaas
                             </additionalparam>
