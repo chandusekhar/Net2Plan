@@ -161,6 +161,8 @@
                 <exclude>${project.groupId}.net2plan-gui:*:*</exclude>
                 <exclude>${project.groupId}.net2plan-cli:*:*</exclude>
                 <exclude>${project.groupId}.net2plan-gui.net2plan-gui-plugins:*:*</exclude>
+                <exclude>${project.groupId}.net2plan-oaas:net2plan-oaas-server:*</exclude>
+                <exclude>${project.groupId}.net2plan-oaas:net2plan-oaas-client:*</exclude>
             </excludes>
         </dependencySet>
     </dependencySets>
