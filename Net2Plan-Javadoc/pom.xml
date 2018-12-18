@@ -157,9 +157,6 @@
                             <version>true</version>
                             <overview>${project.basedir}/src/main/resources/resources/javadoc/overview-oaas.html
                             </overview>
-                            <links>
-                                <link>../parallelcolt</link>
-                            </links>
                             <detectOfflineLinks>false</detectOfflineLinks>
                             <includeDependencySources>true</includeDependencySources>
                             <dependencySourceIncludes>
