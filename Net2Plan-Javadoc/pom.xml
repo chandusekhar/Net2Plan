@@ -132,9 +132,7 @@
                                 <include>com/net2plan/research/**</include>
                             </sourceFileIncludes>
                             <!-- Output directory -->
-                            <additionalparam>
-                                -d ${project.build.directory}/apidocs/api
-                            </additionalparam>
+                            <additionalparam>-outputFolder ${project.build.directory}/apidocs/api</additionalparam>
                         </configuration>
                     </execution>
                     <execution>
@@ -162,9 +160,7 @@
                             <dependencySourceIncludes>
                                 <dependencySourceInclude>com.net2plan.net2plan-oaas:net2plan-oaas-server</dependencySourceInclude>
                             </dependencySourceIncludes>
-                            <additionalparam>
-                                -d ${project.build.directory}/apidocs/oaas
-                            </additionalparam>
+                            <additionalparam>-outputFolder ${project.build.directory}/apidocs/oaas</additionalparam>
                         </configuration>
                     </execution>
                     <execution>
@@ -231,9 +227,7 @@
                             <sourceFileExcludes>
                                 <exclude>com/net2plan/examples/general/reports/robustness/**</exclude>
                             </sourceFileExcludes>
-                            <additionalparam>
-                                -d ${project.build.directory}/apidocs/examples
-                            </additionalparam>
+                            <additionalparam>-outputFolder ${project.build.directory}/apidocs/examples</additionalparam>
                         </configuration>
                     </execution>
                     <execution>
