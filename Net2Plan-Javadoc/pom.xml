@@ -161,7 +161,37 @@
                                 <dependencySourceInclude>com.net2plan.net2plan-oaas:net2plan-oaas-server</dependencySourceInclude>
                             </dependencySourceIncludes>
                             <additionalparam>
-                                -d ${project.build.directory}/apidocs/oaas
+                                -d ${project.build.directory}/apidocs/oaas/server
+                            </additionalparam>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>net2plan-OaaS-client-javadoc</id>
+                        <goals>
+                            <goal>javadoc</goal>
+                        </goals>
+                        <phase>package</phase>
+                        <configuration>
+                            <show>public</show>
+                            <author>true</author>
+                            <nodeprecated>true</nodeprecated>
+                            <nodeprecatedlist>false</nodeprecatedlist>
+                            <noindex>false</noindex>
+                            <nonavbar>false</nonavbar>
+                            <notree>false</notree>
+                            <source>1.8</source>
+                            <splitindex>true</splitindex>
+                            <use>true</use>
+                            <version>true</version>
+                            <overview>${project.basedir}/src/main/resources/resources/javadoc/overview-oaas.html
+                            </overview>
+                            <detectOfflineLinks>false</detectOfflineLinks>
+                            <includeDependencySources>true</includeDependencySources>
+                            <dependencySourceIncludes>
+                                <dependencySourceInclude>com.net2plan.net2plan-oaas:net2plan-oaas-client</dependencySourceInclude>
+                            </dependencySourceIncludes>
+                            <additionalparam>
+                                -d ${project.build.directory}/apidocs/oaas/client
                             </additionalparam>
                         </configuration>
                     </execution>
