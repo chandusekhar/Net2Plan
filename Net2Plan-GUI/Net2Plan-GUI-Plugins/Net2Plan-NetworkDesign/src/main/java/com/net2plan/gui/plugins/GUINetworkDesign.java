@@ -45,6 +45,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.border.LineBorder;
 
 import com.net2plan.interfaces.networkDesign.*;
+import com.net2plan.oaas.ClientUtils;
 import com.net2plan.oaas.Net2PlanOaaSClient;
 import org.apache.commons.collections15.BidiMap;
 import org.apache.commons.collections15.bidimap.DualHashBidiMap;
@@ -970,9 +971,9 @@ public class GUINetworkDesign extends IGUIModule
         return table.getSelectedElements();
     }
 
-    public void configureNet2PlanOaaSClient(String ipAddress, int port)
+    public void configureNet2PlanOaaSClient(ClientUtils.ClientMode mode, String ipAddress, int port)
     {
-        net2PlanOaaSClient = new Net2PlanOaaSClient(ipAddress, port);
+        net2PlanOaaSClient = new Net2PlanOaaSClient(mode, ipAddress, port);
     }
 
     public Net2PlanOaaSClient getNet2PlanOaaSClient()

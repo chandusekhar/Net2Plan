@@ -9,6 +9,7 @@ import com.net2plan.oaas.ClientUtils;
 import com.net2plan.oaas.Net2PlanOaaSClient;
 import com.net2plan.utils.Pair;
 import com.net2plan.utils.Quadruple;
+import com.net2plan.utils.Quintuple;
 import com.net2plan.utils.Triple;
 import com.shc.easyjson.*;
 import net.miginfocom.swing.MigLayout;
@@ -158,13 +159,14 @@ public class OaaSSelector extends JPanel
                 int opt = JOptionPane.showConfirmDialog(null, loginPanel, "OaaS Login", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
                 if(opt == JOptionPane.OK_OPTION)
                 {
-                    Quadruple<String, String, String, String> loginInfo = loginPanel.getLoginInformation();
-                    String ip = loginInfo.getFirst();
-                    String port = loginInfo.getSecond();
-                    String user = loginInfo.getThird();
-                    String password = loginInfo.getFourth();
+                    Quintuple<ClientUtils.ClientMode, String, String, String, String> loginInfo = loginPanel.getLoginInformation();
+                    ClientUtils.ClientMode mode = loginInfo.getFirst();
+                    String ip = loginInfo.getSecond();
+                    String port = loginInfo.getThird();
+                    String user = loginInfo.getFourth();
+                    String password = loginInfo.getFifth();
 
-                    callback.configureNet2PlanOaaSClient(ip, Integer.parseInt(port));
+                    callback.configureNet2PlanOaaSClient(mode, ip, Integer.parseInt(port));
                     Net2PlanOaaSClient client = callback.getNet2PlanOaaSClient();
                     Response authResponse = client.authenticateUser(user, password);
                     if (authResponse.getStatus() == 500)
@@ -300,8 +302,10 @@ public class OaaSSelector extends JPanel
 
         private class LoginPanel extends JPanel
         {
+            private WiderJComboBox modeBox;
             private JTextField ipField, portField, userField;
             private JPasswordField passwordField;
+
             public LoginPanel()
             {
                 super();
@@ -314,11 +318,18 @@ public class OaaSSelector extends JPanel
 
                 final JPanel middleJPanel = new JPanel(new MigLayout("fill, wrap 2"));
 
-
+                final JLabel modeLabel = new JLabel("Mode");
                 final JLabel ipLabel = new JLabel("IP Address");
                 final JLabel portLabel = new JLabel("Port");
                 final JLabel userLabel = new JLabel("User");
                 final JLabel passwordLabel = new JLabel("Password");
+
+                modeBox = new WiderJComboBox();
+                for(ClientUtils.ClientMode mode : ClientUtils.ClientMode.values())
+                    modeBox.addItem(mode);
+                if(modeBox.getItemCount() > 0)
+                    modeBox.setSelectedIndex(0);
+
                 ipField = new JTextField();
                 ipField.setColumns(20);
                 portField = new JTextField();
@@ -331,6 +342,8 @@ public class OaaSSelector extends JPanel
 
                 final JPanel infoPanel = new JPanel(new MigLayout("fill, wrap 2"));
 
+                infoPanel.add(modeLabel, "grow");
+                infoPanel.add(modeBox, "grow");
                 infoPanel.add(ipLabel, "grow");
                 infoPanel.add(ipField, "grow");
                 infoPanel.add(portLabel, "grow");
@@ -344,9 +357,10 @@ public class OaaSSelector extends JPanel
                 add(middleJPanel, BorderLayout.CENTER);
             }
 
-            public Quadruple<String, String, String, String> getLoginInformation()
+            public Quintuple<ClientUtils.ClientMode, String, String, String, String> getLoginInformation()
             {
-                return Quadruple.unmodifiableOf(ipField.getText(), portField.getText(), userField.getText(), new String(passwordField.getPassword()));
+                ClientUtils.ClientMode mode = (ClientUtils.ClientMode)modeBox.getSelectedItem();
+                return Quintuple.unmodifiableOf(mode, ipField.getText(), portField.getText(), userField.getText(), new String(passwordField.getPassword()));
             }
         }
 

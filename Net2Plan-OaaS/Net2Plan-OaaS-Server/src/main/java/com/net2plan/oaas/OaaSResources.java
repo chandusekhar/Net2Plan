@@ -434,7 +434,7 @@ public class OaaSResources
             }
 
 
-            List<Triple<String, String, String>> algorithmParameters_raw = algorithm.getParameters();
+            List<Triple<String, String, String>> algorithmParameters_raw = (algorithm.getParameters() == null) ? new LinkedList<>() : algorithm.getParameters();
             Map<String, String> algorithmParameters = new LinkedHashMap<>();
             for(Triple<String, String, String> t : algorithmParameters_raw)
             {
@@ -548,7 +548,7 @@ public class OaaSResources
             }
 
 
-            List<Triple<String, String, String>> reportParameters_raw = report.getParameters();
+            List<Triple<String, String, String>> reportParameters_raw = (report.getParameters() == null) ? new LinkedList<>() : report.getParameters();
             Map<String, String> reportParameters = new LinkedHashMap<>();
             for(Triple<String, String, String> t : reportParameters_raw)
             {

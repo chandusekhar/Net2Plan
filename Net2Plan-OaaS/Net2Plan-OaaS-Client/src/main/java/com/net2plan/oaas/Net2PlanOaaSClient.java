@@ -21,10 +21,11 @@ public class Net2PlanOaaSClient
 
     /**
      * Net2Plan OaaS Client constructor
+     * @param mode Server mode where the client will be used (HTTP or HTTPS)
      * @param ipAddress IP Address where Net2Plan OaaS is running
      * @param optionalPort port where OaaS is running (default value: 8080)
      */
-    public Net2PlanOaaSClient(String ipAddress, int... optionalPort)
+    public Net2PlanOaaSClient(ClientUtils.ClientMode mode, String ipAddress, int... optionalPort)
     {
         int port;
         if(optionalPort.length == 0)
@@ -34,11 +35,21 @@ public class Net2PlanOaaSClient
         else
             throw new Net2PlanException("More than one port is not allowed");
 
-        String baseURL =  "http://"+ipAddress+":"+port+"/Net2Plan-OaaS";
-        Client client = ClientBuilder.newBuilder().build().register(MultiPartFeature.class);
+        String baseURL = "";
+        Client client = null;
+        switch(mode)
+        {
+            case HTTP:
+                client = ClientBuilder.newBuilder().build().register(MultiPartFeature.class);
+                baseURL = "http://"+ipAddress+":"+port+"/Net2Plan-OaaS";
+                break;
+
+            case HTTPS:
+                client = ClientUtils.createHTTPSClient();
+                baseURL = "https://"+ipAddress+":"+port+"/Net2Plan-OaaS";
+        }
         this.target = client.target(baseURL);
         this.authToken = "";
-        ClientUtils.configureSecureClient();
     }
 
     /**
@@ -199,7 +210,7 @@ public class Net2PlanOaaSClient
 
     public static void main(String [] args)
     {
-        Net2PlanOaaSClient client = new Net2PlanOaaSClient("localhost");
+        Net2PlanOaaSClient client = new Net2PlanOaaSClient(ClientUtils.ClientMode.HTTP, "localhost");
 
         Response auth2 = client.authenticateUser("root", "root");
 
@@ -214,7 +225,7 @@ public class Net2PlanOaaSClient
         System.out.println(getC2.readEntity(String.class));
 
         Response getA2 = client.getAlgorithmByName("Offline_fa_ospfWeightOptimization_GRASP");
-        System.out.println(getA2.readEntity(String.class));
+        System.out.println(getA2.readEntity(String.class));*/
 
         File topologyFile = new File("C:\\Users\\César\\Desktop\\Net2Plan-0.6.1\\workspace\\data\\networkTopologies\\example7nodes_ipOverWDM.n2p");
         NetPlan netPlan = new NetPlan(topologyFile);
@@ -229,8 +240,8 @@ public class Net2PlanOaaSClient
         params.put("algorithm_maxExecutionTimeInSeconds","40");
         params.put("grasp_maxNumIterations","70000");*/
 
-        //Response rex = client.executeOperation(ClientUtils.ExecutionType.REPORT,"Report_delay",null, netPlan);
-        //System.out.println("EXECUTE -> "+rex.readEntity(String.class));
+        Response rex = client.executeOperation(ClientUtils.ExecutionType.REPORT,"Report_robustness",null, netPlan);
+        System.out.println("EXECUTE -> "+rex.readEntity(String.class));
     }
 
 }

@@ -4,8 +4,11 @@ package com.net2plan.oaas;
 import com.shc.easyjson.JSONArray;
 import com.shc.easyjson.JSONObject;
 import com.shc.easyjson.JSONValue;
+import org.glassfish.jersey.media.multipart.MultiPartFeature;
 
 import javax.net.ssl.*;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Map;
@@ -27,7 +30,7 @@ public class ClientUtils
         return array;
     }
 
-    protected static void configureSecureClient()
+    protected static Client createHTTPSClient()
     {
         TrustManager[] trustAllCerts = new TrustManager[]{
                 new X509TrustManager() {
@@ -60,17 +63,13 @@ public class ClientUtils
             e.printStackTrace();
         }
         HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
-        HostnameVerifier hv = (urlHostName, session) -> {
-            boolean verify = false;
-            if (urlHostName.equalsIgnoreCase(session.getPeerHost()))
-            {
-                verify = true;
-            }
-            return verify;
-        };
+        HostnameVerifier hv = (urlHostName, session) -> true;
 
         HttpsURLConnection.setDefaultHostnameVerifier(hv);
 
+        Client client = ClientBuilder.newBuilder().sslContext(sc).hostnameVerifier(hv).build().register(MultiPartFeature.class);
+
+        return client;
     }
 
     public enum ExecutionType
@@ -89,6 +88,40 @@ public class ClientUtils
         public String toString()
         {
             return this.label;
+        }
+    }
+
+    public enum ClientMode
+    {
+        HTTP("http"),
+        HTTPS("https");
+
+        private String label;
+
+        ClientMode(String label)
+        {
+            this.label = label;
+        }
+
+        @Override
+        public String toString()
+        {
+            return this.label;
+        }
+
+        public ClientMode getModeFromId(String id)
+        {
+            ClientMode mode = null;
+            switch(id)
+            {
+                case "http":
+                    mode = ClientMode.HTTP;
+                    break;
+                case "https":
+                    mode = ClientMode.HTTPS;
+                    break;
+            }
+            return mode;
         }
     }
 
