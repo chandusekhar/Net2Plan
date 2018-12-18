@@ -165,9 +165,6 @@
                             <dependencySourceIncludes>
                                 <dependencySourceInclude>com.net2plan.net2plan-oaas:net2plan-oaas-server</dependencySourceInclude>
                             </dependencySourceIncludes>
-                            <sourceFileIncludes>
-                                <include>**</include>
-                            </sourceFileIncludes>
                             <additionalparam>
                                 -d ${project.build.directory}/apidocs/oaas
                             </additionalparam>
