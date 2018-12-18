@@ -78,7 +78,7 @@
                                 <artifactItem>
                                     <groupId>net.sourceforge.parallelcolt</groupId>
                                     <artifactId>parallelcolt</artifactId>
-                                    <version>0.11.4</version>
+                                    <version>0.10.1</version>
                                     <type>jar</type>
                                     <classifier>javadoc</classifier>
                                     <outputDirectory>${project.build.directory}/apidocs/parallelcolt</outputDirectory>
@@ -132,9 +132,7 @@
                                 <include>com/net2plan/research/**</include>
                             </sourceFileIncludes>
                             <!-- Output directory -->
-                            <additionalparam>
-                                -d ${project.build.directory}/apidocs/api
-                            </additionalparam>
+                            <outputDirectory>${project.build.directory}/apidocs/api</outputDirectory>
                         </configuration>
                     </execution>
                     <execution>
@@ -157,9 +155,6 @@
                             <version>true</version>
                             <overview>${project.basedir}/src/main/resources/resources/javadoc/overview-oaas.html
                             </overview>
-                            <links>
-                                <link>../parallelcolt</link>
-                            </links>
                             <detectOfflineLinks>false</detectOfflineLinks>
                             <includeDependencySources>true</includeDependencySources>
                             <dependencySourceIncludes>
@@ -234,9 +229,7 @@
                             <sourceFileExcludes>
                                 <exclude>com/net2plan/examples/general/reports/robustness/**</exclude>
                             </sourceFileExcludes>
-                            <additionalparam>
-                                -d ${project.build.directory}/apidocs/examples
-                            </additionalparam>
+                            <additionalparam>-d ${project.build.directory}/apidocs/examples</additionalparam>
                         </configuration>
                     </execution>
                     <execution>

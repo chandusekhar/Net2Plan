@@ -6167,6 +6167,7 @@ public class NetPlan extends NetworkElement
      * <p>Saves the current network plan to a given output stream.</p>
      *
      * @param outputStream Output stream
+     * @param format output format (XML or JSON)
      */
     public void saveToOutputStream(OutputStream outputStream, Net2PlanFormat format)
     {
