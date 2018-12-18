@@ -132,7 +132,7 @@
                                 <include>com/net2plan/research/**</include>
                             </sourceFileIncludes>
                             <!-- Output directory -->
-                            <additionalparam>-outputFolder ${project.build.directory}/apidocs/api</additionalparam>
+                            <outputDirectory>${project.build.directory}/apidocs/api</outputDirectory>
                         </configuration>
                     </execution>
                     <execution>
@@ -160,7 +160,7 @@
                             <dependencySourceIncludes>
                                 <dependencySourceInclude>com.net2plan.net2plan-oaas:net2plan-oaas-server</dependencySourceInclude>
                             </dependencySourceIncludes>
-                            <additionalparam>-outputFolder ${project.build.directory}/apidocs/oaas</additionalparam>
+                            <outputDirectory>${project.build.directory}/apidocs/oaas</outputDirectory>
                         </configuration>
                     </execution>
                     <execution>
@@ -227,7 +227,7 @@
                             <sourceFileExcludes>
                                 <exclude>com/net2plan/examples/general/reports/robustness/**</exclude>
                             </sourceFileExcludes>
-                            <additionalparam>-outputFolder ${project.build.directory}/apidocs/examples</additionalparam>
+                            <outputDirectory>${project.build.directory}/apidocs/examples</outputDirectory>
                         </configuration>
                     </execution>
                     <execution>
@@ -261,7 +261,7 @@
                             <sourceFileExcludes>
                                 <exclude>com/net2plan/examples/general/reports/robustness/**</exclude>
                             </sourceFileExcludes>
-                            <additionalparam>-outputFolder ${project.build.directory}/apidocs/examples</additionalparam>
+                            <outputDirectory>${project.build.directory}/apidocs/examples</outputDirectory>
                         </configuration>
                     </execution>
                     <execution>
@@ -295,7 +295,7 @@
                             <sourceFileExcludes>
                                 <exclude>com/net2plan/examples/general/reports/robustness/**</exclude>
                             </sourceFileExcludes>
-                            <additionalparam>-outputFolder ${project.build.directory}/apidocs/examples</additionalparam>
+                            <outputDirectory>${project.build.directory}/apidocs/examples</outputDirectory>
                         </configuration>
                     </execution>
                 </executions>
