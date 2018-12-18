@@ -344,17 +344,11 @@ public class ViewReportPane extends JPanel implements ThreadExecutionController.
 
 	public JTabbedPane getReportContainer ()
     {
-        JTabbedPane cont = null;
-        switch(mode)
-        {
-            case LOCAL:
-                cont = reportContainer;
-                break;
+	    return reportContainer;
+    }
 
-            case REMOTE:
-                cont = remoteReportContainer;
-                break;
-        }
-	    return cont;
+    public JTabbedPane getRemoteReportContainer()
+    {
+        return remoteReportContainer;
     }
 }

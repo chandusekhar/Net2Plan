@@ -556,7 +556,7 @@ public class GUINetworkDesign extends IGUIModule
         }, KeyStroke.getKeyStroke(KeyEvent.VK_E, KeyEvent.CTRL_DOWN_MASK));
 
         /* FROM REPORT */
-        addKeyCombinationAction(JComponent.WHEN_IN_FOCUSED_WINDOW , "Close selected report", new AbstractAction()
+        addKeyCombinationAction(JComponent.WHEN_IN_FOCUSED_WINDOW , "Close selected report (Local)", new AbstractAction()
         {
             @Override
             public void actionPerformed(ActionEvent e)
@@ -567,7 +567,8 @@ public class GUINetworkDesign extends IGUIModule
             }
         }, KeyStroke.getKeyStroke(KeyEvent.VK_W, InputEvent.CTRL_DOWN_MASK));
 
-        addKeyCombinationAction(JComponent.WHEN_IN_FOCUSED_WINDOW , "Close all reports", new AbstractAction()
+
+        addKeyCombinationAction(JComponent.WHEN_IN_FOCUSED_WINDOW , "Close all reports (Local)", new AbstractAction()
         {
             @Override
             public void actionPerformed(ActionEvent e)
@@ -575,6 +576,28 @@ public class GUINetworkDesign extends IGUIModule
                 reportPane.getReportContainer().removeAll();
             }
         }, KeyStroke.getKeyStroke(KeyEvent.VK_W, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK));
+
+
+        addKeyCombinationAction(JComponent.WHEN_IN_FOCUSED_WINDOW , "Close selected report (Remote)", new AbstractAction()
+        {
+            @Override
+            public void actionPerformed(ActionEvent e)
+            {
+                int tab = reportPane.getRemoteReportContainer().getSelectedIndex();
+                if (tab == -1) return;
+                reportPane.getRemoteReportContainer().remove(tab);
+            }
+        }, KeyStroke.getKeyStroke(KeyEvent.VK_X, InputEvent.CTRL_DOWN_MASK));
+
+
+        addKeyCombinationAction(JComponent.WHEN_IN_FOCUSED_WINDOW , "Close all reports (Remote)", new AbstractAction()
+        {
+            @Override
+            public void actionPerformed(ActionEvent e)
+            {
+                reportPane.getRemoteReportContainer().removeAll();
+            }
+        }, KeyStroke.getKeyStroke(KeyEvent.VK_X, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK));
 
 
         /* Online simulation */
