@@ -47,7 +47,7 @@ public class OaaSResources
     /**
      * Authenticates an user
      * @param authJSON authentication JSON
-     * @return
+     * @return HTTP Response
      */
     public Response authenticateUser(String authJSON)
     {
