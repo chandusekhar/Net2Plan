@@ -39,10 +39,16 @@ public class OaaSResources
     @Context
     HttpServletRequest webRequest;
 
+
     @POST
     @Path("/authenticate")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
+    /**
+     * Authenticates an user
+     * @param authJSON authentication JSON
+     * @return
+     */
     public Response authenticateUser(String authJSON)
     {
         JSONObject json = new JSONObject();
@@ -90,13 +96,14 @@ public class OaaSResources
 
         return ServerUtils.OK(json);
     }
+
+    @GET
+    @Path("/catalogs")
+    @Produces(MediaType.APPLICATION_JSON)
     /**
      * Obtains the list of available catalogs (URL: /OaaS/catalogs, Operation: GET, Produces: APPLICATION/JSON)
      * @return HTTP Response
      */
-    @GET
-    @Path("/catalogs")
-    @Produces(MediaType.APPLICATION_JSON)
     public Response getCatalogs()
     {
         String token = webRequest.getHeader("token");
@@ -115,14 +122,15 @@ public class OaaSResources
         return ServerUtils.OK(catalogsJSON);
     }
 
+
+    @POST
+    @Path("/catalogs")
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Produces(MediaType.APPLICATION_JSON)
     /**
      * Uploads a new catalog (JAR file) (URL: /OaaS/catalogs, Operation: POST, Consumes: MULTIPART FORM DATA (FORM NAME: file), Produces: APPLICATION/JSON)
      * @return HTTP Response
      */
-    @POST
-    @Path("/catalogs")
-    @Consumes({MediaType.MULTIPART_FORM_DATA, MediaType.APPLICATION_JSON})
-    @Produces(MediaType.APPLICATION_JSON)
     public Response uploadCatalog(@FormDataParam("file") byte [] input, @FormDataParam("file") FormDataContentDisposition fileMetaData)
     {
         JSONObject json = new JSONObject();
@@ -193,13 +201,13 @@ public class OaaSResources
         }
     }
 
+    @GET
+    @Path("/catalogs/{name}")
+    @Produces(MediaType.APPLICATION_JSON)
     /**
      * Obtains a catalog by its name (URL: /OaaS/catalogs/{catalogName}, Operation: GET, Produces: APPLICATION/JSON)
      * @return HTTP Response
      */
-    @GET
-    @Path("/catalogs/{name}")
-    @Produces(MediaType.APPLICATION_JSON)
     public Response getCatalogByName(@PathParam("name") String catalogName)
     {
         String token = webRequest.getHeader("token");
@@ -226,13 +234,13 @@ public class OaaSResources
         return ServerUtils.OK(catalogJSON);
     }
 
+    @GET
+    @Path("/algorithms")
+    @Produces(MediaType.APPLICATION_JSON)
     /**
      * Obtains the list of available algorithms (URL: /OaaS/algorithms, Operation: GET, Produces: APPLICATION/JSON)
      * @return HTTP Response
      */
-    @GET
-    @Path("/algorithms")
-    @Produces(MediaType.APPLICATION_JSON)
     public Response getAlgorithms()
     {
         String token = webRequest.getHeader("token");
@@ -255,13 +263,13 @@ public class OaaSResources
         return ServerUtils.OK(algorithmsJSON);
     }
 
+    @GET
+    @Path("/algorithms/{name}")
+    @Produces(MediaType.APPLICATION_JSON)
     /**
      * Obtains an algorithm by its name (URL: /OaaS/algorithms/{algorithmName}, Operation: GET, Produces: APPLICATION/JSON)
      * @return HTTP Response
      */
-    @GET
-    @Path("/algorithms/{name}")
-    @Produces(MediaType.APPLICATION_JSON)
     public Response getAlgorithmByName(@PathParam("name") String algorithmName)
     {
         String token = webRequest.getHeader("token");
@@ -296,13 +304,13 @@ public class OaaSResources
         return ServerUtils.OK(algorithmJSON);
     }
 
+    @GET
+    @Path("/reports")
+    @Produces(MediaType.APPLICATION_JSON)
     /**
      * Obtains the list of available reports (URL: /OaaS/reports, Operation: GET, Produces: APPLICATION/JSON)
      * @return HTTP Response
      */
-    @GET
-    @Path("/reports")
-    @Produces(MediaType.APPLICATION_JSON)
     public Response getReports()
     {
         String token = webRequest.getHeader("token");
@@ -325,13 +333,13 @@ public class OaaSResources
         return ServerUtils.OK(reportsJSON);
     }
 
+    @GET
+    @Path("/reports/{name}")
+    @Produces(MediaType.APPLICATION_JSON)
     /**
      * Obtains a report by its name (URL: /OaaS/reports/{reportName}, Operation: GET, Produces: APPLICATION/JSON)
      * @return HTTP Response
      */
-    @GET
-    @Path("/reports/{name}")
-    @Produces(MediaType.APPLICATION_JSON)
     public Response getReportByName(@PathParam("name") String reportName)
     {
         String token = webRequest.getHeader("token");
@@ -366,6 +374,10 @@ public class OaaSResources
         return ServerUtils.OK(reportJSON);
     }
 
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/execute")
     /**
      * Sends a request to execute an algorithm or a report
      * @param input input JSON Object. It has to be sent using a specific format:
@@ -378,10 +390,6 @@ public class OaaSResources
      *              </ul>
      * @return HTTP Response
      */
-    @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("/execute")
     public Response execute(String input)
     {
         JSONObject errorJSON = new JSONObject();
