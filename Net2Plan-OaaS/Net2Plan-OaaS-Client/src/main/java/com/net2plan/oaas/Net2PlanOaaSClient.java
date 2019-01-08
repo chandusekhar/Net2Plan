@@ -240,7 +240,7 @@ public class Net2PlanOaaSClient
         params.put("algorithm_maxExecutionTimeInSeconds","40");
         params.put("grasp_maxNumIterations","70000");*/
 
-        Response rex = client.executeOperation(ClientUtils.ExecutionType.REPORT,"Report_robustness",null, netPlan);
+        Response rex = client.executeOperation(ClientUtils.ExecutionType.REPORT,"Report_delay",null, netPlan);
         System.out.println("EXECUTE -> "+rex.readEntity(String.class));
     }
 

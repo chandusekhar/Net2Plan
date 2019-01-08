@@ -5,6 +5,7 @@ package com.net2plan.oaas;
 import com.net2plan.interfaces.networkDesign.IAlgorithm;
 import com.net2plan.interfaces.networkDesign.IReport;
 import com.net2plan.internal.SystemUtils;
+import com.net2plan.internal.XMLUtils;
 import com.net2plan.utils.Pair;
 import com.net2plan.utils.Quadruple;
 import com.net2plan.utils.StringUtils;
@@ -13,9 +14,15 @@ import com.shc.easyjson.JSON;
 import com.shc.easyjson.JSONArray;
 import com.shc.easyjson.JSONObject;
 import com.shc.easyjson.JSONValue;
+import org.codehaus.stax2.XMLInputFactory2;
+import org.codehaus.stax2.XMLOutputFactory2;
+import org.codehaus.stax2.XMLStreamReader2;
+import org.codehaus.stax2.XMLStreamWriter2;
 
 import javax.ws.rs.core.Response;
-import java.io.File;
+import javax.xml.stream.XMLOutputFactory;
+import javax.xml.stream.XMLStreamException;
+import java.io.*;
 import java.util.*;
 
 
@@ -40,6 +47,61 @@ public class ServerUtils
         if(!TOMCAT_FILES_DIR.exists())
             TOMCAT_FILES_DIR.mkdirs();
         USER_CONFIG_FILE = new File(TOMCAT_FILES_DIR.getAbsolutePath() + File.separator + "oaas_users.xml");
+        if(!USER_CONFIG_FILE.exists())
+        {
+            try {
+                boolean create = USER_CONFIG_FILE.createNewFile();
+                if(create)
+                    createDefaultUsersFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        }
+    }
+
+    private static void createDefaultUsersFile()
+    {
+
+        OutputStream output = null;
+        try {
+            output = new FileOutputStream(USER_CONFIG_FILE);
+            XMLOutputFactory2 xmlOutputFactory = (XMLOutputFactory2) XMLOutputFactory.newInstance();
+            XMLStreamWriter2 writer = (XMLStreamWriter2) xmlOutputFactory.createXMLStreamWriter(output);
+            writer.writeStartDocument("UTF-8", "1.0");
+
+            XMLUtils.indent(writer,0);
+            writer.writeStartElement("users");
+
+            //ROOT USER
+            XMLUtils.indent(writer,1);
+            writer.writeStartElement("user");
+            writer.writeAttribute("name","root");
+            writer.writeAttribute("password","root");
+            writer.writeAttribute("category","GOLD");
+            writer.writeEndElement();
+
+            writer.writeRaw("<!-- Copy this line to create more users -->");
+
+            //ADMIN USER
+            XMLUtils.indent(writer,1);
+            writer.writeStartElement("user");
+            writer.writeAttribute("name","admin");
+            writer.writeAttribute("password","admin");
+            writer.writeAttribute("category","ALL");
+            writer.writeEndElement();
+
+            XMLUtils.indent(writer,0);
+            writer.writeEndElement();
+            writer.writeEndDocument();
+            writer.flush();
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (XMLStreamException e) {
+            e.printStackTrace();
+        }
+
     }
 
     protected static synchronized String addToken(String user, String category)

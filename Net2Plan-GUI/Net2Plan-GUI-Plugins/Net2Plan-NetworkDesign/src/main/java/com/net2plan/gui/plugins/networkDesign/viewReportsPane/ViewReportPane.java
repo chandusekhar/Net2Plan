@@ -229,8 +229,8 @@ public class ViewReportPane extends JPanel implements ThreadExecutionController.
         pnl_radio.add(localButton);
         pnl_radio.add(remoteButton);
 
-        cardPanel.add(pane_local, "Local");
-        cardPanel.add(pane_remote, "Remote");
+        cardPanel.add(localSplitPane, "Local");
+        cardPanel.add(remoteSplitPane, "Remote");
 
         localButton.addItemListener(e ->
         {
@@ -296,6 +296,7 @@ public class ViewReportPane extends JPanel implements ThreadExecutionController.
                     if(getReport.getStatus() != 200)
                         throw new Net2PlanException("Report "+reportName+" not found in OaaS instance");
 
+
                     String getReportEntity = getReport.readEntity(String.class);
                     JSONObject getReportJSON = JSON.parse(getReportEntity);
                     String reportTitle = getReportJSON.get("title").getValue();
@@ -304,9 +305,12 @@ public class ViewReportPane extends JPanel implements ThreadExecutionController.
                     if(reportResponse.getStatus() != 200)
                         throw new Net2PlanException(JSON.parse(responseMessage).get("message").getValue());
 
+
                     JSONObject responseJSON = JSON.parse(responseMessage);
+
                     String response = responseJSON.get("executeResponse").getValue();
                     aux = Pair.unmodifiableOf(reportTitle, new ReportBrowser(response));
+
 
                 } catch (Exception e)
                 {

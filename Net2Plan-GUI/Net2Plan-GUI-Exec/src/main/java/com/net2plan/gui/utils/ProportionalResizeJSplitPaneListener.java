@@ -30,9 +30,15 @@ public class ProportionalResizeJSplitPaneListener implements PropertyChangeListe
         String propertyName = changeEvent.getPropertyName();
         if (propertyName.equals(JSplitPane.LAST_DIVIDER_LOCATION_PROPERTY)) {
             if (src.getOrientation() == JSplitPane.HORIZONTAL_SPLIT)
-                src.setResizeWeight(src.getDividerLocation() / src.getSize().getWidth());
+            {
+                double newResizeWeight = src.getDividerLocation() / src.getSize().getWidth();
+                src.setResizeWeight(newResizeWeight);
+            }
             else
-                src.setResizeWeight(src.getDividerLocation() / src.getSize().getHeight());
+            {
+                double newResizeWeight = src.getDividerLocation() / src.getSize().getHeight();
+                src.setResizeWeight(newResizeWeight);
+            }
         }
     }
 }

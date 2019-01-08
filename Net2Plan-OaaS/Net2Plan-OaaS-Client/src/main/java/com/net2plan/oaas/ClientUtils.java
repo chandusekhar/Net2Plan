@@ -72,9 +72,18 @@ public class ClientUtils
         return client;
     }
 
+    /**
+     * Execution Type in Net2Plan OaaS (ALGORITHM or REPORT)
+     */
     public enum ExecutionType
     {
+        /**
+         * ALGORITHM type
+         */
         ALGORITHM("ALGORITHM"),
+        /**
+         * REPORT type
+         */
         REPORT("REPORT");
 
         private String label;
@@ -91,9 +100,18 @@ public class ClientUtils
         }
     }
 
+    /**
+     * Net2Plan OaaS Client working mode (HTTP or HTTPS)
+     */
     public enum ClientMode
     {
+        /**
+         * HTTP mode
+         */
         HTTP("http"),
+        /**
+         * HTTPS mode
+         */
         HTTPS("https");
 
         private String label;
