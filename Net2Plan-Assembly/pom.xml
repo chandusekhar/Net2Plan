@@ -16,11 +16,7 @@
     <parent>
         <groupId>com.net2plan</groupId>
         <artifactId>net2plan</artifactId>
-<<<<<<< HEAD
         <version>0.7.0-SNAPSHOT</version>
-=======
-        <version>0.6.1.2</version>
->>>>>>> master
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -33,22 +29,14 @@
         <dependency>
             <groupId>com.net2plan</groupId>
             <artifactId>net2plan-core</artifactId>
-<<<<<<< HEAD
             <version>0.7.0-SNAPSHOT</version>
-=======
-            <version>0.6.1.2</version>
->>>>>>> master
             <type>jar</type>
         </dependency>
         <!--Core resources bundle(data, help...)-->
         <dependency>
             <groupId>com.net2plan</groupId>
             <artifactId>net2plan-core</artifactId>
-<<<<<<< HEAD
             <version>0.7.0-SNAPSHOT</version>
-=======
-            <version>0.6.1.2</version>
->>>>>>> master
             <type>zip</type>
             <classifier>bundle</classifier>
         </dependency>
@@ -69,77 +57,50 @@
         <dependency>
             <groupId>com.net2plan.net2plan-cli</groupId>
             <artifactId>net2plan-cli-exec</artifactId>
-<<<<<<< HEAD
             <version>0.7.0-SNAPSHOT</version>
-=======
-            <version>0.6.1.2</version>
->>>>>>> master
             <scope>runtime</scope>
             <type>jar</type>
         </dependency>
         <dependency>
             <groupId>com.net2plan.net2plan-cli</groupId>
             <artifactId>net2plan-cli-plugins</artifactId>
-<<<<<<< HEAD
             <version>0.7.0-SNAPSHOT</version>
-=======
-            <version>0.6.1.2</version>
->>>>>>> master
             <scope>runtime</scope>
             <type>jar</type>
         </dependency>
         <dependency>
             <groupId>com.net2plan.net2plan-gui</groupId>
             <artifactId>net2plan-gui-exec</artifactId>
-<<<<<<< HEAD
             <version>0.7.0-SNAPSHOT</version>
-=======
-            <version>0.6.1.2</version>
->>>>>>> master
             <scope>runtime</scope>
             <type>jar</type>
         </dependency>
         <dependency>
             <groupId>com.net2plan.net2plan-gui.net2plan-gui-plugins</groupId>
             <artifactId>net2plan-gui-plugins-networkDesign</artifactId>
-<<<<<<< HEAD
             <version>0.7.0-SNAPSHOT</version>
-=======
-            <version>0.6.1.2</version>
->>>>>>> master
             <scope>runtime</scope>
             <type>jar</type>
         </dependency>
         <dependency>
             <groupId>com.net2plan.net2plan-gui.net2plan-gui-plugins</groupId>
             <artifactId>net2plan-gui-plugins-trafficDesign</artifactId>
-<<<<<<< HEAD
             <version>0.7.0-SNAPSHOT</version>
-=======
-            <version>0.6.1.2</version>
->>>>>>> master
             <scope>runtime</scope>
             <type>jar</type>
         </dependency>
         <dependency>
             <groupId>com.net2plan</groupId>
             <artifactId>net2plan-examples</artifactId>
-<<<<<<< HEAD
             <version>0.7.0-SNAPSHOT</version>
-=======
-            <version>0.6.1.2</version>
->>>>>>> master
             <scope>runtime</scope>
             <type>jar</type>
         </dependency>
         <dependency>
             <groupId>com.net2plan</groupId>
             <artifactId>net2plan-javadoc</artifactId>
-<<<<<<< HEAD
             <version>0.7.0-SNAPSHOT</version>
-=======
-            <version>0.6.1.2</version>
->>>>>>> master
+
             <scope>runtime</scope>
             <type>jar</type>
         </dependency>
