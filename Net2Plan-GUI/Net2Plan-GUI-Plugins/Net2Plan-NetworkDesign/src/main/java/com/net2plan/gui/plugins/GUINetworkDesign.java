@@ -94,7 +94,7 @@ import net.miginfocom.swing.MigLayout;
  */
 public class GUINetworkDesign extends IGUIModule
 {
-    private final static String TITLE = "Offline network design & Online network simulation";
+    private static String TITLE = "Offline network design & Online network simulation";
     private final static int MAXSIZEUNDOLISTCHANGES = 0; // deactivate, not robust yet
     private final static int MAXSIZEUNDOLISTPICK = 10;
 

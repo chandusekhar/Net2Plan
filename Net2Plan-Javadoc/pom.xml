@@ -16,7 +16,11 @@
     <parent>
         <artifactId>net2plan</artifactId>
         <groupId>com.net2plan</groupId>
+<<<<<<< HEAD
         <version>0.7.0-SNAPSHOT</version>
+=======
+        <version>0.6.1.2</version>
+>>>>>>> master
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -28,6 +32,7 @@
         <dependency>
             <groupId>com.net2plan</groupId>
             <artifactId>net2plan-core</artifactId>
+<<<<<<< HEAD
             <version>0.7.0-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
@@ -35,12 +40,19 @@
             <groupId>com.net2plan.net2plan-oaas</groupId>
             <artifactId>net2plan-oaas-client</artifactId>
             <version>0.7.0-SNAPSHOT</version>
+=======
+            <version>0.6.1.2</version>
+>>>>>>> master
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.net2plan</groupId>
             <artifactId>net2plan-examples</artifactId>
+<<<<<<< HEAD
             <version>0.7.0-SNAPSHOT</version>
+=======
+            <version>0.6.1.2</version>
+>>>>>>> master
             <scope>provided</scope>
         </dependency>
     </dependencies>

@@ -5,7 +5,11 @@
     <parent>
         <artifactId>net2plan</artifactId>
         <groupId>com.net2plan</groupId>
+<<<<<<< HEAD
         <version>0.7.0-SNAPSHOT</version>
+=======
+        <version>0.6.1.2</version>
+>>>>>>> master
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
