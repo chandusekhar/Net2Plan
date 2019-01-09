@@ -302,14 +302,12 @@ public class ViewReportPane extends JPanel implements ThreadExecutionController.
                     String reportTitle = getReportJSON.get("title").getValue();
                     Response reportResponse = client.executeOperation(execInfo.getFirst(), reportName, execParameters, netPlan_copy);
                     String responseMessage = reportResponse.readEntity(String.class);
+                    System.out.println(responseMessage);
+
                     if(reportResponse.getStatus() != 200)
                         throw new Net2PlanException(JSON.parse(responseMessage).get("message").getValue());
 
-
-                    JSONObject responseJSON = JSON.parse(responseMessage);
-
-                    String response = responseJSON.get("executeResponse").getValue();
-                    aux = Pair.unmodifiableOf(reportTitle, new ReportBrowser(response));
+                    aux = Pair.unmodifiableOf(reportTitle, new ReportBrowser(responseMessage));
 
 
                 } catch (Exception e)

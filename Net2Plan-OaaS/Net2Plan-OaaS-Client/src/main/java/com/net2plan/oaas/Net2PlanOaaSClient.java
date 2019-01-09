@@ -64,21 +64,22 @@ public class Net2PlanOaaSClient
         json.put("username", new JSONValue(user));
         json.put("password", new JSONValue(pass));
 
+        try {
         WebTarget this_target = target.path("/OaaS/authenticate");
         Invocation.Builder inv = this_target.request(MediaType.APPLICATION_JSON_TYPE).accept(MediaType.APPLICATION_JSON_TYPE);
         Response r = inv.post(Entity.entity(JSON.write(json), MediaType.APPLICATION_JSON_TYPE));
 
         String entity = r.readEntity(String.class);
-        try {
-            JSONObject entityJSON = JSON.parse(entity);
-            JSONValue tokenValue = entityJSON.get("token");
-            this.authToken = (tokenValue == null) ? "" : tokenValue.getValue();
-        } catch (ParseException e)
+        JSONObject entityJSON = JSON.parse(entity);
+        JSONValue tokenValue = entityJSON.get("token");
+        this.authToken = (tokenValue == null) ? "" : tokenValue.getValue();
+
+        } catch (Exception e)
         {
             return Response.serverError().entity(e.getMessage()).build();
         }
 
-        return r;
+        return Response.status(Response.Status.ACCEPTED).build();
     }
 
     /**
@@ -214,10 +215,10 @@ public class Net2PlanOaaSClient
 
         Response auth2 = client.authenticateUser("root", "root");
 
-        File catalog_1 = new File("C:\\Users\\César\\Desktop\\Net2Plan-0.6.1\\workspace\\BuiltInExamples.jar");
-        File catalog_2 = new File("C:\\Users\\César\\Desktop\\Net2Plan-0.6.1\\workspace\\BuiltInExamples - copia.jar");
+        File catalog_1 = new File("C:\\Users\\César\\Desktop\\Net2Plan\\Net2Plan-Assembly\\target\\Net2Plan-0.7.0-SNAPSHOT\\workspace\\BuiltInExamples.jar");
+        //File catalog_2 = new File("C:\\Users\\César\\Desktop\\Net2Plan-0.6.1\\workspace\\BuiltInExamples - copia.jar");
         Response r1 = client.uploadCatalog(catalog_1);
-        Response r2 = client.uploadCatalog(catalog_2);
+        //Response r2 = client.uploadCatalog(catalog_2);
 
 
 
@@ -240,8 +241,8 @@ public class Net2PlanOaaSClient
         params.put("algorithm_maxExecutionTimeInSeconds","40");
         params.put("grasp_maxNumIterations","70000");*/
 
-        Response rex = client.executeOperation(ClientUtils.ExecutionType.REPORT,"Report_delay",null, netPlan);
-        System.out.println("EXECUTE -> "+rex.readEntity(String.class));
+        //Response rex = client.executeOperation(ClientUtils.ExecutionType.REPORT,"Report_delay",null, netPlan);
+        //System.out.println("EXECUTE -> "+rex.readEntity(String.class));
     }
 
 }

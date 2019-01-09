@@ -90,8 +90,7 @@ public class OaaSResources
             }
         } catch (Exception e)
         {
-            json.put("message",new JSONValue(e.getMessage()));
-            return ServerUtils.SERVER_ERROR(json);
+            return ServerUtils.UNAUTHORIZED();
         }
 
         return ServerUtils.OK(json);
@@ -376,7 +375,7 @@ public class OaaSResources
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON,MediaType.TEXT_HTML})
     @Path("/execute")
     /**
      * Sends a request to execute an algorithm or a report
@@ -392,6 +391,7 @@ public class OaaSResources
      */
     public Response execute(String input)
     {
+        Response executeResponse = null;
         JSONObject errorJSON = new JSONObject();
         String response = "";
         JSONObject inputJSON = null;
@@ -529,6 +529,11 @@ public class OaaSResources
                 return ServerUtils.SERVER_ERROR(errorJSON);
             }
 
+            JSONObject responseJSON = new JSONObject();
+            responseJSON.put("outputNetPlan", new JSONValue(netPlan.saveToJSON()));
+            responseJSON.put("executeResponse", new JSONValue(response));
+            executeResponse = ServerUtils.OK(responseJSON);
+
         }
         else if(type.equalsIgnoreCase("REPORT"))
         {
@@ -641,13 +646,11 @@ public class OaaSResources
                 errorJSON.put("message", new JSONValue(e.getMessage()));
                 return ServerUtils.SERVER_ERROR(errorJSON);
             }
+
+            executeResponse = ServerUtils.HTML(response);
         }
 
-        JSONObject responseJSON = new JSONObject();
-        responseJSON.put("outputNetPlan", new JSONValue(netPlan.saveToJSON()));
-        responseJSON.put("executeResponse", new JSONValue(response));
-
-        return ServerUtils.OK(responseJSON);
+        return executeResponse;
     }
 
     /**

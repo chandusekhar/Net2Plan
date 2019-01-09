@@ -134,6 +134,18 @@ public class ServerUtils
     }
 
     /**
+     * Creates a HTTP response 200, OK including a HTML formatted message
+     * @param html HTML formatted message
+     * @return HTTP response 200, OK
+     */
+    protected static Response HTML(String html)
+    {
+        if(html == null || html.isEmpty())
+            return Response.ok().build();
+        else
+            return Response.ok().entity(html).build();
+    }
+    /**
      * Creates a HTTP response 200, OK including a response JSON
      * @param json JSON Object to return (null if no JSON is desired)
      * @return HTTP response 200, OK

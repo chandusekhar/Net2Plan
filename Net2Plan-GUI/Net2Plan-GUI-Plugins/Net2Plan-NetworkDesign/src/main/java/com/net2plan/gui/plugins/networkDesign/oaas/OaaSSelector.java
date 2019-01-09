@@ -169,8 +169,8 @@ public class OaaSSelector extends JPanel
                     callback.configureNet2PlanOaaSClient(mode, ip, Integer.parseInt(port));
                     Net2PlanOaaSClient client = callback.getNet2PlanOaaSClient();
                     Response authResponse = client.authenticateUser(user, password);
-                    if (authResponse.getStatus() == 500)
-                        throw new RuntimeException();
+                    if (authResponse.getStatus() != 202)
+                        throw new Net2PlanException("Unauthorized");
                     txt_connect.setText("http://" + ip + ":" + port);
                     net2PlanOaaSClient = callback.getNet2PlanOaaSClient();
                     Response getCatalogsResponse = net2PlanOaaSClient.getCatalogs();
