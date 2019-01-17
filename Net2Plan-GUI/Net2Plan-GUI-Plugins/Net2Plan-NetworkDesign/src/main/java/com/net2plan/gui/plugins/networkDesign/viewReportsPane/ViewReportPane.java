@@ -33,6 +33,7 @@ import com.net2plan.utils.Pair;
 import com.net2plan.utils.Triple;
 import com.shc.easyjson.JSON;
 import com.shc.easyjson.JSONObject;
+import com.shc.easyjson.ParseException;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
@@ -92,45 +93,19 @@ public class ViewReportPane extends JPanel implements ThreadExecutionController.
 
         JButton btn_show_local = new JButton("Show");
         btn_show_local.setToolTipText("Show the report");
-        btn_show_local.addActionListener(new ActionListener()
-        {
-            @Override
-            public void actionPerformed(ActionEvent e)
-            {
-                reportController.execute();
-            }
-        });
+        btn_show_local.addActionListener(e -> reportController.execute());
 
         JButton btn_show_remote = new JButton("Show");
         btn_show_remote.setToolTipText("Show the report");
-        btn_show_remote.addActionListener(new ActionListener()
-        {
-            @Override
-            public void actionPerformed(ActionEvent e)
-            {
-                reportController.execute();
-            }
-        });
+        btn_show_remote.addActionListener(e -> reportController.execute());
 
         closeAllReports_local = new JButton("Close all");
         closeAllReports_local.setToolTipText("Close all reports");
-        closeAllReports_local.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                reportContainer.removeAll();
-            }
-        });
+        closeAllReports_local.addActionListener(e -> reportContainer.removeAll());
 
         closeAllReports_remote = new JButton("Close all");
         closeAllReports_remote.setToolTipText("Close all reports");
-        closeAllReports_remote.addActionListener(new ActionListener()
-        {
-            @Override
-            public void actionPerformed(ActionEvent e)
-            {
-                remoteReportContainer.removeAll();
-            }
-        });
+        closeAllReports_remote.addActionListener(e -> remoteReportContainer.removeAll());
 
         reportContainer.addContainerListener(new ContainerListener() {
             @Override
@@ -302,10 +277,18 @@ public class ViewReportPane extends JPanel implements ThreadExecutionController.
                     String reportTitle = getReportJSON.get("title").getValue();
                     Response reportResponse = client.executeOperation(execInfo.getFirst(), reportName, execParameters, netPlan_copy);
                     String responseMessage = reportResponse.readEntity(String.class);
-                    System.out.println(responseMessage);
 
                     if(reportResponse.getStatus() != 200)
-                        throw new Net2PlanException(JSON.parse(responseMessage).get("message").getValue());
+                    {
+                        try{
+                            String errorMessage = JSON.parse(responseMessage).get("message").getValue();
+                            throw new Net2PlanException(errorMessage);
+                        }
+                        catch(ParseException e)
+                        {
+
+                        }
+                    }
 
                     aux = Pair.unmodifiableOf(reportTitle, new ReportBrowser(responseMessage));
 
