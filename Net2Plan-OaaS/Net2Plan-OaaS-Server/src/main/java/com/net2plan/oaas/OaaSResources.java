@@ -661,45 +661,31 @@ public class OaaSResources
      */
     private boolean authorizeUser(String token, String... allowedCategoryOptional)
     {
-        String allowedCategory = (allowedCategoryOptional.length == 1) ? allowedCategoryOptional[0] : "ALL";
+        String allowedCategory = (allowedCategoryOptional.length == 1) ? allowedCategoryOptional[0] : "INVITED";
         boolean allow = false;
 
         if(ServerUtils.validateToken(token))
         {
             Pair<String, String> tokenInfo = ServerUtils.getInfoFromToken(token);
-            String category = tokenInfo.getSecond();
+            String userCategory = tokenInfo.getSecond();
 
-            if(allowedCategory.equalsIgnoreCase("BRONZE"))
+            if(allowedCategory.equalsIgnoreCase("INVITED"))
             {
-                if(category.equalsIgnoreCase("BRONZE") || category.equalsIgnoreCase("SILVER") || category.equalsIgnoreCase("GOLD"))
+                if(userCategory.equalsIgnoreCase("INVITED") || userCategory.equalsIgnoreCase("MASTER"))
                     allow = true;
                 else
-                    throw new RuntimeException("Unknown user category -> "+category);
+                    throw new RuntimeException("Unknown user category -> "+userCategory);
             }
-            else if(allowedCategory.equalsIgnoreCase("SILVER"))
+            else if(allowedCategory.equalsIgnoreCase("MASTER"))
             {
-                if(category.equalsIgnoreCase("BRONZE"))
+                if(userCategory.equalsIgnoreCase("MASTER"))
+                    allow = true;
+                else if(userCategory.equalsIgnoreCase("INVITED"))
                     allow = false;
-                else if(category.equalsIgnoreCase("SILVER") || category.equalsIgnoreCase("GOLD"))
-                    allow = true;
                 else
-                    throw new RuntimeException("Unknown user category -> "+category);
+                    throw new RuntimeException("Unknown user category -> "+userCategory);
             }
-            else if(allowedCategory.equalsIgnoreCase("GOLD"))
-            {
-                if(category.equalsIgnoreCase("BRONZE") || category.equalsIgnoreCase("SILVER"))
-                {
-                    allow = false;
-                }
-                else if(category.equalsIgnoreCase("GOLD"))
-                {
-                    allow = true;
-                }
-                else
-                    throw new RuntimeException("Unknown user category -> "+category);
-            }
-            else if(allowedCategory.equalsIgnoreCase("ALL"))
-                allow = true;
+
             else
                 throw new RuntimeException("Unknown catalog category -> "+allowedCategory);
         }
