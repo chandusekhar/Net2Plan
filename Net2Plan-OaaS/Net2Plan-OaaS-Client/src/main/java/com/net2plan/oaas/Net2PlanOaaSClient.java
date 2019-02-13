@@ -160,12 +160,12 @@ public class Net2PlanOaaSClient
     /**
      * Uploads a catalog (JAR file) including different algorithms and/or reports
      * @param catalogFile catalog (JAR file)
-     * @param optionalCategory BRONZE, SILVER, GOLD, ALL
+     * @param optionalCategory INVITED, MASTER
      * @return HTTP Response
      */
     public Response uploadCatalog(File catalogFile, String... optionalCategory)
     {
-        String category = (optionalCategory.length == 1) ? optionalCategory[0] : "ALL";
+        String category = (optionalCategory.length == 1) ? optionalCategory[0] : "INVITED";
         WebTarget this_target = target.path("/OaaS/catalogs");
         FileDataBodyPart body = new FileDataBodyPart("file",catalogFile);
         MultiPart multi = new MultiPart();

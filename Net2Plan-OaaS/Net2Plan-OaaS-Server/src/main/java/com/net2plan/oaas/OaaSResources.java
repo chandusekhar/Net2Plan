@@ -106,7 +106,7 @@ public class OaaSResources
     public Response getCatalogs()
     {
         String token = webRequest.getHeader("token");
-        if(!authorizeUser(token))
+        if(!ServerUtils.authorizeUser(token))
             return ServerUtils.UNAUTHORIZED();
 
         JSONObject catalogsJSON = new JSONObject();
@@ -134,7 +134,7 @@ public class OaaSResources
     {
         JSONObject json = new JSONObject();
         String token = webRequest.getHeader("token");
-        if(!authorizeUser(token, "GOLD"))
+        if(!ServerUtils.authorizeUser(token, "MASTER"))
             return ServerUtils.UNAUTHORIZED();
 
         if(!TOMCAT_FILES_DIR.exists())
@@ -210,7 +210,7 @@ public class OaaSResources
     public Response getCatalogByName(@PathParam("name") String catalogName)
     {
         String token = webRequest.getHeader("token");
-        if(!authorizeUser(token))
+        if(!ServerUtils.authorizeUser(token))
             return ServerUtils.UNAUTHORIZED();
 
         JSONObject catalogJSON = null;
@@ -243,7 +243,7 @@ public class OaaSResources
     public Response getAlgorithms()
     {
         String token = webRequest.getHeader("token");
-        if(!authorizeUser(token))
+        if(!ServerUtils.authorizeUser(token))
             return ServerUtils.UNAUTHORIZED();
 
         JSONObject algorithmsJSON = new JSONObject();
@@ -272,7 +272,7 @@ public class OaaSResources
     public Response getAlgorithmByName(@PathParam("name") String algorithmName)
     {
         String token = webRequest.getHeader("token");
-        if(!authorizeUser(token))
+        if(!ServerUtils.authorizeUser(token))
             return ServerUtils.UNAUTHORIZED();
 
         JSONObject algorithmJSON = null;
@@ -313,7 +313,7 @@ public class OaaSResources
     public Response getReports()
     {
         String token = webRequest.getHeader("token");
-        if(!authorizeUser(token))
+        if(!ServerUtils.authorizeUser(token))
             return ServerUtils.UNAUTHORIZED();
 
         JSONObject reportsJSON = new JSONObject();
@@ -342,7 +342,7 @@ public class OaaSResources
     public Response getReportByName(@PathParam("name") String reportName)
     {
         String token = webRequest.getHeader("token");
-        if(!authorizeUser(token))
+        if(!ServerUtils.authorizeUser(token))
             return ServerUtils.UNAUTHORIZED();
 
         JSONObject reportJSON = null;
@@ -384,7 +384,7 @@ public class OaaSResources
      *                  <li type="square">type: ALGORITHM / REPORT</li>
      *                  <li type="square">name: name of the algorithm or report to execute.</li>
      *                  <li type="square">userparams: map defining the user's custom parameter values. (The have to be the same as the defined in the algorithm or report, if not, the execution will fail)</li>
-     *                  <li type="square">netPlan: NetPlan design (JSON formatted) in which the algorithm or report will be executed in.
+     *                  <li type="square">netPlan: NetPlan design (JSON formatted) which the algorithm or report will be executed on.
      *                  To create this JSON representation, the method saveToJSON() in NetPlan class will help.</li>
      *              </ul>
      * @return HTTP Response
@@ -410,7 +410,7 @@ public class OaaSResources
         String category = ServerUtils.getCategoryFromExecutionName(executeName);
 
         String token = webRequest.getHeader("token");
-        if(!authorizeUser(token, category))
+        if(!ServerUtils.authorizeUser(token, category))
             return ServerUtils.UNAUTHORIZED();
 
         NetPlan netPlan = new NetPlan(inputNetPlan);
@@ -651,46 +651,6 @@ public class OaaSResources
         }
 
         return executeResponse;
-    }
-
-    /**
-     * Checks if the user is authorized to access the API functionalities
-     * @param token user's token
-     * @param allowedCategoryOptional optional allowed Category
-     * @return true if the user is authorized, false if not
-     */
-    private boolean authorizeUser(String token, String... allowedCategoryOptional)
-    {
-        String allowedCategory = (allowedCategoryOptional.length == 1) ? allowedCategoryOptional[0] : "INVITED";
-        boolean allow = false;
-
-        if(ServerUtils.validateToken(token))
-        {
-            Pair<String, String> tokenInfo = ServerUtils.getInfoFromToken(token);
-            String userCategory = tokenInfo.getSecond();
-
-            if(allowedCategory.equalsIgnoreCase("INVITED"))
-            {
-                if(userCategory.equalsIgnoreCase("INVITED") || userCategory.equalsIgnoreCase("MASTER"))
-                    allow = true;
-                else
-                    throw new RuntimeException("Unknown user category -> "+userCategory);
-            }
-            else if(allowedCategory.equalsIgnoreCase("MASTER"))
-            {
-                if(userCategory.equalsIgnoreCase("MASTER"))
-                    allow = true;
-                else if(userCategory.equalsIgnoreCase("INVITED"))
-                    allow = false;
-                else
-                    throw new RuntimeException("Unknown user category -> "+userCategory);
-            }
-
-            else
-                throw new RuntimeException("Unknown catalog category -> "+allowedCategory);
-        }
-
-        return allow;
     }
 
 

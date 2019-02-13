@@ -78,7 +78,7 @@ public class ServerUtils
             writer.writeStartElement("user");
             writer.writeAttribute("name","root");
             writer.writeAttribute("password","root");
-            writer.writeAttribute("category","GOLD");
+            writer.writeAttribute("category","MASTER");
             writer.writeEndElement();
 
             writer.writeRaw("<!-- Copy this line to create more users -->");
@@ -88,7 +88,7 @@ public class ServerUtils
             writer.writeStartElement("user");
             writer.writeAttribute("name","admin");
             writer.writeAttribute("password","admin");
-            writer.writeAttribute("category","ALL");
+            writer.writeAttribute("category","MASTER");
             writer.writeEndElement();
 
             XMLUtils.indent(writer,0);
@@ -392,7 +392,7 @@ public class ServerUtils
      */
     protected static String getCategoryFromExecutionName(String executeName)
     {
-        String category = "ALL";
+        String category = "";
         boolean found = false;
         for(Quadruple<String, String, List<IAlgorithm>, List<IReport>> entry : catalogAlgorithmsAndReports)
         {
@@ -427,9 +427,44 @@ public class ServerUtils
         return category;
     }
 
-    protected static String getCategoryFromUser(String username)
+    /**
+     * Checks if the user is authorized to access the API functionalities
+     * @param token user's token
+     * @param allowedCategoryOptional optional allowed Category
+     * @return true if the user is authorized, false if not
+     */
+    public static boolean authorizeUser(String token, String... allowedCategoryOptional)
     {
-        return "";
+        String allowedCategory = (allowedCategoryOptional.length == 1) ? allowedCategoryOptional[0] : "INVITED";
+        boolean allow = false;
+
+        if(ServerUtils.validateToken(token))
+        {
+            Pair<String, String> tokenInfo = ServerUtils.getInfoFromToken(token);
+            String userCategory = tokenInfo.getSecond();
+
+            if(allowedCategory.equalsIgnoreCase("INVITED"))
+            {
+                if(userCategory.equalsIgnoreCase("INVITED") || userCategory.equalsIgnoreCase("MASTER"))
+                    allow = true;
+                else
+                    throw new RuntimeException("Unknown user category -> "+userCategory);
+            }
+            else if(allowedCategory.equalsIgnoreCase("MASTER"))
+            {
+                if(userCategory.equalsIgnoreCase("MASTER"))
+                    allow = true;
+                else if(userCategory.equalsIgnoreCase("INVITED"))
+                    allow = false;
+                else
+                    throw new RuntimeException("Unknown user category -> "+userCategory);
+            }
+
+            else
+                throw new RuntimeException("Unknown catalog category -> "+allowedCategory);
+        }
+
+        return allow;
     }
 
 
