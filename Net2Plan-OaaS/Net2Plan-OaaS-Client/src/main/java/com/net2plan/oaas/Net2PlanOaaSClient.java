@@ -208,41 +208,4 @@ public class Net2PlanOaaSClient
 
         return r;
     }
-
-    public static void main(String [] args)
-    {
-        Net2PlanOaaSClient client = new Net2PlanOaaSClient(ClientUtils.ClientMode.HTTP, "localhost");
-
-        Response auth2 = client.authenticateUser("root", "root");
-
-        File catalog_1 = new File("C:\\Users\\César\\Desktop\\Net2Plan\\Net2Plan-Assembly\\target\\Net2Plan-0.7.0-SNAPSHOT\\workspace\\BuiltInExamples.jar");
-        //File catalog_2 = new File("C:\\Users\\César\\Desktop\\Net2Plan-0.6.1\\workspace\\BuiltInExamples - copia.jar");
-        Response r1 = client.uploadCatalog(catalog_1);
-        //Response r2 = client.uploadCatalog(catalog_2);
-
-
-
-        /*Response getC2 = client.getCatalogs();
-        System.out.println(getC2.readEntity(String.class));
-
-        Response getA2 = client.getAlgorithmByName("Offline_fa_ospfWeightOptimization_GRASP");
-        System.out.println(getA2.readEntity(String.class));*/
-
-        File topologyFile = new File("C:\\Users\\César\\Desktop\\Net2Plan-0.6.1\\workspace\\data\\networkTopologies\\example7nodes_ipOverWDM.n2p");
-        NetPlan netPlan = new NetPlan(topologyFile);
-        /*Map<String, String> params = new LinkedHashMap<>();
-        params.put("grasp_initializationType","random");
-        params.put("ospf_maxLinkWeight","8");
-        params.put("grasp_differenceInWeightToBeNeighbors","3");
-        params.put("algorithm_randomSeed","5");
-        params.put("algorithm_outputFileNameRoot","");
-        params.put("ospf_weightOfMaxUtilizationInObjectiveFunction","0.6");
-        params.put("grasp_rclRandomnessFactor","0.6");
-        params.put("algorithm_maxExecutionTimeInSeconds","40");
-        params.put("grasp_maxNumIterations","70000");*/
-
-        //Response rex = client.executeOperation(ClientUtils.ExecutionType.REPORT,"Report_delay",null, netPlan);
-        //System.out.println("EXECUTE -> "+rex.readEntity(String.class));
-    }
-
 }
