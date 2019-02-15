@@ -21,7 +21,7 @@ public class Net2PlanOaaSClient
 
     /**
      * Net2Plan OaaS Client constructor
-     * @param mode Server mode where the client will be used (HTTP or HTTPS)
+     * @param mode Server mode (HTTP or HTTPS)
      * @param ipAddress IP Address where Net2Plan OaaS is running
      * @param optionalPort port where OaaS is running (default value: 8080)
      */
