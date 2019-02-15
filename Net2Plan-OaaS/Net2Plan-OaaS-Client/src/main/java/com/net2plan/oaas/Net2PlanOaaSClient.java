@@ -163,15 +163,15 @@ public class Net2PlanOaaSClient
      * @param optionalCategory INVITED, MASTER
      * @return HTTP Response
      */
-    public Response uploadCatalog(File catalogFile, String... optionalCategory)
+    public Response uploadCatalog(File catalogFile, ClientUtils.Category... optionalCategory)
     {
-        String category = (optionalCategory.length == 1) ? optionalCategory[0] : "INVITED";
+        ClientUtils.Category category = (optionalCategory.length == 1) ? optionalCategory[0] : ClientUtils.Category.INVITED;
         WebTarget this_target = target.path("/OaaS/catalogs");
         FileDataBodyPart body = new FileDataBodyPart("file",catalogFile);
         MultiPart multi = new MultiPart();
         multi.bodyPart(body);
 
-        Invocation.Builder inv = this_target.request(MediaType.APPLICATION_JSON).header("token",authToken).header("category",category);
+        Invocation.Builder inv = this_target.request(MediaType.APPLICATION_JSON).header("token",authToken).header("category",category.toString());
         Response r = inv.post(Entity.entity(multi,MediaType.MULTIPART_FORM_DATA));
 
         return r;

@@ -141,6 +141,12 @@ public class OaaSResources
             TOMCAT_FILES_DIR.mkdirs();
 
         String catalogCategory = webRequest.getHeader("category");
+        if(!catalogCategory.equalsIgnoreCase("INVITED") || !catalogCategory.equalsIgnoreCase("MASTER"))
+        {
+            json.put("message", new JSONValue("Unknown category -> "+catalogCategory));
+            return ServerUtils.SERVER_ERROR(json);
+        }
+
 
         String catalogName = fileMetaData.getFileName();
         List<String> catalogsNames = ServerUtils.getCatalogsNames();

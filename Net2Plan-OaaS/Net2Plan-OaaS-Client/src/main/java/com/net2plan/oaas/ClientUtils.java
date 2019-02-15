@@ -143,5 +143,32 @@ public class ClientUtils
         }
     }
 
+    public enum Category
+    {
+        /**
+         * INVITED category
+         */
+        INVITED("INVITED"),
+
+
+        /**
+         * MASTER category
+         */
+        MASTER("MASTER");
+
+        private String label;
+
+        Category(String label)
+        {
+            this.label = label;
+        }
+
+        @Override
+        public String toString()
+        {
+            return this.label;
+        }
+    }
+
 }
 
