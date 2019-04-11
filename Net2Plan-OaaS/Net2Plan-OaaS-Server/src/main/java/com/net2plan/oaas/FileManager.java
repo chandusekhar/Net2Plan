@@ -58,7 +58,7 @@ public class FileManager {
 
         this.persistenceData.put(key,value);
 
-        if(value instanceof Map){
+        /*if(value instanceof Map){
             JSONObject mapObject = new JSONObject();
             Map<String,Object> newMap = (Map<String, Object>)value;
 
@@ -91,7 +91,7 @@ public class FileManager {
 
         }
 
-        System.out.println(persistenceDataJSON);
+        System.out.println(persistenceDataJSON);*/
     }
 
 
@@ -105,30 +105,48 @@ public class FileManager {
             Object value = entry.getValue();
 
             if (value instanceof Collections){
-                persistenceDataJSON.put(newKey,new JSONValue(addCollectionObject()));
+                JSONArray jsonArray = addCollectionObject(value);
+                if(jsonArray!=null)
+                    persistenceDataJSON.put(newKey,new JSONValue(jsonArray));
 
             }else {
-                persistenceDataJSON.put(newKey,addNoCollectionObject());
+                JSONValue jsonValue= addNoCollectionObject(value);
+                if(jsonValue != null)
+                    persistenceDataJSON.put(newKey,jsonValue);
             }
 
         }
 
     }
 
-    public JSONValue addNoCollectionObject(){
+    public JSONValue addNoCollectionObject(Object value){
+
+        JSONValue jsonValue = null;
 
         if (value instanceof String) {
-            mapObject.put(newKey, new JSONValue((String) value));
+            jsonValue = new JSONValue((String) value);
         } else if (value instanceof Integer) {
-            mapObject.put(newKey, new JSONValue((Integer) object));
+            jsonValue = new JSONValue((Integer) value);
         } else if (value instanceof Double) {
-            mapObject.put(newKey, new JSONValue((Double) object));
+            jsonValue = new JSONValue((Double) value);
         } else if (value instanceof Long) {
-            mapObject.put(newKey, new JSONValue((Long) object));
+            jsonValue = new JSONValue((Long) value);
         }
+        return jsonValue;
     }
 
-    public JSONArray addCollectionObject(){
+    public JSONArray addCollectionObject(Object value){
+
+        JSONArray jsonArray = null;
+
+        if(value instanceof List){
+
+
+        }else if(value instanceof Map){
+
+        }
+
+        return jsonArray;
 
     }
 
