@@ -111,6 +111,7 @@ public class OaaSResources
 
         JSONObject catalogsJSON = new JSONObject();
         JSONArray catalogsArray = new JSONArray();
+        catalogAlgorithmsAndReports = new FileManagerJSON().readCatalog();
         for(Quadruple<String, String, List<IAlgorithm>, List<IReport>> catalogEntry : catalogAlgorithmsAndReports)
         {
             JSONObject catalogJSON = ServerUtils.parseCatalog(catalogEntry);
@@ -118,9 +119,16 @@ public class OaaSResources
         }
         catalogsJSON.put("catalogs", new JSONValue(catalogsArray));
 
+
+
         return ServerUtils.OK(catalogsJSON);
     }
 
+    public void writeCatalog(){
+
+        FileManagerJSON.writeCatalog(catalogAlgorithmsAndReports);
+
+    }
 
     @POST
     @Path("/catalogs")
@@ -141,11 +149,11 @@ public class OaaSResources
             TOMCAT_FILES_DIR.mkdirs();
 
         String catalogCategory = webRequest.getHeader("category");
-        if(!catalogCategory.equalsIgnoreCase("INVITED") || !catalogCategory.equalsIgnoreCase("MASTER"))
+        /*if(!catalogCategory.equalsIgnoreCase("INVITED") || !catalogCategory.equalsIgnoreCase("MASTER"))
         {
             json.put("message", new JSONValue("Unknown category -> "+catalogCategory));
             return ServerUtils.SERVER_ERROR(json);
-        }
+        }*/
 
 
         String catalogName = fileMetaData.getFileName();
@@ -187,6 +195,8 @@ public class OaaSResources
             }
 
             catalogAlgorithmsAndReports.add(Quadruple.unmodifiableOf(catalogName, catalogCategory, algorithms, reports));
+
+            writeCatalog();
             ServerUtils.cleanFolder(TOMCAT_FILES_DIR, false);
 
             return ServerUtils.OK(null);

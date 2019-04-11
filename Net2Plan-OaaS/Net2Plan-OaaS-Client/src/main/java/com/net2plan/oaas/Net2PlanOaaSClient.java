@@ -41,12 +41,12 @@ public class Net2PlanOaaSClient
         {
             case HTTP:
                 client = ClientBuilder.newBuilder().build().register(MultiPartFeature.class);
-                baseURL = "http://"+ipAddress+":"+port+"/Net2Plan-OaaS";
+                baseURL = "http://"+ipAddress+":"+port+"/net2plan-oaas-server-0.7.0-SNAPSHOT";
                 break;
 
             case HTTPS:
                 client = ClientUtils.createHTTPSClient();
-                baseURL = "https://"+ipAddress+":"+port+"/Net2Plan-OaaS";
+                baseURL = "https://"+ipAddress+":"+port+"/net2plan-oaas-server-0.7.0-SNAPSHOT";
         }
         this.target = client.target(baseURL);
         this.authToken = "";
@@ -177,6 +177,14 @@ public class Net2PlanOaaSClient
         return r;
     }
 
+    public Response getPersistenceFile(String name)
+    {
+        WebTarget this_target = target.path("/OaaS/results/"+name);
+        Invocation.Builder inv = this_target.request().header("token",authToken).accept(MediaType.APPLICATION_JSON);
+        Response r = inv.get();
+        return r;
+    }
+
     /**
      * Sends an execution (algorithm or report) request to OaaS API
      * @param type execution type (ALGORITHM, REPORT)
@@ -208,5 +216,14 @@ public class Net2PlanOaaSClient
 
         return r;
     }
+    public static void main(String [] args)
+    {
+        Net2PlanOaaSClient client = new Net2PlanOaaSClient(ClientUtils.ClientMode.HTTP, "localhost");
+        client.authenticateUser("admin","admin");
 
+        client.uploadCatalog(new File("C:\\Users\\Manuel\\Desktop\\Net2Plan\\net2plan-algorithm\\target\\net2plan-algorithm-0.7.0-SNAPSHOT.jar"),ClientUtils.Category.MASTER).readEntity(String.class);
+        System.out.println(client.getCatalogs().readEntity(String.class));
+        client.executeOperation(ClientUtils.ExecutionType.ALGORITHM,"ExampleUsePersistence",null,new NetPlan()).readEntity(String.class);
+        System.out.println(client.getPersistenceFile("ExampleUsePersistence").readEntity(String.class));
+    }
 }

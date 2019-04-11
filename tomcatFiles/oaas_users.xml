@@ -1,0 +1,5 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<users>
+	<user name="root" password="root" category="MASTER"/><!-- Copy this line to create more users -->
+	<user name="admin" password="admin" category="MASTER"/>
+</users>
