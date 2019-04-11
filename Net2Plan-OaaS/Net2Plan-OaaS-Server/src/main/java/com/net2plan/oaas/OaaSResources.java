@@ -92,7 +92,7 @@ public class OaaSResources
         {
             return ServerUtils.UNAUTHORIZED();
         }
-
+        readCatalog();
         return ServerUtils.OK(json);
     }
 
@@ -111,7 +111,7 @@ public class OaaSResources
 
         JSONObject catalogsJSON = new JSONObject();
         JSONArray catalogsArray = new JSONArray();
-        catalogAlgorithmsAndReports = new FileManagerJSON().readCatalog();
+        //readCatalog();
         for(Quadruple<String, String, List<IAlgorithm>, List<IReport>> catalogEntry : catalogAlgorithmsAndReports)
         {
             JSONObject catalogJSON = ServerUtils.parseCatalog(catalogEntry);
@@ -126,8 +126,12 @@ public class OaaSResources
 
     public void writeCatalog(){
 
-        FileManagerJSON.writeCatalog(catalogAlgorithmsAndReports);
+        FileManagerJSON.writeCatalogPersistenceFile(catalogAlgorithmsAndReports);
 
+    }
+    public void readCatalog(){
+        catalogAlgorithmsAndReports.clear();
+        catalogAlgorithmsAndReports.addAll( new FileManagerJSON().readCatalogPersistenceFile());
     }
 
     @POST
@@ -140,6 +144,7 @@ public class OaaSResources
      */
     public Response uploadCatalog(@FormDataParam("file") byte [] input, @FormDataParam("file") FormDataContentDisposition fileMetaData)
     {
+        //readCatalog();
         JSONObject json = new JSONObject();
         String token = webRequest.getHeader("token");
         if(!ServerUtils.authorizeUser(token, "MASTER"))
@@ -193,7 +198,7 @@ public class OaaSResources
                     reports.add(rep);
                 }
             }
-
+            readCatalog();
             catalogAlgorithmsAndReports.add(Quadruple.unmodifiableOf(catalogName, catalogCategory, algorithms, reports));
 
             writeCatalog();
@@ -446,6 +451,7 @@ public class OaaSResources
 
         String category = ServerUtils.getCategoryFromExecutionName(executeName);
 
+        System.out.println("CATEGORY"+ category);
         String token = webRequest.getHeader("token");
         if(!ServerUtils.authorizeUser(token, category))
             return ServerUtils.UNAUTHORIZED();

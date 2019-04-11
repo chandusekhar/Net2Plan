@@ -15,43 +15,49 @@ import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
 public class FileManagerJSON {
 
-    public static void writeCatalog(List<Quadruple<String, String, List<IAlgorithm>, List<IReport>>> entry){
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("catalog",entry);
+    public static void writeCatalogPersistenceFile(List<Quadruple<String, String, List<IAlgorithm>, List<IReport>>> entry){
+
+        JSONObject catalog = new JSONObject();
+        catalog.put("catalog",entry);
+
         try  {
 
-            FileUtils.writeByteArrayToFile(new File(ServerUtils.TOMCAT_FILES_DIR+ File.separator + "catalog.n2p"), "".getBytes());
-            FileUtils.writeByteArrayToFile(new File(ServerUtils.TOMCAT_FILES_DIR+ File.separator + "catalog.n2p"), jsonObject.toString().getBytes());
+            FileUtils.writeByteArrayToFile(ServerUtils.CATALOG_FILE, "".getBytes());
+            FileUtils.writeByteArrayToFile(ServerUtils.CATALOG_FILE, catalog.toString().getBytes());
+
             }catch(Exception ex){
             ex.printStackTrace();
         }
 
     }
-    public  List<Quadruple<String, String, List<IAlgorithm>, List<IReport>>> readCatalog(){
+    public  List<Quadruple<String, String, List<IAlgorithm>, List<IReport>>> readCatalogPersistenceFile(){
 
         List<Quadruple<String, String, List<IAlgorithm>, List<IReport>>> entry = new ArrayList<>();
 
         try{
-            byte [] bytes = Files.readAllBytes(new File(ServerUtils.TOMCAT_FILES_DIR + File.separator+"catalog.n2p").toPath());
-            String everything = new String(bytes, StandardCharsets.UTF_8);
-            JSONObject jsonObject = new JSONObject(everything);
-            JSONArray catalog = jsonObject.getJSONArray("catalog");
 
-            for(Object jsonObject1: catalog) {
-                JSONObject catalog2 = (JSONObject) jsonObject1;
-                System.out.println(catalog2);
-                String catalogName=(String)catalog2.getString("first");
-                String catalogCategory=catalog2.getString("second");
+            byte [] bytes = Files.readAllBytes(ServerUtils.CATALOG_FILE.toPath());
+
+            String everything = new String(bytes, StandardCharsets.UTF_8);
+            JSONObject catalogJSON = new JSONObject(everything);
+            JSONArray catalogs = catalogJSON.getJSONArray("catalog");
+
+            for(Object obj: catalogs) {
+
+                JSONObject catalog = (JSONObject) obj;
+
+                String catalogName = catalog.getString("first");
+                String catalogCategory = catalog.getString("second");
+
                 List<IAlgorithm> algorithms = new LinkedList<>();
                 List<IReport> reports = new LinkedList<>();
 
-                File uploadedFile = new File(ServerUtils.TOMCAT_FILES_DIR + File.separator + catalog2.get("first"));
+                File uploadedFile = new File(ServerUtils.TOMCAT_FILES_DIR + File.separator + catalog.get("first"));
 
                 URLClassLoader cl = new URLClassLoader(new URL[]{uploadedFile.toURI().toURL()}, this.getClass().getClassLoader());
                 List<Class<IExternal>> classes = ClassLoaderUtils.getClassesFromFile(uploadedFile, IExternal.class, cl);
@@ -73,15 +79,7 @@ public class FileManagerJSON {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-        System.out.println(entry);
         return entry;
-
-    }
-
-    public static void main(String [] args){
-
-        FileManagerJSON fileManagerJSON = new FileManagerJSON();
-        fileManagerJSON.readCatalog();
 
     }
 }

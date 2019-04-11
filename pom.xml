@@ -36,7 +36,6 @@
         <module>Net2Plan-Launcher</module>
         <module>Net2Plan-CI</module>
         <module>Net2Plan-Assembly</module>
-        <module>net2plan-algorithm</module>
     </modules>
 
     <properties>

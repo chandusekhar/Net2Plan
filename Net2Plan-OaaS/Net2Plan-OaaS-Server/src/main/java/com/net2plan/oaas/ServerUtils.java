@@ -14,6 +14,7 @@ import com.shc.easyjson.JSON;
 import com.shc.easyjson.JSONArray;
 import com.shc.easyjson.JSONObject;
 import com.shc.easyjson.JSONValue;
+import org.apache.commons.io.FileUtils;
 import org.codehaus.stax2.XMLInputFactory2;
 import org.codehaus.stax2.XMLOutputFactory2;
 import org.codehaus.stax2.XMLStreamReader2;
@@ -40,13 +41,14 @@ public class ServerUtils
     /**
      * Directory where uploaded files will be stored while they are being analyzed
      */
-    protected final static File TOMCAT_FILES_DIR, USER_CONFIG_FILE;
+    protected final static File TOMCAT_FILES_DIR, USER_CONFIG_FILE, CATALOG_FILE;
     static
     {
         TOMCAT_FILES_DIR = new File(SystemUtils.getCurrentDir().getAbsolutePath() + File.separator + "tomcatFiles");
         if(!TOMCAT_FILES_DIR.exists())
             TOMCAT_FILES_DIR.mkdirs();
         USER_CONFIG_FILE = new File(TOMCAT_FILES_DIR.getAbsolutePath() + File.separator + "oaas_users.xml");
+        CATALOG_FILE = new File(TOMCAT_FILES_DIR.getAbsolutePath() + File.separator + "catalog.n2p");
         if(!USER_CONFIG_FILE.exists())
         {
             try {
@@ -58,6 +60,25 @@ public class ServerUtils
             }
 
         }
+        if(!CATALOG_FILE.exists())
+        {
+            try {
+                boolean create = CATALOG_FILE.createNewFile();
+                if(create)
+                    createDefaultCatalog();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        }
+    }
+    private static void createDefaultCatalog(){
+        try {
+            FileUtils.writeByteArrayToFile(CATALOG_FILE, "{}".getBytes());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 
     private static void createDefaultUsersFile()
