@@ -379,6 +379,27 @@ public class OaaSResources
         return ServerUtils.OK(reportJSON);
     }
 
+    @GET
+    @Path("/results/{name}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getPersistenceFile(@PathParam("name") String algorithmName)
+    {
+        String token = webRequest.getHeader("token");
+        if(!ServerUtils.authorizeUser(token, "MASTER"))
+            return ServerUtils.UNAUTHORIZED();
+
+        JSONObject resultsJSON = FileManager.readPersistenceFile(algorithmName,token);
+
+        if(resultsJSON == null)
+        {
+            JSONObject json = new JSONObject();
+            json.put("message", new JSONValue("Results of "+algorithmName+" not found"));
+            return ServerUtils.NOT_FOUND(json);
+        }
+
+        return ServerUtils.OK(resultsJSON);
+    }
+
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON,MediaType.TEXT_HTML})
@@ -529,6 +550,8 @@ public class OaaSResources
 
             try{
                 response = algorithm.executeAlgorithm(netPlan, algorithmParameters, net2planParameters);
+                FileManager.writePersistenceFile(response,executeName,token);
+
             }catch(Exception e)
             {
                 errorJSON.put("message", new JSONValue(e.getMessage()));
