@@ -560,7 +560,11 @@ public class OaaSResources
 
             JSONObject responseJSON = new JSONObject();
             responseJSON.put("outputNetPlan", new JSONValue(netPlan.saveToJSON()));
-            responseJSON.put("executeResponse", new JSONValue(response));
+            try {
+                responseJSON.put("executeResponse", new JSONValue(JSON.parse(response)));
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
             executeResponse = ServerUtils.OK(responseJSON);
 
         }
