@@ -388,7 +388,7 @@ public class OaaSResources
         if(!ServerUtils.authorizeUser(token, "MASTER"))
             return ServerUtils.UNAUTHORIZED();
 
-        JSONObject resultsJSON = FileManager.readPersistenceFile(algorithmName,token);
+        JSONObject resultsJSON = FileManager.readPersistenceFile(algorithmName,ServerUtils.tokens.get(token).getFirst());
 
         if(resultsJSON == null)
         {
@@ -550,7 +550,7 @@ public class OaaSResources
 
             try{
                 response = algorithm.executeAlgorithm(netPlan, algorithmParameters, net2planParameters);
-                FileManager.writePersistenceFile(response,executeName,token);
+                FileManager.writePersistenceFile(response,executeName,ServerUtils.tokens.get(token).getFirst());
 
             }catch(Exception e)
             {
