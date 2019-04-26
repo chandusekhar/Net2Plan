@@ -22,4 +22,9 @@
     <welcome-file-list>
         <welcome-file>indexjsp</welcome-file>
     </welcome-file-list>
+    <listener>
+        <listener-class>
+            com.net2plan.oaas.OaaSResources
+        </listener-class>
+    </listener>
 </web-app>

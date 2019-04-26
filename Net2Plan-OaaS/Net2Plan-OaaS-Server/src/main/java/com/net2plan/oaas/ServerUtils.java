@@ -73,11 +73,7 @@ public class ServerUtils
         }
     }
     private static void createDefaultCatalog(){
-        try {
-            FileUtils.writeByteArrayToFile(CATALOG_FILE, "{}".getBytes());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+      writeCatalog();
 
     }
 
@@ -124,7 +120,15 @@ public class ServerUtils
         }
 
     }
+    public static synchronized void writeCatalog(){
 
+        FileManagerJSON.writeCatalogPersistenceFile(catalogAlgorithmsAndReports);
+
+    }
+    public static synchronized void readCatalog(){
+        catalogAlgorithmsAndReports.clear();
+        catalogAlgorithmsAndReports.addAll( new FileManagerJSON().readCatalogPersistenceFile());
+    }
     protected static synchronized String addToken(String user, String category)
     {
         String src = user + category + Math.random();

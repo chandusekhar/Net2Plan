@@ -31,6 +31,7 @@ public class FileManagerJSON {
             FileUtils.writeByteArrayToFile(ServerUtils.CATALOG_FILE, catalog.toString().getBytes());
 
             }catch(Exception ex){
+
             ex.printStackTrace();
         }
 

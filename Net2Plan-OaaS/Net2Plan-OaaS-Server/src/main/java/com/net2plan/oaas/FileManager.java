@@ -9,15 +9,15 @@ import java.nio.file.Files;
 
 public class FileManager {
 
-    public static JSONObject writePersistenceFile (String data, String algorithmName, String userToken)
+    public static JSONObject writePersistenceFile (String data, String algorithmName, String username)
     {
 
         JSONObject response = new JSONObject();
 
         try  {
 
-            FileUtils.writeByteArrayToFile(new File(ServerUtils.TOMCAT_FILES_DIR+ File.separator + algorithmName + "_persistenceFile_"+userToken+".n2p"), "".getBytes());
-            FileUtils.writeByteArrayToFile(new File(ServerUtils.TOMCAT_FILES_DIR+ File.separator + algorithmName + "_persistenceFile_"+userToken+".n2p"), data.getBytes());
+            FileUtils.writeByteArrayToFile(new File(ServerUtils.TOMCAT_FILES_DIR+ File.separator + algorithmName + "_persistenceFile_"+username+".n2p"), "".getBytes());
+            FileUtils.writeByteArrayToFile(new File(ServerUtils.TOMCAT_FILES_DIR+ File.separator + algorithmName + "_persistenceFile_"+username+".n2p"), data.getBytes());
             response.put("status",new JSONValue("OK"));
             response.put("content",new JSONValue("No content for this function"));
         }catch(Exception ex){
@@ -28,12 +28,12 @@ public class FileManager {
         return response;
     }
 
-    public static JSONObject readPersistenceFile (String algorithmName, String userToken)
+    public static JSONObject readPersistenceFile (String algorithmName, String username)
     {
         JSONObject response = new JSONObject();
 
         try{
-            byte [] bytes = Files.readAllBytes(new File(ServerUtils.TOMCAT_FILES_DIR + File.separator+algorithmName + "_persistenceFile_"+userToken+".n2p").toPath());
+            byte [] bytes = Files.readAllBytes(new File(ServerUtils.TOMCAT_FILES_DIR + File.separator+algorithmName + "_persistenceFile_"+username+".n2p").toPath());
             String everything = new String(bytes, StandardCharsets.UTF_8);
 
             JSONObject jsonObject = JSON.parse(everything);
@@ -42,7 +42,7 @@ public class FileManager {
 
         } catch (Exception ex) {
             response.put("status", new JSONValue("ERROR"));
-            response.put("content", new JSONValue(ex.getMessage()));
+            response.put("content", new JSONValue(ex.getMessage() + " not found"));
             ex.printStackTrace();
         }
         return response;

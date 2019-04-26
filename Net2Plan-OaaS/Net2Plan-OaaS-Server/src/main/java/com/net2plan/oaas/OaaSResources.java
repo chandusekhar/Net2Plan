@@ -13,6 +13,8 @@ import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.xml.sax.helpers.XMLReaderFactory;
 
+import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletContextListener;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
@@ -30,11 +32,10 @@ import java.util.*;
  * OaaS Resources
  */
 @Path("/OaaS")
-public class OaaSResources
+public class OaaSResources implements ServletContextListener
 {
     private File TOMCAT_FILES_DIR = ServerUtils.TOMCAT_FILES_DIR;
     private File USERS_FILE = ServerUtils.USER_CONFIG_FILE;
-    private List<Quadruple<String, String, List<IAlgorithm>, List<IReport>>> catalogAlgorithmsAndReports = ServerUtils.catalogAlgorithmsAndReports;
 
     @Context
     HttpServletRequest webRequest;
@@ -92,7 +93,7 @@ public class OaaSResources
         {
             return ServerUtils.UNAUTHORIZED();
         }
-        readCatalog();
+        ServerUtils.readCatalog();
         return ServerUtils.OK(json);
     }
 
@@ -112,7 +113,7 @@ public class OaaSResources
         JSONObject catalogsJSON = new JSONObject();
         JSONArray catalogsArray = new JSONArray();
         //readCatalog();
-        for(Quadruple<String, String, List<IAlgorithm>, List<IReport>> catalogEntry : catalogAlgorithmsAndReports)
+        for(Quadruple<String, String, List<IAlgorithm>, List<IReport>> catalogEntry : ServerUtils.catalogAlgorithmsAndReports)
         {
             JSONObject catalogJSON = ServerUtils.parseCatalog(catalogEntry);
             catalogsArray.add(new JSONValue(catalogJSON));
@@ -124,15 +125,7 @@ public class OaaSResources
         return ServerUtils.OK(catalogsJSON);
     }
 
-    public void writeCatalog(){
 
-        FileManagerJSON.writeCatalogPersistenceFile(catalogAlgorithmsAndReports);
-
-    }
-    public void readCatalog(){
-        catalogAlgorithmsAndReports.clear();
-        catalogAlgorithmsAndReports.addAll( new FileManagerJSON().readCatalogPersistenceFile());
-    }
 
     @POST
     @Path("/catalogs")
@@ -198,10 +191,10 @@ public class OaaSResources
                     reports.add(rep);
                 }
             }
-            readCatalog();
-            catalogAlgorithmsAndReports.add(Quadruple.unmodifiableOf(catalogName, catalogCategory, algorithms, reports));
+            ServerUtils.readCatalog();
+            ServerUtils.catalogAlgorithmsAndReports.add(Quadruple.unmodifiableOf(catalogName, catalogCategory, algorithms, reports));
 
-            writeCatalog();
+            ServerUtils.writeCatalog();
             ServerUtils.cleanFolder(TOMCAT_FILES_DIR, false);
 
             return ServerUtils.OK(null);
@@ -235,7 +228,7 @@ public class OaaSResources
             return ServerUtils.UNAUTHORIZED();
 
         JSONObject catalogJSON = null;
-        for(Quadruple<String, String, List<IAlgorithm>, List<IReport>> catalogEntry : catalogAlgorithmsAndReports)
+        for(Quadruple<String, String, List<IAlgorithm>, List<IReport>> catalogEntry : ServerUtils.catalogAlgorithmsAndReports)
         {
             String catalog = catalogEntry.getFirst();
             if(catalog.equals(catalogName))
@@ -269,7 +262,7 @@ public class OaaSResources
 
         JSONObject algorithmsJSON = new JSONObject();
         JSONArray algorithmsArray = new JSONArray();
-        for(Quadruple<String, String, List<IAlgorithm>, List<IReport>> catalogEntry : catalogAlgorithmsAndReports)
+        for(Quadruple<String, String, List<IAlgorithm>, List<IReport>> catalogEntry : ServerUtils.catalogAlgorithmsAndReports)
         {
             List<IAlgorithm> algs = catalogEntry.getThird();
             for(IAlgorithm alg : algs)
@@ -298,7 +291,7 @@ public class OaaSResources
 
         JSONObject algorithmJSON = null;
         boolean found = false;
-        for(Quadruple<String, String, List<IAlgorithm>, List<IReport>> catalogEntry : catalogAlgorithmsAndReports)
+        for(Quadruple<String, String, List<IAlgorithm>, List<IReport>> catalogEntry : ServerUtils.catalogAlgorithmsAndReports)
         {
             List<IAlgorithm> algs = catalogEntry.getThird();
             for(IAlgorithm alg : algs)
@@ -339,7 +332,7 @@ public class OaaSResources
 
         JSONObject reportsJSON = new JSONObject();
         JSONArray reportsArray = new JSONArray();
-        for(Quadruple<String, String, List<IAlgorithm>, List<IReport>> catalogEntry : catalogAlgorithmsAndReports)
+        for(Quadruple<String, String, List<IAlgorithm>, List<IReport>> catalogEntry : ServerUtils.catalogAlgorithmsAndReports)
         {
             List<IReport> reps = catalogEntry.getFourth();
             for(IReport rep : reps)
@@ -368,7 +361,7 @@ public class OaaSResources
 
         JSONObject reportJSON = null;
         boolean found = false;
-        for(Quadruple<String, String, List<IAlgorithm>, List<IReport>> catalogEntry : catalogAlgorithmsAndReports)
+        for(Quadruple<String, String, List<IAlgorithm>, List<IReport>> catalogEntry : ServerUtils.catalogAlgorithmsAndReports)
         {
             List<IReport> reps = catalogEntry.getFourth();
             for(IReport rep : reps)
@@ -462,8 +455,9 @@ public class OaaSResources
         {
             boolean found = false;
             IAlgorithm algorithm = null;
-            for(Quadruple<String, String, List<IAlgorithm>, List<IReport>> catalogEntry : catalogAlgorithmsAndReports)
+            for(Quadruple<String, String, List<IAlgorithm>, List<IReport>> catalogEntry : ServerUtils.catalogAlgorithmsAndReports)
             {
+
                 List<IAlgorithm> algs = catalogEntry.getThird();
                 for(IAlgorithm alg : algs)
                 {
@@ -588,7 +582,7 @@ public class OaaSResources
         {
             IReport report = null;
             boolean found = false;
-            for(Quadruple<String, String, List<IAlgorithm>, List<IReport>> catalogEntry : catalogAlgorithmsAndReports)
+            for(Quadruple<String, String, List<IAlgorithm>, List<IReport>> catalogEntry : ServerUtils.catalogAlgorithmsAndReports)
             {
                 List<IReport> reps = catalogEntry.getFourth();
                 for(IReport rep : reps)
@@ -703,4 +697,21 @@ public class OaaSResources
     }
 
 
+    @Override
+    public void contextInitialized(ServletContextEvent servletContextEvent) {
+        ServerUtils.readCatalog();
+
+        Timer timer = new Timer();
+        timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                ServerUtils.tokens.clear();
+            }
+        }, 3600000 , 3600000 );
+    }
+
+    @Override
+    public void contextDestroyed(ServletContextEvent servletContextEvent) {
+
+    }
 }
