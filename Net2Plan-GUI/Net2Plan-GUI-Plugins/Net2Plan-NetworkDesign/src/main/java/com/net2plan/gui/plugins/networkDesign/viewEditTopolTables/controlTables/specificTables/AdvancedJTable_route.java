@@ -28,6 +28,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -71,6 +74,7 @@ import com.net2plan.interfaces.networkDesign.Route;
 import com.net2plan.internal.ErrorHandling;
 import com.net2plan.libraries.GraphUtils;
 import com.net2plan.utils.CollectionUtils;
+import com.net2plan.utils.Pair;
 import com.net2plan.utils.SwingUtils;
 
 import cern.colt.matrix.tdouble.DoubleFactory1D;
@@ -96,7 +100,7 @@ public class AdvancedJTable_route extends AdvancedJTable_networkElement<Route>
       res.add(new AjtColumnInfo<Route>(this , Node.class, null , "A", "Ingress node", null , d->d.getIngressNode() , AGTYPE.NOAGGREGATION , null));
       res.add(new AjtColumnInfo<Route>(this , Node.class, null , "B", "Egress node", null , d->d.getEgressNode() , AGTYPE.NOAGGREGATION , null));
       res.add(new AjtColumnInfo<Route>(this , Boolean.class, null , "Is up?", "The route is considered up if it is not traversing failed links or nodes", null , d->!d.isDown() , AGTYPE.COUNTTRUE, r->r.getCarriedTrafficInNoFailureState() > 0 && r.isDown()? Color.RED : null));
-      res.add(new AjtColumnInfo<Route>(this , Boolean.class, null , "Trav. 0-cap links?", "Indicates if the route is traversing links with zero capacity", null , d->!d.isTraversingZeroCapLinks() , AGTYPE.COUNTTRUE, r->r.getCarriedTrafficInNoFailureState() > 0 && r.isTraversingZeroCapLinks()? Color.RED : null));
+      res.add(new AjtColumnInfo<Route>(this , Boolean.class, null , "Trav. 0-cap links?", "Indicates if the route is traversing links with zero capacity", null , d->d.isTraversingZeroCapLinks() , AGTYPE.COUNTTRUE, r->r.getCarriedTrafficInNoFailureState() > 0 && r.isTraversingZeroCapLinks()? Color.RED : null));
       res.add(new AjtColumnInfo<Route>(this , Demand.class, null , "Bidirectional pair", "If the route is bidirectional, provides its bidirectional pair", null , d->d.getBidirectionalPair() , AGTYPE.NOAGGREGATION, null));
       res.add(new AjtColumnInfo<Route>(this , Collection.class, null , "Main routes", "If this is a backup route, shows the routes I am backing up", null , d->d.getRoutesIAmBackup(), AGTYPE.NOAGGREGATION , null));
       res.add(new AjtColumnInfo<Route>(this , Collection.class, null , "Backup routes", "If this is a main route, shows the its back up routes", null , d->d.getBackupRoutes(), AGTYPE.NOAGGREGATION , null));
@@ -117,6 +121,26 @@ public class AdvancedJTable_route extends AdvancedJTable_networkElement<Route>
         final List<AjtRcMenu> res = new ArrayList<> ();
         res.add(new AjtRcMenu("Add route", e->createRouteGUI(callback , layer), (a,b)->true, null));
         res.add(new AjtRcMenu("Remove selected routes", e->getSelectedElements().forEach(dd->((Route)dd).remove()) , (a,b)->b>0, null));
+        res.add(new AjtRcMenu("Arrange selected routes in bidirectional pairs", e->
+        {
+        	final SortedSet<Route> nonBidiRoutes = getSelectedElements().stream().filter(ee->!ee.isBidirectional()).collect(Collectors.toCollection(TreeSet::new));
+        	final Map<Pair<Node,Node> , Route> nodePair2route= new HashMap<>();
+        	for (Route ee : nonBidiRoutes)
+        	{
+        		final Pair<Node,Node> pair = Pair.of(ee.getIngressNode() , ee.getEgressNode());
+        		if (nodePair2route.containsKey(pair)) throw new Net2PlanException ("At most one link per node pair is allowed");
+        		nodePair2route.put(pair, ee);
+        	}
+        	for (Route ee : nonBidiRoutes)
+        	{
+        		if (ee.isBidirectional()) continue;
+        		final Route opposite = nodePair2route.get(Pair.of(ee.getEgressNode(), ee.getIngressNode()));
+        		if (opposite == null) continue;
+        		if (opposite.isBidirectional()) continue;
+        		ee.setBidirectionalPair(opposite);
+        	}
+        }
+        , (a,b)->b>0, null));
         res.add(new AjtRcMenu("Add one route per demand, shortest path (Service chain) in hops", e->new RouteSPF(true, false) , (a,b)->true, null));
         res.add(new AjtRcMenu("Add one route per demand, shortest path (Service chain) in km", e->new RouteSPF(false, false) , (a,b)->true, null));
         res.add(new AjtRcMenu("Add one route and 1+1 link disjoint protection per demand (minimize total num hops)", e->new RouteSPF(true, true) , (a,b)->true, null));

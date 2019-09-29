@@ -13,72 +13,6 @@
 
 package com.net2plan.libraries;
 
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.Rectangle;
-import java.awt.Shape;
-import java.awt.geom.Ellipse2D;
-import java.awt.geom.Point2D;
-import java.awt.image.BufferedImage;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.PriorityQueue;
-import java.util.Set;
-import java.util.SortedMap;
-import java.util.SortedSet;
-import java.util.TreeMap;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
-
-import javax.swing.JComponent;
-
-import org.apache.commons.collections15.ListUtils;
-import org.apache.commons.collections15.Predicate;
-import org.apache.commons.collections15.Transformer;
-import org.apache.commons.collections15.functors.ConstantTransformer;
-import org.apache.commons.collections15.functors.MapTransformer;
-import org.jgrapht.DirectedGraph;
-import org.jgrapht.UndirectedGraph;
-import org.jgrapht.alg.ConnectivityInspector;
-import org.jgrapht.alg.StrongConnectivityInspector;
-import org.jgrapht.graph.AsWeightedGraph;
-import org.jgrapht.graph.DirectedSubgraph;
-import org.jgrapht.graph.DirectedWeightedMultigraph;
-import org.jgrapht.graph.Subgraph;
-import org.jgrapht.graph.UndirectedSubgraph;
-
-import com.jom.OptimizationProblem;
-import com.net2plan.interfaces.networkDesign.Configuration;
-import com.net2plan.interfaces.networkDesign.Demand;
-import com.net2plan.interfaces.networkDesign.Link;
-import com.net2plan.interfaces.networkDesign.Net2PlanException;
-import com.net2plan.interfaces.networkDesign.NetPlan;
-import com.net2plan.interfaces.networkDesign.NetworkElement;
-import com.net2plan.interfaces.networkDesign.NetworkLayer;
-import com.net2plan.interfaces.networkDesign.Node;
-import com.net2plan.interfaces.networkDesign.Resource;
-import com.net2plan.interfaces.networkDesign.Route;
-import com.net2plan.utils.CollectionUtils;
-import com.net2plan.utils.Constants;
-import com.net2plan.utils.Constants.CheckRoutingCycleType;
-import com.net2plan.utils.Constants.RoutingCycleType;
-import com.net2plan.utils.ImageUtils;
-import com.net2plan.utils.Pair;
-import com.net2plan.utils.Quadruple;
-import com.net2plan.utils.Quintuple;
-
 import cern.colt.list.tdouble.DoubleArrayList;
 import cern.colt.list.tint.IntArrayList;
 import cern.colt.matrix.tdouble.DoubleFactory1D;
@@ -90,6 +24,11 @@ import cern.colt.matrix.tdouble.algo.SparseDoubleAlgebra;
 import cern.colt.matrix.tdouble.impl.SparseCCDoubleMatrix2D;
 import cern.jet.math.tdouble.DoubleFunctions;
 import cern.jet.math.tdouble.DoublePlusMultFirst;
+import com.jom.OptimizationProblem;
+import com.net2plan.interfaces.networkDesign.*;
+import com.net2plan.utils.*;
+import com.net2plan.utils.Constants.CheckRoutingCycleType;
+import com.net2plan.utils.Constants.RoutingCycleType;
 import edu.uci.ics.jung.algorithms.filters.EdgePredicateFilter;
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.algorithms.layout.StaticLayout;
@@ -106,6 +45,33 @@ import edu.uci.ics.jung.visualization.decorators.EdgeShape;
 import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
 import edu.uci.ics.jung.visualization.renderers.DefaultVertexLabelRenderer;
 import edu.uci.ics.jung.visualization.renderers.Renderer;
+import org.apache.commons.collections15.ListUtils;
+import org.apache.commons.collections15.Predicate;
+import org.apache.commons.collections15.Transformer;
+import org.apache.commons.collections15.functors.ConstantTransformer;
+import org.apache.commons.collections15.functors.MapTransformer;
+import org.jgrapht.alg.connectivity.ConnectivityInspector;
+import org.jgrapht.alg.connectivity.GabowStrongConnectivityInspector;
+import org.jgrapht.graph.*;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.geom.Ellipse2D;
+import java.awt.geom.Point2D;
+import java.awt.image.BufferedImage;
+import java.util.*;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.function.BiFunction;
+import java.util.stream.Collectors;
+
+//import org.jgrapht.DirectedGraph;
+//import org.jgrapht.UndirectedGraph;
+//import org.jgrapht.alg.ConnectivityInspector;
+//import org.jgrapht.alg.StrongConnectivityInspector;
+//import org.jgrapht.graph.DirectedSubgraph;
+//import org.jgrapht.graph.Subgraph;
+//import org.jgrapht.graph.UndirectedSubgraph;
 
 /** <p>Auxiliary static methods to work with graphs.</p>
  * 
@@ -1276,32 +1242,53 @@ public class GraphUtils
 	 * @param egressNode egress node
 	 * @return see above
 	 */
-	public static Pair<Double,Double> computeWorstCasePropagationDelayAndLengthInKmMsForLoopLess (SortedMap<Link,Double> frs , SortedMap<Node,SortedSet<Link>> outFrs , Node ingressNode , Node egressNode)
+	public static double computeWorstCasePropagationDelayAndLengthInKmMsForLoopLess (int typeOfMetric_0Latemcy_1Length_2Hops , SortedMap<Link,Double> frs , SortedMap<Node,SortedSet<Link>> outFrs , Node ingressNode , Node egressNode)
 	{
-		final SortedMap<Node,Pair<Double,Double>> inNodes = new TreeMap<> ();
-		final SortedSet<Node> nonEgressNodesReceivingLinks = new TreeSet<> (); 
-		inNodes.put(ingressNode, Pair.of(0.0, 0.0));
+		final SortedMap<Node,Link> inNodesAndPrevLinkInLongestPath_latLengthHops = new TreeMap<> ();
+		final BiFunction<Node , Integer , Double> longestPathSoFarIngressToNode = (n,type012) -> 
+		{
+			double accumCost = 0;
+			int numHops = 0;
+			Node currentNode = n; 
+			while (true)
+			{
+				final Link prevLink = inNodesAndPrevLinkInLongestPath_latLengthHops.get(currentNode);
+				if (prevLink == null) return Double.MAX_VALUE;
+				if (type012 == 0)
+					accumCost += prevLink.getPropagationDelayInMs ();
+				else if (type012 == 1) 
+					accumCost += prevLink.getLengthInKm();
+				else  
+					accumCost += 1;
+				numHops ++;
+				currentNode = prevLink.getOriginNode();
+				if (currentNode.equals(ingressNode)) break;
+				if (numHops > inNodesAndPrevLinkInLongestPath_latLengthHops.size() + 2) throw new RuntimeException();
+			}
+			return accumCost;
+		};
+
+		final SortedSet<Node> currentNodes = new TreeSet<> ();
+		currentNodes.add(ingressNode);
 		do
 		{
-			for (Node n : new ArrayList<> (inNodes.keySet()))
+			for (Node n : new ArrayList<> (currentNodes))
 			{
-				if (n == egressNode)
+				if (n.equals(egressNode))
 				{
 					final SortedSet<Link> outFrsEgressNode = outFrs.get(n);
 					if (outFrsEgressNode == null) continue;
 					/* check if there are outgoing links of the egress node carrying traffic => cycle */
 					for (Link e : outFrsEgressNode) 
 					    if (frs.get(e) > 0) 
-					        return Pair.of(Double.MAX_VALUE,Double.MAX_VALUE);
+					        return Double.MAX_VALUE;
+					currentNodes.remove(egressNode);
+					if (currentNodes.isEmpty()) return longestPathSoFarIngressToNode.apply(egressNode, typeOfMetric_0Latemcy_1Length_2Hops);
 					continue;
 				}
 				
-				/* If the node already received an input link (or is the ingress for the second time) => cycle */
-				if (nonEgressNodesReceivingLinks.add(n) == false) 
-				    return Pair.of(Double.MAX_VALUE,Double.MAX_VALUE);
-				
 				/* Usual loop */
-				final Pair<Double,Double> wcSoFar = inNodes.get(n);
+				final Link wcSoFarToCurrentNode = inNodesAndPrevLinkInLongestPath_latLengthHops.get(n);
 				final SortedSet<Link> outgoingFrsThisNode = outFrs == null? new TreeSet<> (frs.keySet()) : outFrs.get(n);
 				if (outgoingFrsThisNode != null) 
 					for (Link e : outgoingFrsThisNode)
@@ -1309,24 +1296,38 @@ public class GraphUtils
 						final Double splitFactor = frs.get(e);
 						if (splitFactor == null) continue;
 						if (splitFactor == 0) continue;
-						final double thisPathCost_wc = wcSoFar.getFirst() + e.getPropagationDelayInMs();
-						final double thisPathCost_length = wcSoFar.getSecond() + e.getLengthInKm();
-						if (inNodes.containsKey(e.getDestinationNode()))
-							inNodes.put(e.getDestinationNode(), Pair.of(Math.max(inNodes.get(e.getDestinationNode()).getFirst() , thisPathCost_wc) , 
-											Math.max(inNodes.get(e.getDestinationNode()).getSecond() , thisPathCost_length)));
+						final double thisPathCost;
+						if (typeOfMetric_0Latemcy_1Length_2Hops == 0) thisPathCost = (wcSoFarToCurrentNode == null? 0 : longestPathSoFarIngressToNode.apply(n, typeOfMetric_0Latemcy_1Length_2Hops)) + e.getPropagationDelayInMs();
+						else if (typeOfMetric_0Latemcy_1Length_2Hops == 1) thisPathCost = (wcSoFarToCurrentNode == null? 0 : longestPathSoFarIngressToNode.apply(n, typeOfMetric_0Latemcy_1Length_2Hops)) + e.getLengthInKm();
+						else 
+						{
+							final int numHopsThisLink = 1;
+							thisPathCost = (wcSoFarToCurrentNode == null? 0 : longestPathSoFarIngressToNode.apply(n, typeOfMetric_0Latemcy_1Length_2Hops)) + numHopsThisLink;
+						}
+						final Node nextNode = e.getDestinationNode();
+						if (inNodesAndPrevLinkInLongestPath_latLengthHops.containsKey(nextNode))
+						{
+							if (thisPathCost > longestPathSoFarIngressToNode.apply(nextNode , typeOfMetric_0Latemcy_1Length_2Hops))
+								inNodesAndPrevLinkInLongestPath_latLengthHops.put(nextNode, e);	
+						}
 						else
-							inNodes.put(e.getDestinationNode(), Pair.of(thisPathCost_wc , thisPathCost_length));
+							inNodesAndPrevLinkInLongestPath_latLengthHops.put(nextNode, e);
+						currentNodes.add(e.getDestinationNode());
 					}
-				
-				inNodes.remove(n);
+				currentNodes.remove(n);
 			}
 			
-			if (inNodes.isEmpty()) 
-			    return Pair.of(Double.MAX_VALUE , Double.MAX_VALUE); // PABLO: here it appears
-			if ((inNodes.size() == 1) && (inNodes.keySet().iterator().next() == egressNode)) return inNodes.get(egressNode);
+			if (currentNodes.isEmpty()) 
+			    return longestPathSoFarIngressToNode.apply(egressNode , typeOfMetric_0Latemcy_1Length_2Hops);
+			if ((currentNodes.size() == 1) && (currentNodes.iterator().next().equals(egressNode))) 
+				return longestPathSoFarIngressToNode.apply(egressNode , typeOfMetric_0Latemcy_1Length_2Hops);
 		} while (true);
 	}
 
+	
+	
+	
+	
 	
 	
 	/**
@@ -1365,9 +1366,10 @@ public class GraphUtils
 		}
 		catch(IllegalArgumentException e) { return Quintuple.of (null , RoutingCycleType.CLOSED_CYCLES , s_n , Double.MAX_VALUE , Double.MAX_VALUE) ; }
 		
-		Pair<Double,Double> wcPropAndLength = computeWorstCasePropagationDelayAndLengthInKmMsForLoopLess(frs, outFrs, ingressNode, egressNode);
-		final RoutingCycleType routingCycleType = wcPropAndLength.getFirst() == Double.MAX_VALUE? RoutingCycleType.OPEN_CYCLES : RoutingCycleType.LOOPLESS;
-		return Quintuple.of(Mv, routingCycleType , s_n , wcPropAndLength.getFirst() , wcPropAndLength.getSecond());
+		final double wcProp = computeWorstCasePropagationDelayAndLengthInKmMsForLoopLess(0, frs, outFrs, ingressNode, egressNode);
+		final double wcLength = computeWorstCasePropagationDelayAndLengthInKmMsForLoopLess(1, frs, outFrs, ingressNode, egressNode);
+		final RoutingCycleType routingCycleType = wcProp == Double.MAX_VALUE? RoutingCycleType.OPEN_CYCLES : RoutingCycleType.LOOPLESS;
+		return Quintuple.of(Mv, routingCycleType , s_n , wcProp , wcLength);
 	}
 
 	
@@ -1720,7 +1722,7 @@ public class GraphUtils
 	public static List<Set<Node>> getConnectedComponents (Collection<Node> nodes, List<Link> links)
 	{
 		org.jgrapht.Graph<Node, Link> graph = JGraphTUtils.getGraphFromLinkMap(nodes, links);
-		final ConnectivityInspector<Node, Link> inspector = new ConnectivityInspector<Node, Link>((DirectedGraph<Node,Link>) graph);
+		final ConnectivityInspector<Node, Link> inspector = new ConnectivityInspector<Node, Link>(graph);
 		return inspector.connectedSets();
 	}
 
@@ -1959,7 +1961,7 @@ public class GraphUtils
 		 * @param graph The backing graph over which a weighted view is to be created
 		 * @param edgeWeightMap A mapping of edges to weights (null means all to one)
 		 * @return Returns a weighted view of the backing graph specified in the constructor */
-		public static <V, E> org.jgrapht.WeightedGraph<V, E> getAsWeightedGraph(org.jgrapht.Graph<V, E> graph, SortedMap<E, Double> edgeWeightMap)
+		public static <V, E> AsWeightedGraph<V, E> getAsWeightedGraph(org.jgrapht.Graph<V, E> graph, SortedMap<E, Double> edgeWeightMap)
 		{
 			if (edgeWeightMap == null)
 			{
@@ -1978,7 +1980,7 @@ public class GraphUtils
 		 * @return {@code JGraphT} graph */
 		public static org.jgrapht.Graph<Node, Link> getGraphFromLinkMap(Collection<Node> nodes, Collection<Link> links)
 		{
-			org.jgrapht.Graph<Node, Link> graph = new DirectedWeightedMultigraph<Node, Link>(Link.class);
+            org.jgrapht.Graph<Node, Link> graph = new DirectedWeightedMultigraph<Node, Link>(Link.class);
 
 			for (Node node : nodes)
 				graph.addVertex(node);
@@ -2069,14 +2071,14 @@ public class GraphUtils
 		 * @return {@code true} if the graph is connected, and false otherwise */
 		public static boolean isConnected(org.jgrapht.Graph graph)
 		{
-			if (graph instanceof DirectedGraph)
+			if (graph instanceof DefaultDirectedGraph)
 			{
-				StrongConnectivityInspector ci = new StrongConnectivityInspector((DirectedGraph) graph);
+				GabowStrongConnectivityInspector ci = new GabowStrongConnectivityInspector((DefaultDirectedGraph) graph);
 				return ci.isStronglyConnected();
-			} else if (graph instanceof UndirectedGraph)
+			} else if (graph instanceof DefaultUndirectedGraph)
 			{
-				ConnectivityInspector ci = new ConnectivityInspector((UndirectedGraph) graph);
-				return ci.isGraphConnected();
+				ConnectivityInspector ci = new ConnectivityInspector((DefaultUndirectedGraph) graph);
+				return ci.isConnected();
 			}
 
 			throw new RuntimeException("Bad");
@@ -2089,11 +2091,11 @@ public class GraphUtils
 		 * @return {@code true} if the subgraph is connected, and false otherwise */
 		public static boolean isConnected(org.jgrapht.Graph graph, SortedSet vertices)
 		{
-			Subgraph subgraph;
-			if (graph instanceof DirectedGraph)
-				subgraph = new DirectedSubgraph((DirectedGraph) graph, vertices, null);
-			else if (graph instanceof UndirectedGraph)
-				subgraph = new UndirectedSubgraph((UndirectedGraph) graph, vertices, null);
+            AsSubgraph subgraph;
+			if (graph instanceof DefaultDirectedGraph)
+				subgraph = new AsSubgraph((DefaultDirectedGraph) graph, vertices, null);
+			else if (graph instanceof DefaultUndirectedGraph)
+				subgraph = new AsSubgraph((DefaultUndirectedGraph) graph, vertices, null);
 			else
 				throw new RuntimeException("Bad");
 
@@ -3266,5 +3268,6 @@ public class GraphUtils
 			super(message);
 		}
 	}
+
 	
 }

@@ -12,11 +12,13 @@
 package com.net2plan.libraries;
 
 import java.util.ArrayList;
-import java.util.TreeMap;
-import java.util.TreeSet;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
+import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections15.Transformer;
@@ -134,6 +136,7 @@ public class IPUtils
 	{
 		final NetworkLayer layer = netPlan.checkInThisNetPlanOptionalLayerParameter (optionalLayer);
 		if (linkWeightVector == null) linkWeightVector = IPUtils.getLinkWeightVector (netPlan, layer);
+		for (int cont = 0; cont < linkWeightVector.size() ; cont ++) if (linkWeightVector.get(cont) <= 0) throw new Net2PlanException ("Link weights must be strictly possitive");
 		
 		final List<Node> nodes = netPlan.getNodes();
 		final List<Link> links = netPlan.getLinks(layer);
@@ -312,7 +315,6 @@ public class IPUtils
 				final SortedSet<Link> minCostLinks = new TreeSet<> (); 
 				for (Node intermediateNode : graph.getNeighbors(sourceNode))
 				{
-					if (nodes.equals (intermediateNode)) continue;
 					final Pair<SortedSet<Link>,Double> nodePairLinks = linksPerNodeSameMinimumCost.get(Pair.of(sourceNode, intermediateNode));
 					if (nodePairLinks == null) continue;
 					if (nodePairLinks.getFirst().isEmpty()) continue;
@@ -383,7 +385,6 @@ public class IPUtils
 				final SortedSet<Link> minCostLinks = new TreeSet<> (); 
 				for (Node intermediateNode : graph.getNeighbors(sourceNode))
 				{
-					if (nodes.equals (intermediateNode)) continue;
 					final Pair<SortedSet<Link>,Double> nodePairLinks = linksPerNodeSameMinimumCost.get(Pair.of(sourceNode, intermediateNode));
 					if (nodePairLinks == null) continue;
 					if (nodePairLinks.getFirst().isEmpty()) continue;
@@ -530,7 +531,7 @@ public class IPUtils
 	 */
 	public static double getLinkWeight(Link link)
 	{
-		if (link.isDown()) return Double.MAX_VALUE;
+		if (link.isDown() || link.getOriginNode().isDown() || link.getDestinationNode().isDown()) return Double.MAX_VALUE;
 		double linkWeight = 1;
 		String str_linkWeight = link.getAttribute(IP_WEIGHT_ATTRIBUTE_NAME);
 		try	{ linkWeight = Double.parseDouble(str_linkWeight); }
@@ -657,8 +658,29 @@ public class IPUtils
 		final Quadruple<DoubleMatrix2D, DoubleMatrix2D, DoubleMatrix1D, DoubleMatrix1D> q = 
 				computeCarriedTrafficFromIGPWeights(netPlan, linkWeightMap , layer);
 		final DoubleMatrix2D f_de = q.getFirst ();
-		netPlan.setForwardingRules(f_de , null , layer);
+		netPlan.setForwardingRules(f_de , new HashSet<> (netPlan.getDemandsHopByHopRouted(layer)) , layer);
 	}
+	
+	/**
+	 * Sets the OSPF/ECMP forwarding rules in the given design, according to the 
+	 * given IGP weight setting. Any previous routing information (either source 
+	 * routing or hop-by-hop routing) will be removed. This method calls 
+	 * sequentually to {@code computeECMPForwardingRules} and {@code setForwardingRules} methods.
+	 * 
+	 * @param netPlan Network design
+	 * @param demandsToUpdate the demands to update. If null, all the layer demands
+	 * @param optionalLayer Network layer (optional)
+	 * @param linkWeightMap Cost per link vector
+	 */
+	public static void setECMPForwardingRulesFromLinkWeights(NetPlan netPlan, DoubleMatrix1D linkWeightMap , Set<Demand> demandsToUpdate , NetworkLayer ... optionalLayer)
+	{
+		final NetworkLayer layer = netPlan.checkInThisNetPlanOptionalLayerParameter(optionalLayer);
+		final Quadruple<DoubleMatrix2D, DoubleMatrix2D, DoubleMatrix1D, DoubleMatrix1D> q = 
+				computeCarriedTrafficFromIGPWeights(netPlan, linkWeightMap , layer);
+		final DoubleMatrix2D f_de = q.getFirst ();
+		netPlan.setForwardingRules(f_de , demandsToUpdate , layer);
+	}
+
 	
 	/**
 	 * Sets the weight associated to the link.

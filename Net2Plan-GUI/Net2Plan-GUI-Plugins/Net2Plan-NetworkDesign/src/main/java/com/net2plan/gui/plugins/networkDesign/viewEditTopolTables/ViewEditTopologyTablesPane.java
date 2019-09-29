@@ -13,12 +13,12 @@ package com.net2plan.gui.plugins.networkDesign.viewEditTopolTables;
 
 
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.swing.JFileChooser;
@@ -56,6 +56,7 @@ import com.net2plan.interfaces.networkDesign.NetPlan;
 import com.net2plan.interfaces.networkDesign.NetworkLayer;
 import com.net2plan.internal.Constants.NetworkElementType;
 import com.net2plan.internal.ErrorHandling;
+import com.net2plan.utils.IntUtils;
 import com.net2plan.utils.Pair;
 import com.net2plan.utils.SwingUtils;
 
@@ -165,11 +166,7 @@ public class ViewEditTopologyTablesPane extends JPanel
         final NetPlan currentState = callback.getDesign();
         if (ErrorHandling.isDebugEnabled()) currentState.checkCachesConsistency();
         
-        this.recomputNetPlanView();
-        
-//        final AdvancedJTable_abstractElement layerTable = this.netPlanViewTable.get(AJTableType.LAYERS).getFirst();
-//    	System.out.println(layerTable.getTableScrollPane().getViewport());
-//    	System.out.println("View is null? " + (layerTable.getTableScrollPane().getViewport().getView() == null));
+        this.recomputeNetPlanView();
 
         highLevelTabComponent_network.updateNetPlanView(currentState);
         for (NetworkLayer layer : currentState.getNetworkLayers())
@@ -185,7 +182,6 @@ public class ViewEditTopologyTablesPane extends JPanel
         }
 
         treePanel.updateView();
-
 
         if (ErrorHandling.isDebugEnabled()) currentState.checkCachesConsistency();
     }
@@ -222,7 +218,7 @@ public class ViewEditTopologyTablesPane extends JPanel
 		table.clearSelection();
         final List<Integer> modelViewRows = elements.stream().map(ee->(Integer) table.getRowModelIndexOfElement(ee.getObject()).orElse(-1)).
         		filter(ee->ee != -1).
-        		collect(Collectors.toList()); 
+        		collect(Collectors.toList());
         for (int rowModelIndex : modelViewRows)
         {
             final int viewRow = table.convertRowIndexToView(rowModelIndex);
@@ -282,9 +278,8 @@ public class ViewEditTopologyTablesPane extends JPanel
 
     	treePanel.restoreView();
     }
-
     
-    private void recomputNetPlanView ()
+    private void recomputeNetPlanView()
     {    	
     	/* Save current selected tab */
 		final int selectedIndexFirstLevel = netPlanView.getSelectedIndex() == -1 ? 0 : netPlanView.getSelectedIndex();
@@ -297,29 +292,29 @@ public class ViewEditTopologyTablesPane extends JPanel
     	final Map<NetworkLayer, Map<AJTableType, Map<String, Boolean>>> hideColumnStatePerTable = new HashMap<>();
     	final Map<NetworkLayer, Map<AJTableType, Map<String, Integer>>> columnDoubleFormatStatePerTable = new HashMap<>();
     	final Map<NetworkLayer, Map<AJTableType, Boolean>> attributeCollapsedStatePerTable = new HashMap<>();
+
     	
     	for (Map.Entry<NetworkLayer, Map<AJTableType, Pair<AdvancedJTable_abstractElement, FilteredTablePanel>>> entry : netPlanViewTable.entrySet())
     	{
-    		final NetworkLayer layer = entry.getKey();
-    		final Map<AJTableType, Map<String, Boolean>> hideColumnStateThisTable = new HashMap<>();
-    		final Map<AJTableType, Map<String, Integer>> columnDoubleFormatStateThisTable = new HashMap<>();
-    		final Map<AJTableType, Boolean> attributeCollapsedStateThisTable = new HashMap<>();
+            final NetworkLayer layer = entry.getKey();
+            final Map<AJTableType, Map<String, Boolean>> hideColumnStateThisTable = new HashMap<>();
+            final Map<AJTableType, Map<String, Integer>> columnDoubleFormatStateThisTable = new HashMap<>();
+            final Map<AJTableType, Boolean> attributeCollapsedStateThisTable = new HashMap<>();
 
-    		for (AJTableType ajTableType : entry.getValue().keySet())
-    		{
-    			if (ajTableType == AJTableType.LAYERS) continue;
-    			
-    			final AdvancedJTable_abstractElement table = entry.getValue().get(ajTableType).getFirst();
-    			hideColumnStateThisTable.put(ajTableType, table.getColumnShowHideValueByHeaderMap());
-    			columnDoubleFormatStateThisTable.put(ajTableType, table.getColumnNumberOfDecimalsByHeaderMap());
-    			
-    			if (table instanceof AdvancedJTable_networkElement)
-    				attributeCollapsedStateThisTable.put(ajTableType, ((AdvancedJTable_networkElement) table).isAttributesAreCollapsedInOneColumn());
-    		}
-    		hideColumnStatePerTable.put(layer, hideColumnStateThisTable);
-    		columnDoubleFormatStatePerTable.put(layer, columnDoubleFormatStateThisTable);
-    		attributeCollapsedStatePerTable.put(layer, attributeCollapsedStateThisTable);
-    	}
+            for (AJTableType ajTableType : entry.getValue().keySet()) {
+                if (ajTableType == AJTableType.LAYERS) continue;
+
+                final AdvancedJTable_abstractElement table = entry.getValue().get(ajTableType).getFirst();
+                hideColumnStateThisTable.put(ajTableType, table.getColumnShowHideValueByHeaderMap());
+                columnDoubleFormatStateThisTable.put(ajTableType, table.getColumnNumberOfDecimalsByHeaderMap());
+
+                if (table instanceof AdvancedJTable_networkElement)
+                    attributeCollapsedStateThisTable.put(ajTableType, ((AdvancedJTable_networkElement) table).isAttributesAreCollapsedInOneColumn());
+            }
+            hideColumnStatePerTable.put(layer, hideColumnStateThisTable);
+            columnDoubleFormatStatePerTable.put(layer, columnDoubleFormatStateThisTable);
+            attributeCollapsedStatePerTable.put(layer, attributeCollapsedStateThisTable);
+        }
     	
     	final NetPlan np = callback.getDesign();
     	netPlanViewTable.clear();
@@ -365,9 +360,9 @@ public class ViewEditTopologyTablesPane extends JPanel
         	netPlanView.addTab(layer.getName().equals("")? "Layer " + layer.getIndex() : layer.getName() , subpaneThisLayer);
         }
         
-        /* Recover hide columns, decimal formats and attribute collapsed */
+        /* Recover hide columns, decimal formats, selected rows and attribute collapsed */
     	for (Map.Entry<NetworkLayer, Map<AJTableType, Pair<AdvancedJTable_abstractElement, FilteredTablePanel>>> entry : netPlanViewTable.entrySet())
-    	{
+        {
     		final NetworkLayer layer = entry.getKey();
     		for (AJTableType ajTableType : entry.getValue().keySet())
     		{
@@ -385,6 +380,6 @@ public class ViewEditTopologyTablesPane extends JPanel
     	netPlanView.setSelectedIndex(selectedIndexFirstLevel);
     	if (netPlanView.getSelectedComponent() instanceof JTabbedPane && selectedIndexSecondLevel >= 0)
     		((JTabbedPane) netPlanView.getSelectedComponent()).setSelectedIndex(selectedIndexSecondLevel);
-    	
+
     }
 }

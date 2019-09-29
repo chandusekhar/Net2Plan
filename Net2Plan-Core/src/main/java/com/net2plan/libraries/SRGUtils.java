@@ -58,7 +58,7 @@ public class SRGUtils
 		 * Defines a SRG containing all links between a node pair. Nodes are not associated to any SRG.
 		 */
 		PER_BIDIRECTIONAL_LINK_BUNDLE
-	};
+	}
 	
 	
 	/**
@@ -75,7 +75,7 @@ public class SRGUtils
 		if (NUMSRGS != A_sf.columns ()) throw new Net2PlanException ("Wrong vector size");
 		DoubleMatrix1D pi_s = DoubleFactory1D.dense.make (NUMSTATES);
 		if (A_sf.rows() == 0) return pi_s;
-		if ((A_f.getMaxLocation() [0] > 1) || (A_f.getMinLocation() [0] < 0)) throw new RuntimeException("Availability must be in range [0, 1]");
+		if (A_f.size() > 0) if ((A_f.getMaxLocation() [0] > 1) || (A_f.getMinLocation() [0] < 0)) throw new RuntimeException("Availability must be in range [0, 1]");
 		
 		for (int s = 0 ; s < A_sf.rows () ; s ++)
 		{
